@@ -1,0 +1,48 @@
+#ifndef CAMERA_H
+#define CAMERA_H
+
+#include <shader.h>
+#include <glm/glm.hpp>
+#include <GL/glew.h>
+
+class Camera
+{
+public:
+    virtual void setUniforms( Shader * shader ) const {}
+};
+
+class PerspectiveCamera : public Camera
+{
+public:
+    static const std::string PROJ_UNIFORM_STR;
+    static const std::string VIEW_UNIFORM_STR;
+
+    PerspectiveCamera( float fov, float aspect, float near, float far );
+
+    void setUniforms( Shader * shader ) const;
+
+    glm::vec3 getPosition() const { return _eye; }
+    void setPosition( const glm::vec3& eye ) { _eye = eye; updateView(); }
+    void translate( const glm::vec3& t ) {     _eye += t; updateView(); }
+   
+    float getAngleY() const { return _angleY; } 
+    void setAngleY( const float& a ) { _angleY = a; updateView(); }
+    void turnY( const float& a ) {     _angleY += a; updateView(); }
+
+    float getAngleX() const { return _angleX; }
+    void setAngleX( const float& a ) { _angleX = a; updateView(); }
+    void turnX( const float& a ) {     _angleX += a; updateView(); }
+
+    glm::mat4 getView() const { return _view; }
+private:
+    glm::vec3   _eye;
+    float       _angleX; //!< angle around X axis
+    float       _angleY; //!< angle around Y axis
+
+    void updateView();
+
+    glm::mat4   _proj;
+    glm::mat4   _view;    
+};
+
+#endif // CAMERA_H
