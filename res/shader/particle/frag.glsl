@@ -6,7 +6,7 @@ in vec2 gUV;
 
 out vec4 fragColor;
 
-uniform float lambda = 10;
+uniform float lambda = 2;
 //uniform sampler2D tex;
 
 float sigmoid(float x)
@@ -18,6 +18,6 @@ void main()
 {
     if(length(gUV - vec2(0.5, 0.5)) > 0.5)
         discard;
-    vec4 base = vec4( 1, 1, 1, 1 - sigmoid( length( gUV - vec2( 0.5, 0.5 ) ) ) );
+    vec4 base = vec4( 1, 1, 1, exp( - lambda * length( gUV - vec2( 0.5, 0.5 ) ) ) );
     fragColor = base * gColor;
 }

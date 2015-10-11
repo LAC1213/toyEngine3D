@@ -32,6 +32,7 @@
 static int width, height;
 static PerspectiveCamera * cam;
 static BulletSpawner * bullets;
+static Terrain * terrain_g;
 
 void glfwErrorCallback(int error, const char* description)
 {
@@ -49,6 +50,9 @@ static void onKeyAction(GLFWwindow * window, int key, int scancode, int action, 
             break;
         case GLFW_KEY_ESCAPE:
             exit(EXIT_SUCCESS);
+            break;
+        case GLFW_KEY_Z:
+            terrain_g->toggleWireframe();
             break;
         case GLFW_KEY_SPACE:
             bullets->shoot();
@@ -165,6 +169,7 @@ int main(int argc, char ** argv)
     Terrain::SHADER = new Shader( "./res/shader/terrain/", Shader::LOAD_FULL );
     ParticleSystem::SHADER = new Shader( "./res/shader/particle/", Shader::LOAD_GEOM );
     Billboard::SHADER = new Shader( "./res/shader/billboard/", Shader::LOAD_GEOM );
+    PostEffect::SHADER = new Shader( "./res/shader/post/", Shader::LOAD_BASIC );    
 
     PerspectiveCamera c = PerspectiveCamera( 45, 1000.0 / 800, 0.1f, 100 );
     c.setPosition( glm::vec3( 0, 0, 10 ) );
@@ -178,11 +183,9 @@ int main(int argc, char ** argv)
     SmoothTail particleSystem( cam );
     bullets = new BulletSpawner( cam );
 
-    Terrain terrain( cam, Terrain::generateHeightmap(), 0 );
-
     GLuint texture = SOIL_load_OGL_texture
-              (
-                  "../rts/resources/textures/ground.jpg",
+        (
+                  "./res/textures/ground.jpg",
                   SOIL_LOAD_AUTO,
                   SOIL_CREATE_NEW_ID,
                   SOIL_FLAG_INVERT_Y
@@ -200,11 +203,15 @@ int main(int argc, char ** argv)
     glGenerateMipmap(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    Billboard b( cam, texture );
-    b.setPosition( glm::vec3( 5, 0, 0 ) );
-
+    Terrain terrain( cam, Terrain::generateHeightmap(), texture );
+    terrain_g = &terrain;
+    
     FBO canvas( width, height );
+    MultiSampleFBO msaa( width, height, 16 );
+
     PostEffect effect( PostEffect::NONE, &canvas );
+    Bloom bloom( &canvas );
+
     glViewport( 0, 0, width, height );
 
     double t0, dt;
@@ -228,21 +235,26 @@ int main(int argc, char ** argv)
         cam->translate( (float)dt*glm::vec3( v.x, 0, v.y ) );
 
         /* render scene */
-        glBindFramebuffer( GL_FRAMEBUFFER, canvas.fbo );
+        glBindFramebuffer( GL_FRAMEBUFFER, msaa.fbo );
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
        
         glPatchParameteri( GL_PATCH_VERTICES, 3 ); 
-        b.render();
         sphere.render();
         terrain.render();
         particleSystem.render();
         bullets->render();
        
-        /* do post processing and text */ 
-        glBindFramebuffer( GL_FRAMEBUFFER, 0 );
-        glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, msaa.fbo);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, canvas.fbo);
+        glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+        /* post processing and text */
+        bloom.render();
         
+        glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+        glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );     
         effect.render();
+
         txt->render();
         delete txt;
         

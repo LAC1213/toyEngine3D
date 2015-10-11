@@ -1,12 +1,12 @@
 #include <posteffect.h>
 
-const std::string PostEffect::SHADER_DIR = "./res/shader/post/";
+Shader * PostEffect::SHADER = 0;
 
 PostEffect::PostEffect( Type type, FBO * canvas )
     :   _type( type ),
         _canvas( canvas )
 {
-    _shader = new Shader( SHADER_DIR.c_str(), Shader::LOAD_BASIC );
+    _shader = SHADER;
     _elements = 6;
     _indexed = false;
     _mode = GL_TRIANGLES;
@@ -30,7 +30,6 @@ PostEffect::PostEffect( Type type, FBO * canvas )
 
 PostEffect::~PostEffect()
 {
-    delete _shader;
     glDeleteVertexArrays( 1, &_vao );
     glDeleteBuffers( 1, &_vbo );
 }
@@ -53,35 +52,39 @@ void PostEffect::render()
     Renderable::render();
 }
 
-FBO::FBO( int w, int h )
-    : width( w ), height( h )
+FBO::FBO( int w, int h, bool depth )
+    : depthEnabled( depth ), width( w ), height( h ) 
 {
-    glActiveTexture( GL_TEXTURE0 );
     glGenTextures( 1, &texture );
     glBindTexture( GL_TEXTURE_2D, texture );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
     glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL );
     glBindTexture( GL_TEXTURE_2D, 0 );
 
-    glGenRenderbuffers(1, &depthRenderbuffer);
-    glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, w, h);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    if( depthEnabled )
+    {
+        glGenRenderbuffers(1, &depthRenderbuffer);
+        glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, w, h);
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    }
 
     glGenFramebuffers(1, &fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer);
+    if( depthEnabled )
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer);
     glBindFramebuffer( GL_FRAMEBUFFER, 0 );
 }
 
 FBO::~FBO()
 {
     glDeleteTextures( 1, &texture );
-    glDeleteRenderbuffers( 1, &depthRenderbuffer );
+    if( depthEnabled )
+        glDeleteRenderbuffers( 1, &depthRenderbuffer );
     glDeleteFramebuffers( 1, &fbo );
 }
 
@@ -93,8 +96,80 @@ void FBO::onResize(int w, int h)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, w, h);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    if ( depthEnabled )
+    {
+        glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, w, h);
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    }
+}
 
+MultiSampleFBO::MultiSampleFBO( int w, int h, GLuint sampleCount ) : samples( sampleCount )
+{
+    width = w;
+    height = h;
+    depthEnabled = true;
+    glGenTextures(1, &texture );
+    glBindTexture( GL_TEXTURE_2D_MULTISAMPLE, texture );
+    glTexImage2DMultisample( GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGB, w, h, GL_TRUE );
+    glBindTexture( GL_TEXTURE_2D_MULTISAMPLE, 0 );
+
+    glGenRenderbuffers( 1, &depthRenderbuffer );
+    glBindRenderbuffer( GL_RENDERBUFFER, depthRenderbuffer );
+    glRenderbufferStorageMultisample( GL_RENDERBUFFER, samples, GL_DEPTH_COMPONENT16, w, h );
+    glBindRenderbuffer( GL_RENDERBUFFER, 0 );
+
+    glGenFramebuffers( 1, &fbo );
+    glBindFramebuffer( GL_FRAMEBUFFER, fbo );
+    glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, texture, 0 );
+    glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer );
+    glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+}
+
+void MultiSampleFBO::onResize( int w, int h )
+{
+    width = w;
+    height = h;
+    glBindTexture( GL_TEXTURE_2D_MULTISAMPLE, texture );
+    glTexImage2DMultisample( GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGB, w, h, GL_TRUE );
+    glBindTexture( GL_TEXTURE_2D_MULTISAMPLE, 0 );
+
+    glBindRenderbuffer( GL_RENDERBUFFER, depthRenderbuffer );
+    glRenderbufferStorageMultisample( GL_RENDERBUFFER, samples, GL_DEPTH_COMPONENT16, w, h );
+    glBindRenderbuffer( GL_RENDERBUFFER, 0 );
+}
+
+Bloom::Bloom( FBO * canvas ) 
+    :   PostEffect( NONE, canvas ),
+        _first( canvas->width, canvas->height ),
+        _second( canvas->width, canvas->height ),
+        _filter( BLOOM_FILTER, _canvas ),
+        _gaussv( GAUSS_V, &_first ),
+        _gaussh( GAUSS_H, &_second )
+{   
+}
+
+void Bloom::render()
+{
+    glBindFramebuffer( GL_FRAMEBUFFER, _first.fbo );
+    glClear( GL_COLOR_BUFFER_BIT );
+    _filter.setType( NONE );
+    _filter.render();
+
+    for( int i = 0 ; i < 10 ; ++i )
+    {
+        glBindFramebuffer( GL_FRAMEBUFFER, _second.fbo );
+        glClear( GL_COLOR_BUFFER_BIT );
+        _gaussv.render();
+
+        glBindFramebuffer( GL_FRAMEBUFFER, _first.fbo );
+        glClear( GL_COLOR_BUFFER_BIT );
+        _gaussh.render();
+    }
+ 
+    glBindFramebuffer( GL_FRAMEBUFFER, _canvas->fbo );
+    _filter.setType( BLOOM_FILTER );
+    _filter.setCanvas( &_second );
+    _filter.render();
+    _filter.setCanvas( _canvas );
 }

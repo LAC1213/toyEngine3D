@@ -2,8 +2,9 @@
 #define TERRAIN_H
 
 #include <mesh.h>
+#include <collider.h>
 
-class Terrain : public Mesh
+class Terrain : public Mesh, public Collider 
 {
 public:
     static Shader * SHADER;
@@ -11,13 +12,17 @@ public:
     virtual ~Terrain();
 
     virtual void render();
+    virtual bool contains( glm::vec3 point ) const;
 
     static GLuint generateHeightmap();
-
 protected:
     float _width;
     float _depth;
     float _maxHeight;
+
+    float * _cpuHeights;
+    size_t  _heightsWidth;
+    size_t  _heightsHeight;
 
     size_t _quadCount;
 

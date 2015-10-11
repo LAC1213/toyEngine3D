@@ -11,6 +11,11 @@ uniform mat4 model;
 
 uniform sampler2D heightmap;
 
+vec4 getPoint( vec2 coord )
+{
+    return vec4(coord.x, texture( heightmap, coord ).r, coord.y, 1);
+}
+
 void main()
 {
     float u = gl_TessCoord.x;
@@ -20,10 +25,10 @@ void main()
     vec2 p = mix(s, t, v);
     tePatchDistance = vec4( u, v, 1-u, 1-v );
 
-    vec3 a = vec3( 0.001, texture( heightmap, vec2( p.x + 0.001, p.y ) ).r, 0 );
-    vec3 b = vec3( 0, texture( heightmap, vec2( p.x, p.y + 0.001 ) ).r, 0.001 );
-    teNormal = cross( b, a );
-    vec4 obj = vec4(p.x, texture( heightmap, p ).r, p.y, 1);
+    vec3 a = getPoint( p + vec2( 0.001, 0 ) ).xyz;
+    vec3 b = getPoint( p + vec2( 0, 0.001 ) ).xyz;
+    vec4 obj = getPoint( p );
+    teNormal = cross( a - vec3(obj), b - vec3(obj) );
     tePosition = obj.xyz;
     gl_Position = proj * view * model * obj;
 }

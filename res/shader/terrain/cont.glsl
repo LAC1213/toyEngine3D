@@ -15,8 +15,8 @@ void main()
 {
     tcPosition[ID] = vPosition[ID];
 
-        vec2 p = vPosition[ID];
-        float d = length( view * model * vec4(p.x, texture( heightmap, p ).r ,p.y, 1 ));
+    vec2 p = vPosition[ID];
+    float d = length( view * model * vec4(p.x, texture( heightmap, p ).r ,p.y, 1 ));
 
     float lod;
 
@@ -32,7 +32,6 @@ void main()
         lod = 2;
     else
         lod = 1;
-
 
     gl_TessLevelInner[0] = lod;
     gl_TessLevelInner[1] = lod;

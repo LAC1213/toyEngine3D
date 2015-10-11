@@ -101,9 +101,7 @@ void ParticleSystem::render()
     GLint loc =_shader->getUniformLocation( "model" );
     glProgramUniformMatrix4fv( *_shader, loc, 1, GL_FALSE, glm::value_ptr(model) );
 
-    glBlendFunc( GL_ONE, GL_ONE );
     Renderable::render();
-    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 }
 
 
@@ -148,21 +146,18 @@ BulletSpawner::BulletSpawner( PerspectiveCamera * cam ) : ParticleSystem( cam, 0
 void BulletSpawner::shoot()
 {
     glm::vec3 pos = glm::vec3(glm::inverse(_pcam->getView()) * glm::vec4( 0, -0.2, 0, 1 ));
-    glm::vec3 dir = glm::inverse(glm::mat3(_pcam->getView())) * glm::vec3( 0, 0, -10 );
+    glm::vec3 dir = glm::inverse(glm::mat3(_pcam->getView())) * glm::vec3( 0, 0, -20 );
     
     Particle bullet;
     bullet.position = Curve<glm::vec3>( pos, dir );
-    bullet.color = Curve<glm::vec4>( glm::vec4( 1, 1, 1, 1 ) );
+    bullet.color = Curve<glm::vec4>( glm::vec4( 1, 0.5, 0.3, 1 ) );
     bullet.uv = Curve<glm::vec2>( glm::vec2( 0, 0 ) );
     bullet.size = Curve<GLfloat>( 0.1f );
     bullet.life = 4;
    
     for( size_t i = 0 ; i < _particles.size() ; ++i )
         if( _particles[i].life <= 0 )
-        {
-            _particles[i] = bullet;
-            return;
-        }
+            _particles.erase( _particles.begin() + i );
     
     _particles.push_back( bullet );
 }
