@@ -175,7 +175,7 @@ void diamondSquare( double ** data, unsigned int size )
 /* using diamond square algorithm */
 GLuint Terrain::generateHeightmap()
 {
-    constexpr int width = exp2( 10 ) + 1;
+    constexpr int width = exp2( 11 ) + 1;
     unsigned short * heights = new unsigned short[ width*width ];
     double ** data = new double*[ width ];
     for( int i = 0 ; i < width ; ++i )

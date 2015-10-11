@@ -10,7 +10,7 @@ in vec3 gNormal;
 in float gPrimitive;
 
 uniform vec4 LightColor = {1, 1, 1, 1};
-uniform vec3 LightPosition;
+uniform vec3 LightPosition = { 0, 1, 10 };
 uniform vec4 DiffuseMaterial = {0, 0.7, 0.7, 1};
 uniform vec4 AmbientMaterial = {0.4, 0.4, 0.4, 1};
 
@@ -33,9 +33,9 @@ void main()
 {
     vec3 N = normalize(gNormal);
     vec3 L = (view * vec4(LightPosition, 1)).xyz - gPosition;
-    float df = 20*dot(N, normalize(L))/length(L);
+    float df = 40*dot(N, normalize(L))/length(L);
     if ( df < 0 ) df = 0;
-   
+
     vec3 n0 = normalize(mat3( view * model ) * vec3( 0, 0, -1 ));
     vec2 uv0, uv;
     if(n0.z < 0)
@@ -49,15 +49,14 @@ void main()
     uv += vec2( 2*M_PI, 2*M_PI );
     uv = mod( uv, 2*M_PI );
     uv *= 0.5/M_PI;
-    vec4 color = LightColor * (AmbientMaterial + df * DiffuseMaterial)* texture(tex, uv);
+
+    vec4 color = LightColor * (AmbientMaterial + df * DiffuseMaterial);
 
     if(wireframe)
     {
-        color = DiffuseMaterial;
         float d1 = min(min(gTriDistance.x, gTriDistance.y), gTriDistance.z);
         float d2 = min(min(gPatchDistance.x, gPatchDistance.y), gPatchDistance.z);
-        color *= 2 * amplify(d1, 40, -0.5) * amplify(d2, 60, -0.5);
-        color.a = 1;
+        color *= amplify(d1, 40, -0.5) * amplify(d2, 60, -0.5);
     }
 
     FragColor = color;

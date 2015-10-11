@@ -25,10 +25,10 @@ void main()
     vec2 p = mix(s, t, v);
     tePatchDistance = vec4( u, v, 1-u, 1-v );
 
-    vec3 a = getPoint( p + vec2( 0.001, 0 ) ).xyz;
-    vec3 b = getPoint( p + vec2( 0, 0.001 ) ).xyz;
+    vec3 a = getPoint( p + vec2( 0.0001, 0 ) ).xyz;
+    vec3 b = getPoint( p + vec2( 0, 0.0001 ) ).xyz;
     vec4 obj = getPoint( p );
-    teNormal = cross( a - vec3(obj), b - vec3(obj) );
+    teNormal = cross( b - vec3(obj), a - vec3(obj) );
     tePosition = obj.xyz;
     gl_Position = proj * view * model * obj;
 }

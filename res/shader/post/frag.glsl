@@ -39,7 +39,7 @@ void main()
 
     if( effect == BLOOM_FILTER )
     {
-        if( dot(texture(tex, vUV).rgb, texture(tex, vUV).rgb ) < 2 )
+        if( dot(texture(tex, vUV).rgb, texture(tex, vUV).rgb ) < 1.5 )
         {
             fragColor = vec4( 1, 1, 1, 0 );
         }
