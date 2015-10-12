@@ -16,7 +16,7 @@ Terrain::Terrain( Camera * cam, HeightMap * heightmap, GLuint texture )
     _wireframe = false;
     _diffuseColor = glm::vec4( 0.6, 0.6, 0.6, 1 );
     glm::mat4 s = glm::scale( glm::mat4(1), glm::vec3( _width, _maxHeight, _depth ) );
-    _model = glm::translate( _model, glm::vec3( -12.5, -3, -12.5 ) ) * s;
+    _model = glm::translate( glm::mat4(1.0f), glm::vec3( -12.5, -5, -12.5 ) ) * s;
 
     _shader = SHADER;
     _mode = GL_PATCHES;
@@ -60,9 +60,9 @@ Terrain::Terrain( Camera * cam, HeightMap * heightmap, GLuint texture )
 
 Terrain::~Terrain()
 {
+    std::cout << "del terrain" << std::endl;
     glDeleteBuffers( 2, _buffers );
     glDeleteVertexArrays( 1, &_vao );
-    delete _shader;
 }
 
 void Terrain::render()
@@ -207,6 +207,15 @@ HeightMap HeightMap::genRandom( unsigned int pow )
     heightmap.data = data;
     heightmap.texture = tex;
     return heightmap;
+}
+
+HeightMap::HeightMap( const HeightMap& copy )
+    :   width( copy.width ),
+        height( copy.height )
+{
+    memcpy( data, copy.data, width*sizeof(*data) );
+    for( size_t i = 0 ; i < width ; ++i )
+        memcpy( data[i], copy.data[i], height*sizeof(**data) );
 }
 
 HeightMap::HeightMap( size_t w, size_t h )

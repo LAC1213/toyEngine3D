@@ -38,12 +38,26 @@ void PerspectiveCamera::updateView()
     _view = rx * ry * t;
 }
 
-PlayerCamera::PlayerCamera( GLFWwindow * window, float aspect, std::vector<Collider*> colliders )
+PlayerCamera::PlayerCamera( GLFWwindow * window, float aspect )
     :   PerspectiveCamera( 45, aspect, 0.01f, 100.f ),
-        _colliders( colliders ),
         _window( window )
 {
-    _position.ddf.y = -1;
+    _position.ddf.y = -2;
+}
+
+void PlayerCamera::addCollider( Collider * collider )
+{
+    _colliders.push_back( collider );
+}
+
+void PlayerCamera::removeCollider( Collider * collider )
+{
+    for( size_t i = 0 ; i < _colliders.size() ; ++i )
+        if( _colliders[i] == collider )
+        {
+            _colliders.erase( _colliders.begin() + i );
+            return;
+        }
 }
 
 void PlayerCamera::step( double dt )
@@ -53,12 +67,15 @@ void PlayerCamera::step( double dt )
     _position.step( dt );
     _rotation.step( dt );
 
-    for( int i = 0 ; i < _colliders.size() ; ++i )
+    for( size_t i = 0 ; i < _colliders.size() ; ++i )
     {
         glm::vec3 d = _colliders[i]->correct( _position.f - glm::vec3( 0, 0.04, 0 ) );
         _position.f += d;
         if( glm::dot( d, d ) > 0 )
+        {
+            _canJump = true;
             _position.df = glm::vec3(0, 0, 0);
+        }
     }
 
     _eye = _position.f;
@@ -70,7 +87,10 @@ void PlayerCamera::step( double dt )
 
 void PlayerCamera::jump()
 {
+    if( !_canJump )
+        return;
     _position.df.y = 1;
+    _canJump = false;
 }
 
 void PlayerCamera::pollInput()

@@ -17,7 +17,7 @@ public:
     virtual bool contains( glm::vec3 point ) const;
     virtual glm::vec3 correct( glm::vec3 point ) const;
 
-private:
+protected:
     glm::vec3 _center;
     float   _radius;
 };

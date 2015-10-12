@@ -61,12 +61,16 @@ class PlayerCamera : public PerspectiveCamera
 {
 public:
     PlayerCamera() {}
-    PlayerCamera( GLFWwindow * window, float aspect, std::vector<Collider*> colliders ); 
+    PlayerCamera( GLFWwindow * window, float aspect );
+
+    void addCollider( Collider * collider );
+    void removeCollider( Collider * collider );
 
     virtual void step( double dt );
     void jump();
 protected: 
     void pollInput();
+    bool    _canJump;
 
     std::vector<Collider*> _colliders;
     GLFWwindow * _window;

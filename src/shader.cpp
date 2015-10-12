@@ -9,9 +9,11 @@
 #include <util.h>
 #include <string.h>
 
-Shader::Shader() : _program( 0 )
+using std::max;
+
+/*Shader::Shader() : _program( 0 )
 {
-}
+}*/
 
 Shader::~Shader()
 {

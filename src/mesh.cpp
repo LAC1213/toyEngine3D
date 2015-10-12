@@ -102,12 +102,10 @@ MeshData MeshData::genIcoSphere()
 Mesh::Mesh( Camera * cam, MeshData * data, GLuint texture )
     :   _texture( texture ),
         _wireframe( true ),
-        _diffuseColor( 0.3, 0.8, 0.5, 1 ),
+        _diffuseColor( 1, 0.5, 0.2, 1 ),
         _model(1.0f)
         
 {     
-    _model *= 0.1f;
-    _model[3][3] = 1;
     _shader = data->shader;
     _cam = cam;
     genVAO( data->attributes, data->indexBuffer );

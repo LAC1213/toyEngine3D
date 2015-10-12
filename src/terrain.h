@@ -7,6 +7,8 @@
 class HeightMap
 {
 public:
+    HeightMap() {}
+    HeightMap( const HeightMap& copy );
     HeightMap( size_t w, size_t h );
     ~HeightMap();
     
@@ -23,6 +25,7 @@ class Terrain : public Mesh, public Collider
 public:
     static Shader * SHADER;
     Terrain( Camera * cam, HeightMap * heightmap, GLuint texture );
+    Terrain() {}
     virtual ~Terrain();
 
     virtual void render();

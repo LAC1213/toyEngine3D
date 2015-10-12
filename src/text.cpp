@@ -2,6 +2,8 @@
 #include <util.h>
 #include <vector>
 
+using std::max;
+
 FT_Library Font::ft = 0;
 
 Font::Font( std::string name, int fontSize ) : _size( fontSize )

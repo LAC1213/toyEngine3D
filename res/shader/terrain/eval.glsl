@@ -25,8 +25,10 @@ void main()
     vec2 p = mix(s, t, v);
     tePatchDistance = vec4( u, v, 1-u, 1-v );
 
-    vec3 a = getPoint( p + vec2( 1.0/2049, 0 ) ).xyz;
-    vec3 b = getPoint( p + vec2( 0, 1.0/2049 ) ).xyz;
+    vec2 tex_offset = 1.0 / textureSize( heightmap, 0 ); 
+
+    vec3 a = getPoint( p + vec2( tex_offset.x, 0 ) ).xyz;
+    vec3 b = getPoint( p + vec2( 0, tex_offset.y ) ).xyz;
     vec4 obj = getPoint( p );
     teNormal = cross( b - vec3(obj), a - vec3(obj) );
     tePosition = obj.xyz;

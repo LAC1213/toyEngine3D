@@ -4,7 +4,7 @@
 #include <mesh.h>
 #include <actor.h>
 #include <vector>
-#include <set>
+#include <body.h>
 
 class Particle  
 {
@@ -70,7 +70,6 @@ public:
 
     void spawnParticle();
     virtual void step( double dt );
-    virtual void render();
 
 protected:
     glm::vec3   _pos;
@@ -79,9 +78,13 @@ protected:
 class BulletSpawner : public ParticleSystem
 {
 public:
-    BulletSpawner( PerspectiveCamera * cam );
+    BulletSpawner( PerspectiveCamera * cam, std::vector<Enemy*>* enemies );
 
+    virtual void step( double dt );
     virtual void shoot();
+
+private:
+    std::vector<Enemy*>* _enemies;
 };
 
 #endif //PARTICLE_H

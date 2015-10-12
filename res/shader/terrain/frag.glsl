@@ -31,7 +31,7 @@ void main()
 {
     vec3 N = normalize(gNormal);
     vec3 L = LightPosition - gPosition;
-    float df = 40*dot(N, normalize(L))/length(L);
+    float df = 20*dot(N, normalize(L))/length(L);
     if ( df < 0 ) df = 0;
 
     vec4 color = LightColor * (AmbientMaterial + df * DiffuseMaterial)* texture( tex, vec2( 4*gPatchDistance ) );
@@ -44,5 +44,7 @@ void main()
         color.a = 1;
     }
 
-    FragColor = color;
+    FragColor.rgb = color.rgb / ( color.rgb + vec3(1.0) );
+    FragColor.a = 1;
+    //FragColor = color;
 }
