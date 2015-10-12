@@ -43,6 +43,9 @@ public:
     HeightMap       _heightmap;
     Terrain *       _terrain;
     std::vector<Enemy*> _enemies;
+
+    double          _spawnFrequency;
+    double          _spawnTimer;
 };
 
 #endif //WORLD_H

@@ -13,12 +13,14 @@ World::World( GLFWwindow * window, int width, int height )
         _canvas( _width, _height ),
         _bloomed( _width, _height ),
         _sphereData( MeshData::genIcoSphere() ),
-        _font( "/usr/share/fonts/TTF/DejaVuSansMono.ttf", 18 ),
+        _font( "/usr/share/fonts/TTF/DejaVuSansMono.ttf", 14 ),
         _time( 0 ),
         _score( 0 ),
         _cam( _window, (float)_width / _height ),
         _bullets( &_cam, &_enemies ),
-        _heightmap( HeightMap::genRandom( 11 ) )
+        _heightmap( HeightMap::genRandom( 11 ) ),
+        _spawnFrequency( 2 ),
+        _spawnTimer( 1.0/_spawnFrequency )
 {
     _groundTex = SOIL_load_OGL_texture
                  (
@@ -41,10 +43,7 @@ World::World( GLFWwindow * window, int width, int height )
 
     _terrain = new Terrain( &_cam, &_heightmap, _groundTex );
 
-    _enemies.push_back(new Enemy( &_cam, &_sphereData, _terrain )); 
-
     _cam.addCollider( _terrain );
-    _cam.addCollider( _enemies[0] );
 }
 
 World::~World()
@@ -58,11 +57,57 @@ World::~World()
 void World::step( double dt )
 {
     _time += dt;
+    _spawnTimer -= dt;
+
     _bullets.step( dt );
     _cam.step( dt );
 
     for( size_t i = 0 ; i < _enemies.size() ; ++i )
-        _enemies[i]->step( dt );
+    {
+        if( _enemies[i]->isAlive() )
+        {
+            _enemies[i]->step( dt );
+            if( _enemies[i]->contains( _cam.getPosition() ) )
+            {
+                _score = 0;
+                std::cout << "loose" << std::endl;
+            }      
+            
+            if( glm::length(_enemies[i]->position.f - _cam.getPosition()) < 3 ) 
+            {
+                _enemies[i]->setColor( glm::vec4(1, 0.3, 0, 1 ));
+            }
+            else
+            {
+                _enemies[i]->setColor( glm::vec4(0.6, 0, 1, 1 ));
+            }
+        }
+        else
+        {
+            _cam.removeCollider( _enemies[i] );
+            delete _enemies[i];
+            _enemies.erase( _enemies.begin() + i );
+            --i;
+            ++_score;
+        }
+    }
+
+    auto rnd = [] () { return (float) rand() / RAND_MAX; };
+    static const glm::vec4 spawnArea = glm::vec4( -12.5, -12.5, 25, 25 );
+    if( _spawnTimer < 0 )
+    {
+        _spawnTimer = 1.0/_spawnFrequency;
+        static const float speed = 0.3;
+        Enemy * e = new Enemy( &_cam, &_sphereData, _terrain );
+        e->position.f = glm::vec3( spawnArea.x + rnd()*spawnArea.z, 0, spawnArea.y + rnd()*spawnArea.w );
+        e->position.df.x = speed*(rnd() - 0.5);
+        e->position.df.z = sqrt( speed*speed - e->position.df.x*e->position.df.x );
+        if( rnd() > 0.5 )
+            e->position.df.z *= -1;
+
+        _enemies.push_back( e );
+        _cam.addCollider( e );
+    }
 }
 
 void World::render()
@@ -75,7 +120,7 @@ void World::render()
     ss.precision(4);
     ss << "Score: " << _score << "  Time: " << _time;
     Text txt( &_font, ss.str(), glm::vec2( _width, _height ) );
-    txt.setPosition( glm::vec2( 10, 10 ) );
+    txt.setPosition( glm::vec2( 5, 2 ) );
 
     /* render scene */
     glBindFramebuffer( GL_FRAMEBUFFER, _msaa.fbo );

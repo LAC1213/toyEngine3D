@@ -111,6 +111,8 @@ int main(int argc, char ** argv)
 
     GLFWwindow * window = initContext();
 
+    srand( time(0) );
+
     if(FT_Init_FreeType(&Font::ft))
         errorExit("Couldn't initialize freetype");
 

@@ -33,8 +33,6 @@ void main()
     else
         lod = 1;
 
-    lod = 16;
-
     gl_TessLevelInner[0] = lod;
     gl_TessLevelInner[1] = lod;
     gl_TessLevelOuter[0] = lod;

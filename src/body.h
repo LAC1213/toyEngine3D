@@ -15,8 +15,13 @@ public:
 
     virtual void onHit();
 
+    bool isAlive() const { return _alive; }
+
+    void setColor( glm::vec4 color ) { _diffuseColor = color; }
 protected:
-    Collider *   _collider;
+    Collider *  _collider;
+
+    bool        _alive;
 };
 
 #endif //BODY_H

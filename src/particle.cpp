@@ -208,7 +208,7 @@ void BulletSpawner::step( double dt )
 void BulletSpawner::shoot()
 {
     glm::vec3 pos = glm::vec3(glm::inverse(_pcam->getView()) * glm::vec4( 0, 0.002, 0, 1 ));
-    glm::vec3 dir = glm::inverse(glm::mat3(_pcam->getView())) * glm::vec3( 0, 0, -2 );
+    glm::vec3 dir = glm::inverse(glm::mat3(_pcam->getView())) * glm::vec3( 0, 0, -8 );
     
     Particle bullet;
     bullet.position = Curve<glm::vec3>( pos, dir );

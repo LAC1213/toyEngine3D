@@ -35,6 +35,7 @@ void main()
     vec3 L = (view * vec4(LightPosition, 1)).xyz - gPosition;
     float df = 40*dot(N, normalize(L))/length(L);
     if ( df < 0 ) df = 0;
+    df = 3;
 
     vec3 n0 = normalize(mat3( view * model ) * vec3( 0, 0, -1 ));
     vec2 uv0, uv;

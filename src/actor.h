@@ -39,9 +39,9 @@ public:
     glm::mat4 getModel() const
     {
         glm::mat4 s = glm::scale( glm::mat4(1), scale.f );
-        glm::mat4 rx = glm::rotate( glm::mat4(1), -rotation.f.x, glm::vec3(1, 0, 0) );
+        glm::mat4 rx = glm::rotate( glm::mat4(1), rotation.f.x, glm::vec3(1, 0, 0) );
         glm::mat4 ry = glm::rotate( glm::mat4(1), rotation.f.y, glm::vec3(0, 1, 0) );
-        glm::mat4 rz = glm::rotate( glm::mat4(1), -rotation.f.z, glm::vec3(0, 0, 1) );
+        glm::mat4 rz = glm::rotate( glm::mat4(1), rotation.f.z, glm::vec3(0, 0, 1) );
         glm::mat4 t = glm::translate( glm::mat4(1), position.f );
         return t * s * rx * rz * ry;
     }
