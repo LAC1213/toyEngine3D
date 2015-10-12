@@ -41,6 +41,7 @@ public:
         GAUSS_V,
         GAUSS_H,
         BLOOM_FILTER,
+        BLEND
     };
 
     PostEffect( Type type, FBO * canvas );
@@ -56,14 +57,25 @@ protected:
     GLuint  _vbo;
 };
 
+class Blend : public PostEffect
+{
+public:
+    Blend( FBO * a, FBO * b );
+    virtual void render();
+
+protected:
+    FBO *   _blendFBO;
+};
+
 class Bloom : public PostEffect
 {
 public:
-    Bloom( FBO * canvas );
+    Bloom( FBO * in, FBO * out );
 
     virtual void render();
 
 private:
+    FBO *   _in;
     FBO     _first;  //!< pingpong buffer 1
     FBO     _second; //!< pingpong buffer 2
 

@@ -20,6 +20,7 @@
 #include <mesh.h>
 #include <iostream>
 #include <glm/glm.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #include <posteffect.h>
 #include <SOIL/SOIL.h>
@@ -30,7 +31,7 @@
 #include <sstream>
 
 static int width, height;
-static PerspectiveCamera * cam;
+static PlayerCamera * cam;
 static BulletSpawner * bullets;
 static Terrain * terrain_g;
 
@@ -54,8 +55,11 @@ static void onKeyAction(GLFWwindow * window, int key, int scancode, int action, 
         case GLFW_KEY_Z:
             terrain_g->toggleWireframe();
             break;
-        case GLFW_KEY_SPACE:
+        case GLFW_KEY_X:
             bullets->shoot();
+            break;
+        case GLFW_KEY_SPACE:
+            cam->jump();
             break;
         }
     }
@@ -114,37 +118,6 @@ GLFWwindow * initContext()
     return window;
 }
 
-glm::vec2 getInput( GLFWwindow * window, float phi )
-{
-    float vx = 0, vz = 0;
-    constexpr float ds = 8;
-            if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        {
-            vx += cos(phi);
-            vz += sin(phi);
-        }
-        if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        {
-            vx += -cos(phi);
-            vz += -sin(phi);
-        }
-        if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        {
-            vx += -sin(phi);
-            vz += cos(phi);
-        }
-        if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        {
-            vx += sin(phi);
-            vz += -cos(phi);
-        }
-    glm::vec2 v( vx, vz );
-    if( vx == 0 && vz == 0 )
-        return glm::vec2( 0, 0 );
-    else
-        return ds*glm::normalize(v);
-}
-
 int main(int argc, char ** argv)
 {
     int errFd = -1;
@@ -171,16 +144,16 @@ int main(int argc, char ** argv)
     Billboard::SHADER = new Shader( "./res/shader/billboard/", Shader::LOAD_GEOM );
     PostEffect::SHADER = new Shader( "./res/shader/post/", Shader::LOAD_BASIC );    
 
-    PerspectiveCamera c = PerspectiveCamera( 45, 1000.0 / 800, 0.1f, 100 );
-    c.setPosition( glm::vec3( 0, 0, 10 ) );
+    PlayerCamera c;
     cam = &c;
 
     MeshData d = MeshData::genIcoSphere();
     Mesh sphere( cam, &d, 0 );
+    Sphere collSphere( glm::vec3( 0, 0, 0 ), 0.1 );
 
     Font font( "/usr/share/fonts/TTF/DejaVuSansMono.ttf", 14 );
 
-    SmoothTail particleSystem( cam );
+    LightWell particleSystem( cam, glm::vec3( 0, 0, 4 ) );
     bullets = new BulletSpawner( cam );
 
     GLuint texture = SOIL_load_OGL_texture
@@ -203,14 +176,22 @@ int main(int argc, char ** argv)
     glGenerateMipmap(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    Terrain terrain( cam, Terrain::generateHeightmap(), texture );
+    HeightMap diasq = HeightMap::genRandom( 11 );
+    Terrain terrain( cam, &diasq, texture );
     terrain_g = &terrain;
     
+    std::vector<Collider*> colliders;
+    colliders.push_back( &terrain );
+    colliders.push_back( &collSphere );
+    c = PlayerCamera( window, 1000.0 / 800, colliders );
+    c.setPosition( glm::vec3( 0, 0, 10 ) );
+
     FBO canvas( width, height );
+    FBO bloomers( width, height );
     MultiSampleFBO msaa( width, height, 16 );
 
-    PostEffect effect( PostEffect::NONE, &canvas );
-    Bloom bloom( &canvas );
+    Blend effect( &bloomers, &canvas );
+    Bloom bloom( &canvas, &bloomers );
 
     glViewport( 0, 0, width, height );
 
@@ -231,8 +212,7 @@ int main(int argc, char ** argv)
         Text * txt = new Text( &font, ss.str(), glm::vec2( width, height ) );
         txt->setPosition( glm::vec2( 10, 10 ) );
 
-        glm::vec2 v = getInput( window, cam->getAngleY() );
-        cam->translate( (float)dt*glm::vec3( v.x, 0, v.y ) );
+        cam->step( dt );
 
         /* render scene */
         glBindFramebuffer( GL_FRAMEBUFFER, msaa.fbo );
@@ -241,15 +221,16 @@ int main(int argc, char ** argv)
         glPatchParameteri( GL_PATCH_VERTICES, 3 ); 
         sphere.render();
         terrain.render();
-        particleSystem.render();
         bullets->render();
+        particleSystem.render();
        
         glBindFramebuffer(GL_READ_FRAMEBUFFER, msaa.fbo);
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, canvas.fbo);
         glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
-        /* post processing and text */
         bloom.render();
+
+        /* post processing and text */
         
         glBindFramebuffer( GL_FRAMEBUFFER, 0 );
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );     

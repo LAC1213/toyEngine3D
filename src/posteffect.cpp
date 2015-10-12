@@ -61,7 +61,7 @@ FBO::FBO( int w, int h, bool depth )
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB16F, w, h, 0, GL_RGB, GL_FLOAT, NULL );
     glBindTexture( GL_TEXTURE_2D, 0 );
 
     if( depthEnabled )
@@ -93,7 +93,7 @@ void FBO::onResize(int w, int h)
     width = w;
     height = h;
     glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     glBindTexture(GL_TEXTURE_2D, 0);
 
     if ( depthEnabled )
@@ -111,7 +111,7 @@ MultiSampleFBO::MultiSampleFBO( int w, int h, GLuint sampleCount ) : samples( sa
     depthEnabled = true;
     glGenTextures(1, &texture );
     glBindTexture( GL_TEXTURE_2D_MULTISAMPLE, texture );
-    glTexImage2DMultisample( GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGB, w, h, GL_TRUE );
+    glTexImage2DMultisample( GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGB16F, w, h, GL_TRUE );
     glBindTexture( GL_TEXTURE_2D_MULTISAMPLE, 0 );
 
     glGenRenderbuffers( 1, &depthRenderbuffer );
@@ -131,7 +131,7 @@ void MultiSampleFBO::onResize( int w, int h )
     width = w;
     height = h;
     glBindTexture( GL_TEXTURE_2D_MULTISAMPLE, texture );
-    glTexImage2DMultisample( GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGB, w, h, GL_TRUE );
+    glTexImage2DMultisample( GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGB16F, w, h, GL_TRUE );
     glBindTexture( GL_TEXTURE_2D_MULTISAMPLE, 0 );
 
     glBindRenderbuffer( GL_RENDERBUFFER, depthRenderbuffer );
@@ -139,11 +139,12 @@ void MultiSampleFBO::onResize( int w, int h )
     glBindRenderbuffer( GL_RENDERBUFFER, 0 );
 }
 
-Bloom::Bloom( FBO * canvas ) 
+Bloom::Bloom( FBO * in, FBO * canvas ) 
     :   PostEffect( NONE, canvas ),
+        _in( in ),
         _first( canvas->width, canvas->height ),
         _second( canvas->width, canvas->height ),
-        _filter( BLOOM_FILTER, _canvas ),
+        _filter( BLOOM_FILTER, _in ),
         _gaussv( GAUSS_V, &_first ),
         _gaussh( GAUSS_H, &_second )
 {   
@@ -153,10 +154,10 @@ void Bloom::render()
 {
     glBindFramebuffer( GL_FRAMEBUFFER, _first.fbo );
     glClear( GL_COLOR_BUFFER_BIT );
-    _filter.setType( NONE );
+    _filter.setType( BLOOM_FILTER );
     _filter.render();
 
-    for( int i = 0 ; i < 10 ; ++i )
+    for( int i = 0 ; i < 7; ++i )
     {
         glBindFramebuffer( GL_FRAMEBUFFER, _second.fbo );
         glClear( GL_COLOR_BUFFER_BIT );
@@ -168,8 +169,26 @@ void Bloom::render()
     }
  
     glBindFramebuffer( GL_FRAMEBUFFER, _canvas->fbo );
-    _filter.setType( BLOOM_FILTER );
+    glClear( GL_COLOR_BUFFER_BIT );
     _filter.setCanvas( &_second );
+    _filter.setType( NONE );
     _filter.render();
-    _filter.setCanvas( _canvas );
+    _filter.setCanvas( _in );
+    _filter.setType( BLOOM_FILTER );
+}
+
+Blend::Blend( FBO * a, FBO * b ) 
+    :   PostEffect( BLEND, a ),
+        _blendFBO( b )
+{   
+}
+
+void Blend::render()
+{
+    glActiveTexture( GL_TEXTURE0 + 1 );
+    glBindTexture( GL_TEXTURE_2D, _blendFBO->texture );
+    GLint loc = _shader->getUniformLocation( "blendTex" );
+    glProgramUniform1i( *_shader, loc, 1 );
+
+    PostEffect::render();
 }

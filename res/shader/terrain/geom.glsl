@@ -17,19 +17,19 @@ void main()
     mat3 normal = mat3(model);
     vec3 facetNormal = cross( tePosition[1] - tePosition[0], tePosition[2] - tePosition[0] );
 
-    gNormal = normal * facetNormal;
+    gNormal = normal * teNormal[0];
     gPosition = vec3(model * vec4(tePosition[0], 1));
     gPatchDistance = tePatchDistance[0];
     gTriDistance = vec3(1, 0, 0);
     gl_Position = gl_in[0].gl_Position; EmitVertex();
 
-    gNormal = normal * facetNormal;
+    gNormal = normal * teNormal[1];
     gPosition = vec3(model * vec4(tePosition[1], 1));
     gPatchDistance = tePatchDistance[1];
     gTriDistance = vec3(0, 1, 0);
     gl_Position = gl_in[1].gl_Position; EmitVertex();
 
-    gNormal = normal * facetNormal;
+    gNormal = normal * teNormal[2];
     gPosition = vec3(model * vec4(tePosition[2], 1));
     gPatchDistance = tePatchDistance[2];
     gTriDistance = vec3(0, 0, 1);

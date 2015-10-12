@@ -63,6 +63,19 @@ protected:
     Curve<glm::vec3> _pos;
 };
 
+class LightWell : public ParticleSystem
+{
+public:
+    LightWell( PerspectiveCamera * cam, glm::vec3 pos );
+
+    void spawnParticle();
+    virtual void step( double dt );
+    virtual void render();
+
+protected:
+    glm::vec3   _pos;
+};
+
 class BulletSpawner : public ParticleSystem
 {
 public:

@@ -113,14 +113,16 @@ SmoothTail::SmoothTail( PerspectiveCamera * cam )
 
 void SmoothTail::step( double dt )
 {
-    static std::random_device rd;
-    static std::mt19937 mt( rd() );
-    static std::uniform_real_distribution<float> dist( -0.05, 0.05 );
+   // static std::random_device rd;
+   // static std::mt19937 mt( rd() );
+   // static std::uniform_real_distribution<float> dist( -0.05, 0.05 );
+    
+    auto rnd = [] () { return 0.1*(float) rand() / RAND_MAX - 0.05; };
 
     _pos.step( dt );
 
     Particle part;
-    part.position = Curve<glm::vec3>( _pos.f + glm::vec3( dist(mt), dist(mt), dist(mt) ) );
+    part.position = Curve<glm::vec3>( _pos.f + glm::vec3( rnd(), rnd(), rnd() ));
     part.color = Curve<glm::vec4>( glm::vec4( 0.8, 0.8, 1, 1 ), glm::vec4( 0.05f, 0.05f, 0, -0.2 ) );
     part.uv = Curve<glm::vec2>( glm::vec2( 0, 0 ) );
     part.size = Curve<GLfloat> ( 0.1f, 0, -0.2);
@@ -138,6 +140,55 @@ void SmoothTail::step( double dt )
     ParticleSystem::step( dt );
 }
 
+LightWell::LightWell( PerspectiveCamera * cam, glm::vec3 pos ) 
+    :   ParticleSystem( cam, 0 ),
+        _pos( pos )
+{
+}
+
+void LightWell::spawnParticle()
+{
+    auto rnd = [] () { return 0.02*(float) rand() / RAND_MAX - 0.01; };
+
+    Particle part;
+    part.position = Curve<glm::vec3>( _pos , glm::vec3( 30*rnd(), 1.4 + rnd(), 30*rnd() ), glm::vec3( 0, -2, 0 ));
+    part.color = Curve<glm::vec4>( glm::vec4( 0, 8, 0, 1 ) );
+    part.uv = Curve<glm::vec2>( glm::vec2( 0, 0 ) );
+    part.size = Curve<GLfloat> ( 0.2f, 0, -0.1);
+    part.life = 4;
+
+    for( size_t i = 0 ; i < _particles.size() ; ++i )
+        if( _particles[i].life <= 0 )
+        {
+            _particles[i] = part;
+            return;
+        }
+
+    _particles.push_back( part );
+}
+
+void LightWell::step( double dt )
+{
+   // static std::random_device rd;
+   // static std::mt19937 mt( rd() );
+   // static std::uniform_real_distribution<float> dist( -0.05, 0.05 );
+    
+    for( int i = 0 ; i < 300*dt ; ++i )
+        spawnParticle();
+    
+    ParticleSystem::step( dt );
+}
+
+void LightWell::render()
+{
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE );
+    glDepthMask( GL_FALSE );
+    
+    ParticleSystem::render();
+    
+    glDepthMask( GL_TRUE );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+}
 
 BulletSpawner::BulletSpawner( PerspectiveCamera * cam ) : ParticleSystem( cam, 0 )
 {
@@ -145,7 +196,7 @@ BulletSpawner::BulletSpawner( PerspectiveCamera * cam ) : ParticleSystem( cam, 0
 
 void BulletSpawner::shoot()
 {
-    glm::vec3 pos = glm::vec3(glm::inverse(_pcam->getView()) * glm::vec4( 0, -0.2, 0, 1 ));
+    glm::vec3 pos = glm::vec3(glm::inverse(_pcam->getView()) * glm::vec4( 0, 0.02, 0, 1 ));
     glm::vec3 dir = glm::inverse(glm::mat3(_pcam->getView())) * glm::vec3( 0, 0, -20 );
     
     Particle bullet;

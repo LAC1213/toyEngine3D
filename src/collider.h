@@ -7,6 +7,7 @@ class Collider
 {
 public:
     virtual bool contains( glm::vec3 point ) const = 0;
+    virtual glm::vec3 correct( glm::vec3 point ) const = 0;
 };
 
 class Sphere : public Collider
@@ -14,6 +15,7 @@ class Sphere : public Collider
 public:
     Sphere( glm::vec3 center, float radius );
     virtual bool contains( glm::vec3 point ) const;
+    virtual glm::vec3 correct( glm::vec3 point ) const;
 
 private:
     glm::vec3 _center;

@@ -6,14 +6,16 @@ in vec2 vUV;
 out vec4 fragColor;
 
 uniform sampler2D tex;
+uniform sampler2D blendTex;
 
 uniform vec2 screen = vec2(640, 480);
 
-#define NONE 0
-#define PIXEL 1
-#define GAUSS_V 2
-#define GAUSS_H 3
-#define BLOOM_FILTER 4
+#define NONE            0
+#define PIXEL           1
+#define GAUSS_V         2
+#define GAUSS_H         3
+#define BLOOM_FILTER    4
+#define BLEND           5
 
 uniform int effect = NONE;
 uniform int n = 16;
@@ -23,8 +25,9 @@ float weight[3] = float[]( 0.2270270270, 0.3162162162, 0.0702702703  );
 
 void main()
 {
-    float dx = 1.0/screen.x;
-    float dy = 1.0/screen.y;
+    vec2 tex_offset = 1.0 / textureSize(tex, 0);
+    float dx = tex_offset.x;
+    float dy = tex_offset.y;
     float x, y;
     if(effect == PIXEL)
     {
@@ -39,14 +42,13 @@ void main()
 
     if( effect == BLOOM_FILTER )
     {
-        if( dot(texture(tex, vUV).rgb, texture(tex, vUV).rgb ) < 1.5 )
+        if( dot(texture(tex, vUV).rgb, texture(tex, vUV).rgb ) < 4 )
         {
-            fragColor = vec4( 1, 1, 1, 0 );
+            discard;
         }
         else
         {
             fragColor = texture( tex, vUV );
-            fragColor.a = 1;
         }
         return;
     }
@@ -79,6 +81,12 @@ void main()
         return;
     }
 
+    if( effect == BLEND )
+    {
+        fragColor.rgb = texture( tex, vUV ).rgb + texture( blendTex, vUV ).rgb;
+        fragColor.a = 1;
+        return;
+    }
 
     if(effect == NONE)
     {

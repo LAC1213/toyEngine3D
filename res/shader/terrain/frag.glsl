@@ -8,9 +8,9 @@ in vec3 gNormal;
 in float gPrimitive;
 
 uniform vec4 LightColor = {1, 1, 1, 1};
-uniform vec3 LightPosition = { 0, 1, 10 };
+uniform vec3 LightPosition = { 0, 5, 10 };
 uniform vec4 DiffuseMaterial = {0, 0.7, 0.7, 1};
-uniform vec4 AmbientMaterial = {0.1, 0.1, 0.1, 1};
+uniform vec4 AmbientMaterial = {0.4, 0.4, 0.4, 1};
 
 uniform sampler2D tex;
 
@@ -34,10 +34,8 @@ void main()
     float df = 40*dot(N, normalize(L))/length(L);
     if ( df < 0 ) df = 0;
 
-    vec4 color = LightColor * (AmbientMaterial + df * DiffuseMaterial * texture( tex, vec2( gPatchDistance ) ));
+    vec4 color = LightColor * (AmbientMaterial + df * DiffuseMaterial)* texture( tex, vec2( 4*gPatchDistance ) );
 
-   // color.rgb = abs(N);
-   // color.a = 1;
     if(wireframe)
     {
         float d1 = min(min(gTriDistance.x, gTriDistance.y), gTriDistance.z);

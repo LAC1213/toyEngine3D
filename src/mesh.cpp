@@ -106,6 +106,8 @@ Mesh::Mesh( Camera * cam, MeshData * data, GLuint texture )
         _model(1.0f)
         
 {     
+    _model *= 0.1f;
+    _model[3][3] = 1;
     _shader = data->shader;
     _cam = cam;
     genVAO( data->attributes, data->indexBuffer );

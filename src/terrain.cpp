@@ -4,19 +4,19 @@
 
 Shader * Terrain::SHADER = 0;
 
-Terrain::Terrain( Camera * cam, GLuint heightmap, GLuint texture )
+Terrain::Terrain( Camera * cam, HeightMap * heightmap, GLuint texture )
     :   _heightmap( heightmap )
 {
-    _width = 100;
-    _depth = 100;
-    _maxHeight = 15;
-    _quadCount = 100;
+    _width = 25;
+    _depth = 25;
+    _maxHeight = 5;
+    _quadCount = 25;
 
     _texture = texture;
     _wireframe = false;
-    _diffuseColor = glm::vec4( 0.2, 1, 0.5, 1 );
+    _diffuseColor = glm::vec4( 0.6, 0.6, 0.6, 1 );
     glm::mat4 s = glm::scale( glm::mat4(1), glm::vec3( _width, _maxHeight, _depth ) );
-    _model = glm::translate( _model, glm::vec3( -50, -10, -50 ) ) * s;
+    _model = glm::translate( _model, glm::vec3( -12.5, -3, -12.5 ) ) * s;
 
     _shader = SHADER;
     _mode = GL_PATCHES;
@@ -72,17 +72,17 @@ void Terrain::render()
     GLint loc = _shader->getUniformLocation( "heightmap" );
     glProgramUniform1i( *_shader, loc, 1 );
     glActiveTexture( GL_TEXTURE1 );
-    glBindTexture( GL_TEXTURE_2D, _heightmap );
+    glBindTexture( GL_TEXTURE_2D, _heightmap->texture );
 
     Mesh::render();
 }
 
 static double getRnd()
 {
-    static std::random_device rd;
-    static std::mt19937 mt(rd());
-    static std::uniform_real_distribution<double> dist(0, 1);
-    return dist(mt);
+   // static std::random_device rd;
+   // static std::mt19937 mt(rd());
+   // static std::uniform_real_distribution<double> dist(0, 1);
+    return (double)rand() / RAND_MAX;
 }
 
 /* stack overflow copy paste :P */
@@ -91,12 +91,12 @@ void diamondSquare( double ** data, unsigned int size )
 //value 2^n+1
     unsigned int DATA_SIZE = size;
 //an initial seed value for the corners of the data
-    constexpr double SEED = 30000.0;
+    constexpr double SEED = 0.5;
 //seed the data
     data[0][0] = data[0][DATA_SIZE-1] = data[DATA_SIZE-1][0] =
                                             data[DATA_SIZE-1][DATA_SIZE-1] = SEED;
 
-    double h = 15000.0;//the range (-h -> +h) for the average offset
+    double h = 0.25;//the range (-h -> +h) for the average offset
     //for the new value in range of h
 //side length is distance of a single square side
 //or distance of diagonal in diamond
@@ -173,22 +173,22 @@ void diamondSquare( double ** data, unsigned int size )
 }
 
 /* using diamond square algorithm */
-GLuint Terrain::generateHeightmap()
+HeightMap HeightMap::genRandom( unsigned int pow )
 {
-    constexpr int width = exp2( 11 ) + 1;
+    unsigned int width = exp2( pow ) + 1;
     unsigned short * heights = new unsigned short[ width*width ];
     double ** data = new double*[ width ];
-    for( int i = 0 ; i < width ; ++i )
+    for( size_t i = 0 ; i < width ; ++i )
     {
         data[ i ] = new double[ width ];
     }
 
     diamondSquare( data, width );
 
-    for(int i = 0 ; i < width ; ++i )
-        for(int j = 0 ; j < width ; ++j )
+    for( size_t i = 0 ; i < width ; ++i )
+        for( size_t j = 0 ; j < width ; ++j )
         {
-            heights[ i*width +j ] = data[i][j];
+            heights[ i*width +j ] = 0xffff * data[i][j];
         }
 
     GLuint tex;
@@ -200,12 +200,25 @@ GLuint Terrain::generateHeightmap()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
     delete[] heights;
-    for( int i = 0 ; i < width ; ++i )
-    {
-        delete[] data[i];
-    }
-    delete[] data;
-    return tex;
+
+    HeightMap heightmap( width, width );
+    heightmap.data = data;
+    heightmap.texture = tex;
+    return heightmap;
 }
 
+HeightMap::HeightMap( size_t w, size_t h )
+    :   width( w ),
+        height( h )
+{
+}
+
+HeightMap::~HeightMap()
+{
+    for( size_t i = 0 ; i < width ; ++i )
+        delete[] data[i];
+    delete[] data;
+    glDeleteTextures( 1, &texture );
+}

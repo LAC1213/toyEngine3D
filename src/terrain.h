@@ -4,30 +4,41 @@
 #include <mesh.h>
 #include <collider.h>
 
+class HeightMap
+{
+public:
+    HeightMap( size_t w, size_t h );
+    ~HeightMap();
+    
+    GLuint texture;
+    double ** data;
+    size_t width;
+    size_t height;
+
+    static HeightMap genRandom( unsigned int pow );
+};
+
 class Terrain : public Mesh, public Collider 
 {
 public:
     static Shader * SHADER;
-    Terrain( Camera * cam, GLuint heightmap, GLuint texture );
+    Terrain( Camera * cam, HeightMap * heightmap, GLuint texture );
     virtual ~Terrain();
 
     virtual void render();
     virtual bool contains( glm::vec3 point ) const;
+    virtual glm::vec3 correct( glm::vec3 point ) const;
 
-    static GLuint generateHeightmap();
 protected:
     float _width;
     float _depth;
     float _maxHeight;
 
-    float * _cpuHeights;
-    size_t  _heightsWidth;
-    size_t  _heightsHeight;
+    HeightMap * _heightmap;
 
     size_t _quadCount;
 
     GLuint _buffers[2];
-    GLuint _heightmap;
 };
 
 #endif //TERRAIN_H

@@ -19,5 +19,5 @@ void main()
     if(length(gUV - vec2(0.5, 0.5)) > 0.5)
         discard;
     vec4 base = vec4( 1, 1, 1, exp( - lambda * length( gUV - vec2( 0.5, 0.5 ) ) ) );
-    fragColor = base * gColor;
+    fragColor = gColor;
 }

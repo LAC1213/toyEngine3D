@@ -20,15 +20,15 @@ void main()
 
     float lod;
 
-    if( d < 1 )
+    if( d < 4 )
         lod = 32;
-    else if ( d < 4 )
+    else if ( d < 8 )
         lod = 16;
-    else if( d < 8 )
-        lod = 8;
     else if( d < 16 )
-        lod = 4;
+        lod = 8;
     else if( d < 32 )
+        lod = 4;
+    else if( d < 64 )
         lod = 2;
     else
         lod = 1;
