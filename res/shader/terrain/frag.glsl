@@ -1,16 +1,19 @@
 #version 450
 
-out vec4 FragColor;
+layout (location = 0) out vec4 FragColor;
+layout (location = 1) out vec4 position;
+layout (location = 2) out vec4 normal;
+
 in vec3 gTriDistance;
 in vec4 gPatchDistance;
 in vec3 gPosition;
 in vec3 gNormal;
 in float gPrimitive;
 
-uniform vec4 LightColor = {1, 1, 1, 1};
-uniform vec3 LightPosition = { 0, 5, 10 };
+//uniform vec4 LightColor = {1, 1, 1, 1};
+//uniform vec3 LightPosition = { 0, 5, 10 };
 uniform vec4 DiffuseMaterial = {0, 0.7, 0.7, 1};
-uniform vec4 AmbientMaterial = {0.4, 0.4, 0.4, 1};
+//uniform vec4 AmbientMaterial = {0.4, 0.4, 0.4, 1};
 
 uniform sampler2D tex;
 
@@ -30,11 +33,11 @@ float amplify(float d, float scale, float offset)
 void main()
 {
     vec3 N = normalize(gNormal);
-    vec3 L = LightPosition - gPosition;
-    float df = 20*dot(N, normalize(L))/length(L);
-    if ( df < 0 ) df = 0;
+  //  vec3 L = LightPosition - gPosition;
+  //  float df = 20*dot(N, normalize(L))/length(L);
+  //  if ( df < 0 ) df = 0;
 
-    vec4 color = LightColor * (AmbientMaterial + df * DiffuseMaterial)* texture( tex, vec2( 4*gPatchDistance ) );
+    vec4 color = DiffuseMaterial* texture( tex, vec2( 4*gPatchDistance ) );
 
     if(wireframe)
     {
@@ -46,5 +49,7 @@ void main()
 
     FragColor.rgb = color.rgb / ( color.rgb + vec3(1.0) );
     FragColor.a = 1;
-    //FragColor = color;
+    position = vec4(view * vec4(gPosition, 1));
+    normal.xyz = mat3(view) * N;
+    normal.a = 1;
 }

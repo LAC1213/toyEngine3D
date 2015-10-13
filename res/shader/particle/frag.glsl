@@ -4,7 +4,9 @@ in vec3 gPosition;
 in vec4 gColor;
 in vec2 gUV;
 
-out vec4 fragColor;
+layout (location = 0) out vec4 fragColor;
+layout (location = 1) out vec4 position;
+layout (location = 2) out vec4 normal;
 
 uniform float lambda = 2;
 //uniform sampler2D tex;
@@ -20,4 +22,7 @@ void main()
         discard;
     vec4 base = vec4( 1, 1, 1, exp( - lambda * length( gUV - vec2( 0.5, 0.5 ) ) ) );
     fragColor = gColor;
+    normal.xyz = -normalize( gPosition );
+    normal.w = 1;
+    position = vec4(gPosition, 1);
 }

@@ -1,6 +1,7 @@
 #include <world.h>
 #include <SOIL/SOIL.h>
 #include <util.h>
+#include <lighting.h>
 
 #include <sstream>
 #include <iostream>
@@ -9,7 +10,8 @@ World::World( GLFWwindow * window, int width, int height )
     :   _window( window ),
         _width( width ),
         _height( height ),
-        _msaa( _width, _height, 16 ),
+  //      _msaa( _width, _height, 16 ),
+        _gBuffer( _width, _height ),
         _canvas( _width, _height ),
         _bloomed( _width, _height ),
         _sphereData( MeshData::genIcoSphere() ),
@@ -118,6 +120,7 @@ void World::render()
 {
     static Blend effect( &_bloomed, &_canvas );
     Bloom bloom( &_canvas, &_bloomed );
+    static Lighting lighting( &_gBuffer );
 
     glViewport( 0, 0, _width, _height );
     std::stringstream ss;
@@ -127,8 +130,13 @@ void World::render()
     txt.setPosition( glm::vec2( 5, 2 ) );
 
     /* render scene with msaa */
-    glBindFramebuffer( GL_FRAMEBUFFER, _msaa.fbo );
+//    glBindFramebuffer( GL_FRAMEBUFFER, _msaa.fbo );
+
+    glBindFramebuffer( GL_FRAMEBUFFER, _gBuffer.fbo );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+    GLuint attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+    glDrawBuffers( 3, attachments );
 
     _terrain->render();
 
@@ -139,18 +147,37 @@ void World::render()
     _bullets.render();
     _lightwell.render();
 
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, _msaa.fbo);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _canvas.fbo);
-    glBlitFramebuffer(0, 0, _width, _height, 0, 0, _width, _height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
+ //   glBindFramebuffer(GL_READ_FRAMEBUFFER, _msaa.fbo);
+ //   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _canvas.fbo);
+ //   glBlitFramebuffer(0, 0, _width, _height, 0, 0, _width, _height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    
+    glBindFramebuffer( GL_FRAMEBUFFER, _canvas.fbo );
+    glClear( GL_COLOR_BUFFER_BIT );
+    lighting.render();
     bloom.render();
+/*
+    glBindFramebuffer( GL_READ_FRAMEBUFFER, _gBuffer.fbo );
+    glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
+    glReadBuffer( GL_COLOR_ATTACHMENT0 );
+    glBlitFramebuffer( 0, 0, _width, _height, 0, 0, _width/2, _height/2, GL_COLOR_BUFFER_BIT, GL_LINEAR );
+
+    glReadBuffer( GL_COLOR_ATTACHMENT1 );
+    glBlitFramebuffer( 0, 0, _width, _height, _width/2, 0, _width, _height/2, GL_COLOR_BUFFER_BIT, GL_LINEAR );
+
+    glReadBuffer( GL_COLOR_ATTACHMENT2 );
+    glBlitFramebuffer( 0, 0, _width, _height, _width/2, _height/2, _width, _height, GL_COLOR_BUFFER_BIT, GL_LINEAR );
+
+    glBindFramebuffer( GL_READ_FRAMEBUFFER, _canvas.fbo );
+    glReadBuffer( GL_COLOR_ATTACHMENT0 );
+    glDrawBuffer( GL_COLOR_ATTACHMENT0 );
+    glBlitFramebuffer( 0, 0, _width, _height, 0, _height/2, _width/2, _height, GL_COLOR_BUFFER_BIT, GL_LINEAR );
+*/
 
     /* post processing and text */
 
     glBindFramebuffer( GL_FRAMEBUFFER, 0 );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     effect.render();
-
     txt.render();
 }
 void World::onKeyAction( int key, int scancode, int action, int mods )
@@ -190,6 +217,7 @@ void World::onResize( int width, int height )
     _height = height;
     _canvas.onResize( width, height );
     _bloomed.onResize( width, height );
-    _msaa.onResize( width, height );
-    _cam.onResize( width, height ); 
+ //   _msaa.onResize( width, height );
+    _cam.onResize( width, height );
+   _gBuffer.onResize( width, height ); 
 }

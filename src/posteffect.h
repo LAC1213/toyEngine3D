@@ -8,7 +8,7 @@ class FBO
 public:
     FBO() {}
     FBO( int w, int h, bool depth = false );
-    ~FBO();
+    virtual ~FBO();
 
     bool depthEnabled;
 
@@ -28,6 +28,17 @@ public:
     virtual void onResize( int w, int h );   
     
     GLuint samples; 
+};
+
+class GBuffer : public FBO
+{
+public:
+    GBuffer( int w, int h );
+    virtual ~GBuffer();
+    virtual void onResize( int w, int h );
+
+    GLuint normalTex;
+    GLuint positionTex;
 };
 
 class PostEffect : public Renderable

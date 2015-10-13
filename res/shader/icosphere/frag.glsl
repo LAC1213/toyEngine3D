@@ -2,7 +2,10 @@
 
 #define M_PI 3.1415926535897932384626433832795
 
-out vec4 FragColor;
+layout (location = 0) out vec4 FragColor;
+layout (location = 1) out vec4 position; // in camera space
+layout (location = 2) out vec4 normal;   // in camera space
+
 in vec3 gTriDistance;
 in vec3 gPatchDistance;
 in vec3 gPosition;
@@ -63,4 +66,6 @@ void main()
     FragColor = color;
     if( FragColor.a < 1 )
         FragColor.a =1;
+    position = vec4(gPosition, 1);
+    normal = vec4(N, 1);
 }

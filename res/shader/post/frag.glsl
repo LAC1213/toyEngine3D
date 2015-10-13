@@ -1,6 +1,5 @@
 #version 450
 
-in vec3 vPos;
 in vec2 vUV;
 
 out vec4 fragColor;

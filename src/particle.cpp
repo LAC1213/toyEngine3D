@@ -212,7 +212,7 @@ void BulletSpawner::shoot()
     
     Particle bullet;
     bullet.position = Curve<glm::vec3>( pos, dir );
-    bullet.color = Curve<glm::vec4>( glm::vec4( 0.6, 1, 2, 2 ) );
+    bullet.color = Curve<glm::vec4>( glm::vec4( 0.6, 1, 2, 4 ) );
     bullet.uv = Curve<glm::vec2>( glm::vec2( 0, 0 ) );
     bullet.size = Curve<GLfloat>( 0.01f );
     bullet.life = 4;

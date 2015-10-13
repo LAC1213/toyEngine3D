@@ -1,6 +1,9 @@
 #version 450
 
-out vec4 FragColor;
+layout (location = 0) out vec4 fragColor;
+layout (location = 1) out vec4 position;
+layout (location = 2) out vec4 normal;
+
 in vec3 gTriDistance;
 in vec3 gPosition;
 in vec3 gNormal;
@@ -41,5 +44,6 @@ void main()
     if(color.a < alphaThreshold)
         discard;
     FragColor = color;
-    gl_FragDepth = -gPosition.z/100;
+    position = vec4( gPosition, 1 );
+    normal = vec4( gNormal, 1 );
 }

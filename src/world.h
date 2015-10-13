@@ -12,7 +12,7 @@
 class World
 {
 public:
-    World( GLFWwindow * windowi, int width, int height );
+    World( GLFWwindow * window, int width, int height );
     ~World();
 
     void step( double dt );
@@ -27,7 +27,8 @@ public:
     int             _width;
     int             _height;
 
-    MultiSampleFBO  _msaa;
+//    MultiSampleFBO  _msaa;
+    GBuffer         _gBuffer;
     FBO             _canvas;
     FBO             _bloomed;
 

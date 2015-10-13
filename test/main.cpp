@@ -25,6 +25,7 @@
 #include <text.h>
 #include <billboard.h>
 #include <posteffect.h>
+#include <lighting.h>
 
 static World * gWorld;
 
@@ -114,7 +115,8 @@ int main(int argc, char ** argv)
     Terrain::SHADER = new Shader( "./res/shader/terrain/", Shader::LOAD_FULL );
     ParticleSystem::SHADER = new Shader( "./res/shader/particle/", Shader::LOAD_GEOM );
     Billboard::SHADER = new Shader( "./res/shader/billboard/", Shader::LOAD_GEOM );
-    PostEffect::SHADER = new Shader( "./res/shader/post/", Shader::LOAD_BASIC );    
+    PostEffect::SHADER = new Shader( "./res/shader/post/", Shader::LOAD_BASIC );   
+    Lighting::SHADER = new Shader( "./res/shader/lighting/", Shader::LOAD_BASIC ); 
 
     int width, height;
     glfwGetFramebufferSize( window, &width, &height );
@@ -137,7 +139,7 @@ int main(int argc, char ** argv)
         world.render();
         
         glfwSwapBuffers( window );
-        glfwPollEvents(); 
+        glfwPollEvents();
     }
 
     glfwDestroyWindow(window);
@@ -148,6 +150,7 @@ int main(int argc, char ** argv)
     delete ParticleSystem::SHADER;
     delete Billboard::SHADER;
     delete PostEffect::SHADER;
+    delete Lighting::SHADER;
 
     return EXIT_SUCCESS;
 }
