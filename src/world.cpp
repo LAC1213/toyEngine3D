@@ -18,6 +18,7 @@ World::World( GLFWwindow * window, int width, int height )
         _score( 0 ),
         _cam( _window, (float)_width / _height ),
         _bullets( &_cam, &_enemies ),
+        _lightwell( &_cam, glm::vec3( 0, 0, 0 ) ),
         _heightmap( HeightMap::genRandom( 11 ) ),
         _spawnFrequency( 2 ),
         _spawnTimer( 1.0/_spawnFrequency )
@@ -59,7 +60,10 @@ void World::step( double dt )
     _time += dt;
     _spawnTimer -= dt;
 
+    _fps = 1.0/dt;
+
     _bullets.step( dt );
+    _lightwell.step( dt );
     _cam.step( dt );
 
     for( size_t i = 0 ; i < _enemies.size() ; ++i )
@@ -75,11 +79,11 @@ void World::step( double dt )
             
             if( glm::length(_enemies[i]->position.f - _cam.getPosition()) < 3 ) 
             {
-                _enemies[i]->setColor( glm::vec4(1, 0.3, 0, 1 ));
+                _enemies[i]->setColor( glm::vec4(2, 0.6, 0, 1 ));
             }
             else
             {
-                _enemies[i]->setColor( glm::vec4(0.6, 0, 1, 1 ));
+                _enemies[i]->setColor( glm::vec4(0.6, 0, 2, 1 ));
             }
         }
         else
@@ -113,25 +117,27 @@ void World::step( double dt )
 void World::render()
 {
     static Blend effect( &_bloomed, &_canvas );
-    static Bloom bloom( &_canvas, &_bloomed );
+    Bloom bloom( &_canvas, &_bloomed );
 
     glViewport( 0, 0, _width, _height );
     std::stringstream ss;
-    ss.precision(4);
-    ss << "Score: " << _score << "  Time: " << _time;
+    ss.precision(5);
+    ss << "Score: " << _score << "  Time: " << _time << " FPS: " << _fps;
     Text txt( &_font, ss.str(), glm::vec2( _width, _height ) );
     txt.setPosition( glm::vec2( 5, 2 ) );
 
-    /* render scene */
+    /* render scene with msaa */
     glBindFramebuffer( GL_FRAMEBUFFER, _msaa.fbo );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+    _terrain->render();
 
     glPatchParameteri( GL_PATCH_VERTICES, 3 );
     for( size_t i = 0 ; i < _enemies.size() ; ++i )
         _enemies[i]->render();
 
-    _terrain->render();
     _bullets.render();
+    _lightwell.render();
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, _msaa.fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _canvas.fbo);
@@ -180,5 +186,10 @@ void World::onMouseMove( double x, double y )
 
 void World::onResize( int width, int height )
 {
-    
+    _width = width;
+    _height = height;
+    _canvas.onResize( width, height );
+    _bloomed.onResize( width, height );
+    _msaa.onResize( width, height );
+    _cam.onResize( width, height ); 
 }

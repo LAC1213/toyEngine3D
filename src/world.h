@@ -40,12 +40,15 @@ public:
 
     PlayerCamera    _cam;
     BulletSpawner   _bullets;
+    LightWell       _lightwell;
     HeightMap       _heightmap;
     Terrain *       _terrain;
     std::vector<Enemy*> _enemies;
 
     double          _spawnFrequency;
     double          _spawnTimer;
+
+    double          _fps;
 };
 
 #endif //WORLD_H

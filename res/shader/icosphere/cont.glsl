@@ -2,7 +2,9 @@
 
 layout(vertices = 3) out;
 in vec3 vPosition[];
+
 out vec3 tcPosition[];
+
 uniform mat4 model;
 uniform mat4 view;
 

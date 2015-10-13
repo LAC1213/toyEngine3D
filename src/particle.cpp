@@ -163,7 +163,7 @@ void LightWell::spawnParticle()
         vz = -vz;
 
     part.position = Curve<glm::vec3>( _pos , glm::vec3( vx, 1.4 + rnd(), vz), glm::vec3( 0, -2, 0 ));
-    part.color = Curve<glm::vec4>( glm::vec4( 0.5, 1, 2, 1 ) );
+    part.color = Curve<glm::vec4>( glm::vec4( 0.5, 2, 1.5, 1 ) );
     part.uv = Curve<glm::vec2>( glm::vec2( 0, 0 ) );
     part.size = Curve<GLfloat> ( 0.1f, 0, -0.03);
     part.life = 4;

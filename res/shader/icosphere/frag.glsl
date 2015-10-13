@@ -61,4 +61,6 @@ void main()
     }
 
     FragColor = color;
+    if( FragColor.a < 1 )
+        FragColor.a =1;
 }

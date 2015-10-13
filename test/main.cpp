@@ -65,15 +65,9 @@ GLFWwindow * initContext()
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPos(window, 0, 0);
 
-  //  glfwSetKeyCallback(window, onKeyAction);
-  //  glfwSetCursorPosCallback(window, onMouseMove);
-    //glfwSetFramebufferSizeCallback(window, onResize);
-
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
-
-   // glfwGetFramebufferSize(window, &width, &height);
 
     GLenum err = glewInit();
     if(err != GLEW_OK)
