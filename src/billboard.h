@@ -11,7 +11,7 @@ public:
     ~Billboard();
 
     virtual void render();
-    void setPosition( glm::vec3 pos ) { _pos = pos; }
+    void setPosition( glm::vec3 pos ); 
     glm::vec3 getPosition() const { return _pos; }
 
     void setSize( glm::vec2 size ) { _scale = size; }

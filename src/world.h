@@ -40,6 +40,7 @@ public:
     size_t          _score;
 
     PlayerCamera    _cam;
+    Lighting        _lighting;
     BulletSpawner   _bullets;
     LightWell       _lightwell;
     HeightMap       _heightmap;

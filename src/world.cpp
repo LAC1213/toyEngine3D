@@ -12,13 +12,14 @@ World::World( GLFWwindow * window, int width, int height )
         _height( height ),
   //      _msaa( _width, _height, 16 ),
         _gBuffer( _width, _height ),
-        _canvas( _width, _height ),
+        _canvas( _width, _height, true ),
         _bloomed( _width, _height ),
         _sphereData( MeshData::genIcoSphere() ),
         _font( "/usr/share/fonts/TTF/DejaVuSansMono.ttf", 14 ),
         _time( 0 ),
         _score( 0 ),
         _cam( _window, (float)_width / _height ),
+        _lighting( &_cam, &_gBuffer ),
         _bullets( &_cam, &_enemies ),
         _lightwell( &_cam, glm::vec3( 0, 0, 0 ) ),
         _heightmap( HeightMap::genRandom( 11 ) ),
@@ -81,16 +82,17 @@ void World::step( double dt )
             
             if( glm::length(_enemies[i]->position.f - _cam.getPosition()) < 3 ) 
             {
-                _enemies[i]->setColor( glm::vec4(21, 0.6, 0, 1 ));
+                _enemies[i]->setColor( glm::vec4(8, 0, 0, 1 ));
             }
             else
             {
-                _enemies[i]->setColor( glm::vec4(0.6, 0, 21, 1 ));
+                _enemies[i]->setColor( glm::vec4(6, 0, 6, 1 ));
             }
         }
         else
         {
             _cam.removeCollider( _enemies[i] );
+            _lighting.removePointLight( &_enemies[i]->pointLight() );
             delete _enemies[i];
             _enemies.erase( _enemies.begin() + i );
             --i;
@@ -113,19 +115,19 @@ void World::step( double dt )
 
         _enemies.push_back( e );
         _cam.addCollider( e );
+        _lighting.addPointLight( &e->pointLight() );
     }
 }
 
 void World::render()
 {
     static Blend effect( &_bloomed, &_canvas );
-    Bloom bloom( &_canvas, &_bloomed );
-    static Lighting lighting( &_gBuffer );
+    static Bloom bloom( &_canvas, &_bloomed );
 
     glViewport( 0, 0, _width, _height );
     std::stringstream ss;
     ss.precision(5);
-    ss << "Score: " << _score << "  Time: " << _time << " FPS: " << _fps;
+    ss << "Score: " << _score << " Spheres: " << _enemies.size() << "  Time: " << _time << " FPS: " << _fps;
     Text txt( &_font, ss.str(), glm::vec2( _width, _height ) );
     txt.setPosition( glm::vec2( 5, 2 ) );
 
@@ -140,20 +142,24 @@ void World::render()
 
     _terrain->render();
 
+ //   glBindFramebuffer(GL_READ_FRAMEBUFFER, _msaa.fbo);
+ //   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _canvas.fbo);
+ //   glBlitFramebuffer(0, 0, _width, _height, 0, 0, _width, _height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    
+    glBindFramebuffer( GL_FRAMEBUFFER, _canvas.fbo );
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    _lighting.render();
+    
+    glBindFramebuffer( GL_READ_FRAMEBUFFER, _gBuffer.fbo );
+    glBlitFramebuffer( 0, 0, _width, _height, 0, 0, _width, _height, GL_DEPTH_BUFFER_BIT, GL_NEAREST );
+
     glPatchParameteri( GL_PATCH_VERTICES, 3 );
     for( size_t i = 0 ; i < _enemies.size() ; ++i )
         _enemies[i]->render();
 
     _bullets.render();
     _lightwell.render();
-
- //   glBindFramebuffer(GL_READ_FRAMEBUFFER, _msaa.fbo);
- //   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _canvas.fbo);
- //   glBlitFramebuffer(0, 0, _width, _height, 0, 0, _width, _height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
     
-    glBindFramebuffer( GL_FRAMEBUFFER, _canvas.fbo );
-    glClear( GL_COLOR_BUFFER_BIT );
-    lighting.render();
     bloom.render();
 /*
     glBindFramebuffer( GL_READ_FRAMEBUFFER, _gBuffer.fbo );

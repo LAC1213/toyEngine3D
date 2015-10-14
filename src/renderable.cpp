@@ -7,7 +7,8 @@ Attribute::Attribute( GLuint buffer, GLenum t, Dimension d, GLsizei s, const GLv
         type( t ),
         dim( d ),
         stride( s ),
-        offset( o )
+        offset( o ),
+        divisor( 0 )
 {
 }
 
@@ -15,7 +16,8 @@ Attribute::Attribute( GLenum t, Dimension d, GLsizei s, const GLvoid * o )
     :   type( t ),
         dim( d ),
         stride( s ),
-        offset( o )
+        offset( o ),
+        divisor( 0 )
 {
     glGenBuffers( 1, &vbo );
 }
@@ -70,7 +72,8 @@ void Renderable::genVAO( std::vector<Attribute> atts, GLuint indexBuffer )
     {
         glEnableVertexAttribArray( i );
         glBindBuffer( GL_ARRAY_BUFFER, atts[i].vbo );
-        glVertexAttribPointer( i, atts[i].dim, atts[i].type, GL_FALSE, atts[i].stride, atts[i].offset );   
+        glVertexAttribPointer( i, atts[i].dim, atts[i].type, GL_FALSE, atts[i].stride, atts[i].offset );
+        glVertexAttribDivisor( i, atts[i].divisor ); 
     }
    
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBuffer ); 

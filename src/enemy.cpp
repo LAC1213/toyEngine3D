@@ -8,6 +8,9 @@ Enemy::Enemy( Camera * cam, MeshData * data, Collider * collider )
 {
     position.ddf = glm::vec3( 0, -1, 0 );
     scale.f = glm::vec3( _radius, _radius, _radius );
+
+    _light.attenuation = glm::vec3( 8, 4, 4 );
+    _light.specular = glm::vec3( 0.1, 0.1, 0.1 );
 }
 
 void Enemy::step( double dt )
@@ -20,7 +23,10 @@ void Enemy::step( double dt )
 
     if( scale.f.x < 0.01 )
        _alive = false; 
+
     _center = position.f;
+    _light.position = _center;
+    _light.diffuse = glm::vec3(_diffuseColor);
 }
 
 void Enemy::render()

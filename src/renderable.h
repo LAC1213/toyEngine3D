@@ -29,6 +29,7 @@ public:
     Dimension dim;
     GLsizei stride;
     const GLvoid * offset;
+    GLuint divisor;
 
     Attribute() {}
     Attribute( GLenum t, Dimension dim, GLsizei s = 0, const GLvoid * o = 0 );

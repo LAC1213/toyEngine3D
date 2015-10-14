@@ -83,6 +83,8 @@ void main()
     if( effect == BLEND )
     {
         fragColor.rgb = texture( tex, vUV ).rgb + texture( blendTex, vUV ).rgb;
+        fragColor.rgb = fragColor.rgb / ( fragColor.rgb + vec3(1.0) );
+        fragColor.rgb = pow( fragColor.rgb, vec3(1.0/2.2) );
         fragColor.a = 1;
         return;
     }

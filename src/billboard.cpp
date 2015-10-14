@@ -11,6 +11,7 @@ Billboard::Billboard( Camera * cam, GLuint texture )
     _indexed = false;
     _elements = 1;
     _vbo = Attribute( GL_FLOAT, Attribute::vec3 );
+    _vbo.loadData( glm::value_ptr( _pos ), 3*sizeof(GLfloat), GL_STATIC_DRAW );
     std::vector<Attribute> as;
     as.push_back( _vbo );
     genVAO( as, 0 );
@@ -22,10 +23,14 @@ Billboard::~Billboard()
     glDeleteVertexArrays(1, &_vao);
 }
 
+void Billboard::setPosition( glm::vec3 pos )
+{
+    _pos = pos;
+    _vbo.loadData( glm::value_ptr( _pos ), 3*sizeof(GLfloat), GL_STATIC_DRAW );
+}
+
 void Billboard::render()
 {
-    _vbo.loadData( glm::value_ptr( _pos ), 3*sizeof(GLfloat), GL_STATIC_DRAW );
-
     glActiveTexture( GL_TEXTURE0 );
     glBindTexture( GL_TEXTURE_2D, _texture );
     GLint loc = _shader->getUniformLocation( "tex" );

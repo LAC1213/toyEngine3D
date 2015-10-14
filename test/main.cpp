@@ -91,7 +91,7 @@ GLFWwindow * initContext()
 int main(int argc, char ** argv)
 {
     int errFd = -1;
-    errFd = open("stderr_log.txt", O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    errFd = open("stderr_log.txt", O_TRUNC | O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
     if(errFd == -1)
         perror("Couldn't set error logfile");

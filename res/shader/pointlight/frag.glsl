@@ -1,17 +1,19 @@
 #version 450
 
-out vec4 fragColor;
+in vec2 vUV;
 
-uniform vec3 lightPos;
-uniform vec3 diffuse;
-uniform vec3 specular;
-uniform vec3 attenuation;
+layout (location = 0) out vec3 fragColor;
 
-uniform vec3 ambient;
+in vec3 gPosition;
+in vec3 gDiffuse;
+in vec3 gSpecular;
+in vec3 gAttenuation;
 
-uniform vec3 sunDir;
-uniform vec3 sunDiffuse;
-uniform vec3 sunSpecular;
+uniform vec3 ambient = { 0.1, 0.1, 0.1 };
+
+uniform vec3 sunDir = { 0, 1, 0 };
+uniform vec3 sunDiffuse = { 1, 1, 1 };
+uniform vec3 sunSpecular = { 0, 0, 0 };
 
 uniform sampler2D colorTex;
 uniform sampler2D positionTex;
@@ -41,17 +43,15 @@ void main()
     vec3 position = texture( positionTex, gl_FragCoord.xy/textureSize(positionTex, 0) ).rgb;
     vec3 normal = texture( normalTex, gl_FragCoord.xy/textureSize(normalTex, 0) ).rgb;
 
-    vec3 sdir = mat3(view) * sunDir;
-    float sf = max( dot(normal, -sdir), 0 );
-    vec3 viewDir = normalize( -position );
-    vec3 halfDir = normalize( -sdir + viewDir );
-    float ds = pow( max(dot(viewDir, halfDir), 0), 32);
+    float sf = max( dot(normal, sunDir), 0 );
 
-    vec3 result = ambient*color;
-    vec3 p = vec3( view * vec4( lightPos, 1 ) );
-    result += lightingFactor( position, normal, p, diffuse, specular )*color;
-    result += sf * sunDiffuse * color + ds * sunSpecular * color;
-    float l = distance( p, position );
-    result /= attenuation.x * l*l + attenuation.y * l + attenuation.z;
-    fragColor = vec4( result, 1 );
+    vec3 result = lightingFactor( position, normal, gPosition, gDiffuse, gSpecular )*color;
+    result += ambient*color;
+    float l = distance( gPosition, position );
+    result /= gAttenuation.x * l*l + gAttenuation.y * l + gAttenuation.z;
+    //result += sf * sunDiffuse * color;
+    fragColor = result;
+    //fragColor = vec4( 0, 0, 0, 1 );
+    fragColor =  gAttenuation + gDiffuse + gPosition + gSpecular;
+    //fragColor = vec4( 1, 1, 1, 1 );
 }

@@ -10,22 +10,31 @@ public:
     glm::vec3 position;
     glm::vec3 diffuse;
     glm::vec3 specular;
+    glm::vec3 attenuation;
 };
 
 class Lighting : public Renderable 
 {
 public:
     static Shader * SHADER;
-    Lighting( GBuffer * gBuffer );
+    Lighting( PerspectiveCamera * cam, GBuffer * gBuffer );
     ~Lighting();
-
-    PointLight light;
 
     virtual void render();
 
+    void addPointLight( PointLight * light );
+    void removePointLight( PointLight * light );
+
 protected:
     GBuffer * _gBuffer;
-    Attribute _quad;
+    std::vector<Attribute> _attributes;
+
+    std::vector<PointLight*> _lights;
+
+    glm::vec3 _ambient;
+    glm::vec3 _sunDir;
+    glm::vec3 _sunDiffuse;
+    glm::vec3 _sunSpecular;
 };
 
 #endif // LIGHTING_H
