@@ -63,45 +63,33 @@ void Lighting::render()
 
     glActiveTexture( GL_TEXTURE0 );
     glBindTexture( GL_TEXTURE_2D, _gBuffer->texture );
-    GLint loc = _shader->getUniformLocation( "colorTex" );
-    glProgramUniform1i( *_shader, loc, 0 );
+    _shader->setUniform( "colorTex", 0 );
 
     glActiveTexture( GL_TEXTURE1 );
     glBindTexture( GL_TEXTURE_2D, _gBuffer->positionTex );
-    loc = _shader->getUniformLocation( "positionTex" );
-    glProgramUniform1i( *_shader, loc, 1 );
+    _shader->setUniform( "positionTex", 1 );
 
     glActiveTexture( GL_TEXTURE2 );
     glBindTexture( GL_TEXTURE_2D, _gBuffer->normalTex );
-    loc = _shader->getUniformLocation( "normalTex" );
-    glProgramUniform1i( *_shader, loc, 2 );
+    _shader->setUniform( "normalTex", 2 );
 
-    loc = _shader->getUniformLocation( "ambient" );
-    glProgramUniform3f( *_shader, loc, 0, 0, 0 );
-    loc = _shader->getUniformLocation( "sunDir" );
-    glProgramUniform3f( *_shader, loc, 0, 0, 0 );
+    _shader->setUniform( "ambient", glm::vec3( 0, 0, 0 ) );
+    _shader->setUniform( "sunDir", glm::vec3( 0, 0, 0 ) );
 
     for( size_t i = 0 ; i < _lights.size() ; ++i )
     {
         if( i == 0 )
         {
-            loc = _shader->getUniformLocation( "ambient" );
-            glProgramUniform3fv( *_shader, loc, 1, glm::value_ptr( _ambient ) );
-            loc = _shader->getUniformLocation( "sunDir" );
-            glProgramUniform3fv( *_shader, loc, 1, glm::value_ptr( _sunDir ) );
-            loc = _shader->getUniformLocation( "sunDiffuse" );
-            glProgramUniform3fv( *_shader, loc, 1, glm::value_ptr( _sunDiffuse ) );
-            loc = _shader->getUniformLocation( "sunSpecular" );
-            glProgramUniform3fv( *_shader, loc, 1, glm::value_ptr( _sunSpecular ) );
+            _shader->setUniform( "ambient", _ambient );
+            _shader->setUniform( "sunDir", _sunDir );
+            _shader->setUniform( "sunDiffuse", _sunDiffuse );
+            _shader->setUniform( "sunSpecular", _sunSpecular );
         }
-        loc = _shader->getUniformLocation( "lightPos" );
-        glProgramUniform3fv( *_shader, loc, 1, glm::value_ptr(_lights[i]->position));
-        loc = _shader->getUniformLocation( "diffuse" );
-        glProgramUniform3fv( *_shader, loc, 1, glm::value_ptr(_lights[i]->diffuse));
-        loc = _shader->getUniformLocation( "specular" );
-        glProgramUniform3fv( *_shader, loc, 1, glm::value_ptr(_lights[i]->specular));
-        loc = _shader->getUniformLocation( "attenuation" );
-        glProgramUniform3fv( *_shader, loc, 1, glm::value_ptr(_lights[i]->attenuation));
+
+        _shader->setUniform( "lightPos", _lights[i]->position );
+        _shader->setUniform( "diffuse", _lights[i]->diffuse );
+        _shader->setUniform( "specular", _lights[i]->specular );
+        _shader->setUniform( "attenuation", _lights[i]->attenuation );
 
         Renderable::render();
     }

@@ -8,19 +8,24 @@
 
 #include <util.h>
 #include <string.h>
+#include <glm/gtc/type_ptr.hpp>
 
 using std::max;
 
-/*Shader::Shader() : _program( 0 )
+Shader::Shader() : _program( 0 )
 {
-}*/
+}
 
 Shader::~Shader()
 {
     glDeleteProgram( _program );
 }
 
-GLint Shader::getUniformLocation( std::string name )
+/** Wrapper around glGetUniformLocation() which also caches locations
+ * \param name Name of the uniform variable
+ * \returns -1 if the uniform wasn't found, else the opengl location ID
+ */
+GLint Shader::getUniformLocation( const std::string& name )
 {
     auto search = _uniforms.find( name );
     GLint id;
@@ -39,7 +44,89 @@ GLint Shader::getUniformLocation( std::string name )
     return id;
 }
 
-Shader::Shader( std::string shaderDir, int loadFlags)
+/** Bunch of Uniform setter functions which lookup the name with glGetUniformLocation().
+ * \param name Name of the uniform variable
+ * \param val set the uniform to this value
+ * \returns true on success, false on failure
+ */
+bool Shader::setUniform( const std::string& name, GLint val )
+{
+    GLint loc = getUniformLocation( name );
+    if( loc == -1 )
+       return false;
+    else
+       glProgramUniform1i( _program, loc, val );
+    return true; 
+}
+
+bool Shader::setUniform( const std::string& name, GLfloat val )
+{
+    GLint loc = getUniformLocation( name );
+    if( loc == -1 )
+       return false;
+    else
+       glProgramUniform1f( _program, loc, val ); 
+    return true;
+}
+
+bool Shader::setUniform( const std::string& name, const glm::vec2& val )
+{
+    GLint loc = getUniformLocation( name );
+    if( loc == -1 )
+       return false;
+    else
+       glProgramUniform2fv( _program, loc, 1, glm::value_ptr(val) ); 
+    return true;
+}
+
+bool Shader::setUniform( const std::string& name, const glm::vec3& val )
+{
+    GLint loc = getUniformLocation( name );
+    if( loc == -1 )
+       return false;
+    else
+       glProgramUniform3fv( _program, loc, 1, glm::value_ptr(val) ); 
+    return true;
+}
+
+bool Shader::setUniform( const std::string& name, const glm::vec4& val )
+{
+    GLint loc = getUniformLocation( name );
+    if( loc == -1 )
+       return false;
+    else
+       glProgramUniform4fv( _program, loc, 1, glm::value_ptr(val) ); 
+    return true;
+}
+
+bool Shader::setUniform( const std::string& name, const glm::mat4& val )
+{
+    GLint loc = getUniformLocation( name );
+    if( loc == -1 )
+       return false;
+    else
+       glProgramUniformMatrix4fv( _program, loc, 1, GL_FALSE, glm::value_ptr(val) ); 
+    return true;
+}
+
+/** Load a Shader from directory with the necessary files.
+ *  The following naming convention is assumed:
+ *  vertex shader: vert.glsl
+ *  fragment shader: frag.glsl
+ *  geometry shader: geom.glsl
+ *  tesseval shader: eval.glsl
+ *  tesscontrol shader: cont.glsl
+ *  
+ *  These flags are used to specify the shader type:
+ *  LOAD_BASIC : load fragment + vertex shader (always the case)
+ *  LOAD_GEOM : load geometry shader
+ *  LOAD_TESS : load tesselation shader
+ *  LOAD_FULL = LOAD_GEOM | LOAD_TESS : load tesselation and geometry shader
+ *
+ *  \param shaderDir directory where the shader files are located
+ *  \param loadFlags specifies what kind of shaders should be loaded
+ */
+Shader::Shader( const std::string& shaderDir, LoadFlag loadFlags )
 {
     const char * shader_dir = shaderDir.c_str();
     // Create the shaders
