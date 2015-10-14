@@ -12,10 +12,7 @@ in vec3 gPosition;
 in vec3 gNormal;
 in float gPrimitive;
 
-uniform vec4 LightColor = {1, 1, 1, 1};
-uniform vec3 LightPosition = { 0, 1, 10 };
 uniform vec4 DiffuseMaterial = {1, 0.5, 0, 1};
-uniform vec4 AmbientMaterial = {0.4, 0.4, 0.4, 1};
 
 uniform sampler2D tex;
 
@@ -35,10 +32,6 @@ float amplify(float d, float scale, float offset)
 void main()
 {
     vec3 N = normalize(gNormal);
-    vec3 L = (view * vec4(LightPosition, 1)).xyz - gPosition;
-    float df = 40*dot(N, normalize(L))/length(L);
-    if ( df < 0 ) df = 0;
-    df = 3;
 
     vec3 n0 = normalize(mat3( view * model ) * vec3( 0, 0, -1 ));
     vec2 uv0, uv;
@@ -54,7 +47,7 @@ void main()
     uv = mod( uv, 2*M_PI );
     uv *= 0.5/M_PI;
 
-    vec4 color = LightColor * (AmbientMaterial + df * DiffuseMaterial);
+    vec4 color = DiffuseMaterial;
 
     if(wireframe)
     {

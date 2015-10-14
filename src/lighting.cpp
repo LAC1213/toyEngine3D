@@ -22,9 +22,10 @@ Lighting::Lighting( GBuffer * gBuffer )
 
     _quad.loadData( verts, sizeof verts, GL_STATIC_DRAW );
 
-    light.position.y = 10;
-    light.diffuse = glm::vec3( 1, 1, 1 );
-    light.specular = glm::vec3( 1, 1, 1 );
+    light.position.y = 1;
+    light.position.z = 1;
+    light.diffuse = glm::vec3( 0.3, 1, 0.6 );
+    light.specular = glm::vec3( 0.3, 0.3, 0.3 );
     
     std::vector<Attribute> atts;
     atts.push_back( _quad );

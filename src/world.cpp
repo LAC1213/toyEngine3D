@@ -81,11 +81,11 @@ void World::step( double dt )
             
             if( glm::length(_enemies[i]->position.f - _cam.getPosition()) < 3 ) 
             {
-                _enemies[i]->setColor( glm::vec4(2, 0.6, 0, 1 ));
+                _enemies[i]->setColor( glm::vec4(21, 0.6, 0, 1 ));
             }
             else
             {
-                _enemies[i]->setColor( glm::vec4(0.6, 0, 2, 1 ));
+                _enemies[i]->setColor( glm::vec4(0.6, 0, 21, 1 ));
             }
         }
         else
