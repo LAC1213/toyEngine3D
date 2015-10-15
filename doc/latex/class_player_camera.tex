@@ -1,0 +1,69 @@
+\hypertarget{class_player_camera}{}\section{Player\+Camera Class Reference}
+\label{class_player_camera}\index{Player\+Camera@{Player\+Camera}}
+
+
+Inheritance diagram for Player\+Camera\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=183pt]{class_player_camera__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for Player\+Camera\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{class_player_camera__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_player_camera_afcf71dc64aedd049567516a350f2d02e}{}{\bfseries Player\+Camera} (G\+L\+F\+Wwindow $\ast$window, float aspect)\label{class_player_camera_afcf71dc64aedd049567516a350f2d02e}
+
+\item 
+\hypertarget{class_player_camera_a525a7ad82ddb2fc7a5811064f70c128f}{}void {\bfseries add\+Collider} (\hyperlink{class_collider}{Collider} $\ast$collider)\label{class_player_camera_a525a7ad82ddb2fc7a5811064f70c128f}
+
+\item 
+\hypertarget{class_player_camera_ab6b201da5ff54012dc1a83281ce0cb47}{}void {\bfseries remove\+Collider} (\hyperlink{class_collider}{Collider} $\ast$collider)\label{class_player_camera_ab6b201da5ff54012dc1a83281ce0cb47}
+
+\item 
+\hypertarget{class_player_camera_a4b8f46b1603602471711ee4859c08ce2}{}virtual void {\bfseries step} (double dt)\label{class_player_camera_a4b8f46b1603602471711ee4859c08ce2}
+
+\item 
+\hypertarget{class_player_camera_a07e07be4973f01f696ab9cd2cc1d7fdc}{}void {\bfseries jump} ()\label{class_player_camera_a07e07be4973f01f696ab9cd2cc1d7fdc}
+
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_player_camera_abcda08bdd8dd2764e65539bdfae09131}{}void {\bfseries poll\+Input} ()\label{class_player_camera_abcda08bdd8dd2764e65539bdfae09131}
+
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_player_camera_a42928613b1630cb4ae4d0607ac97b245}{}bool {\bfseries \+\_\+can\+Jump}\label{class_player_camera_a42928613b1630cb4ae4d0607ac97b245}
+
+\item 
+\hypertarget{class_player_camera_a883b822fa2ad7dfbc12551db76fbee9e}{}std\+::vector$<$ \hyperlink{class_collider}{Collider} $\ast$ $>$ {\bfseries \+\_\+colliders}\label{class_player_camera_a883b822fa2ad7dfbc12551db76fbee9e}
+
+\item 
+\hypertarget{class_player_camera_a3c8a4894c9863274e696973c2e303e78}{}G\+L\+F\+Wwindow $\ast$ {\bfseries \+\_\+window}\label{class_player_camera_a3c8a4894c9863274e696973c2e303e78}
+
+\item 
+\hypertarget{class_player_camera_a1d23e13334832fb7ad78fff02e987feb}{}\hyperlink{class_curve}{Curve}$<$ glm\+::vec3 $>$ {\bfseries \+\_\+position}\label{class_player_camera_a1d23e13334832fb7ad78fff02e987feb}
+
+\item 
+\hypertarget{class_player_camera_a43bfc21e3f1d0f3f95f509f5a0f4aed4}{}\hyperlink{class_curve}{Curve}$<$ glm\+::vec2 $>$ {\bfseries \+\_\+rotation}\label{class_player_camera_a43bfc21e3f1d0f3f95f509f5a0f4aed4}
+
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/camera.\+h\item 
+src/camera.\+cpp\end{DoxyCompactItemize}

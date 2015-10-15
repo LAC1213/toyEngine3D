@@ -1,0 +1,13 @@
+digraph "PostEffect::setCanvas"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="PostEffect::setCanvas",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node2 [label="Bloom::render",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$class_bloom.html#a7754f494e4a503d4483215912efe6687"];
+  Node2 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node3 [label="World::render",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$class_world.html#a150eab10c21532162bb698d72aecec16"];
+  Node3 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node4 [label="main",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$main_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627"];
+}

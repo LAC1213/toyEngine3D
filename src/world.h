@@ -28,9 +28,9 @@ public:
     int             _height;
 
 //    MultiSampleFBO  _msaa;
-    GBuffer         _gBuffer;
-    FBO             _canvas;
-    FBO             _bloomed;
+    Framebuffer *   _gBuffer;
+    Framebuffer *   _canvas;
+    Framebuffer *   _bloomed;
 
     MeshData        _sphereData;
     GLuint          _groundTex;

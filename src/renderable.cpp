@@ -55,9 +55,9 @@ void Renderable::render()
     _cam->setUniforms( _shader );
 
     if( _indexed )
-        glDrawElements( _mode, _elements, _indexType, 0 );
+        glDrawElementsInstanced( _mode, _elements, _indexType, 0, 1 );
     else
-        glDrawArrays( _mode, _startIndex, _elements );
+        glDrawArraysInstanced( _mode, _startIndex, _elements, 1 );
 
     glUseProgram( 0 );
     glBindVertexArray( 0 );

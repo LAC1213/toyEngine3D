@@ -5,25 +5,26 @@
 
 #include <sstream>
 #include <iostream>
+#include <framebuffer.h>
 
 World::World( GLFWwindow * window, int width, int height )
     :   _window( window ),
         _width( width ),
         _height( height ),
-  //      _msaa( _width, _height, 16 ),
-        _gBuffer( _width, _height ),
-        _canvas( _width, _height, true ),
-        _bloomed( _width, _height ),
+        //      _msaa( _width, _height, 16 ),
+        _gBuffer( Framebuffer::genGeometryBuffer() ),
+        _canvas( Framebuffer::genScreenBuffer() ),
+        _bloomed( Framebuffer::genScreenBuffer() ),
         _sphereData( MeshData::genIcoSphere() ),
         _font( "/usr/share/fonts/TTF/DejaVuSansMono.ttf", 14 ),
         _time( 0 ),
         _score( 0 ),
         _cam( _window, (float)_width / _height ),
-        _lighting( &_cam, &_gBuffer ),
+        _lighting( &_cam, _gBuffer ),
         _bullets( &_cam, &_enemies ),
         _lightwell( &_cam, glm::vec3( 0, 0, 0 ) ),
         _heightmap( HeightMap::genRandom( 11 ) ),
-        _spawnFrequency( 2 ),
+        _spawnFrequency( 0.2 ),
         _spawnTimer( 1.0/_spawnFrequency )
 {
     _groundTex = SOIL_load_OGL_texture
@@ -48,6 +49,8 @@ World::World( GLFWwindow * window, int width, int height )
     _terrain = new Terrain( &_cam, &_heightmap, _groundTex );
 
     _cam.addCollider( _terrain );
+    _canvas->enableDepthBuffer();
+    onResize( width, height );
 }
 
 World::~World()
@@ -56,6 +59,9 @@ World::~World()
     for( size_t i = 0 ; i < _enemies.size() ; ++i )
         delete _enemies[i];
     delete _terrain;
+    delete _gBuffer;
+    delete _canvas;
+    delete _bloomed;
 }
 
 void World::step( double dt )
@@ -78,9 +84,9 @@ void World::step( double dt )
             {
                 _score = 0;
                 std::cout << "loose" << std::endl;
-            }      
-            
-            if( glm::length(_enemies[i]->position.f - _cam.getPosition()) < 3 ) 
+            }
+
+            if( glm::length(_enemies[i]->position.f - _cam.getPosition()) < 3 )
             {
                 _enemies[i]->setColor( glm::vec4(8, 0, 0, 1 ));
             }
@@ -100,7 +106,9 @@ void World::step( double dt )
         }
     }
 
-    auto rnd = [] () { return (float) rand() / RAND_MAX; };
+    auto rnd = [] () {
+        return (float) rand() / RAND_MAX;
+    };
     static const glm::vec4 spawnArea = glm::vec4( -12.5, -12.5, 25, 25 );
     if( _spawnTimer < 0 )
     {
@@ -121,8 +129,8 @@ void World::step( double dt )
 
 void World::render()
 {
-    static Blend effect( &_bloomed, &_canvas );
-    static Bloom bloom( &_canvas, &_bloomed );
+    static Blend effect( _bloomed, _canvas );
+    static Bloom bloom( _canvas, _bloomed );
 
     glViewport( 0, 0, _width, _height );
     std::stringstream ss;
@@ -134,24 +142,18 @@ void World::render()
     /* render scene with msaa */
 //    glBindFramebuffer( GL_FRAMEBUFFER, _msaa.fbo );
 
-    glBindFramebuffer( GL_FRAMEBUFFER, _gBuffer.fbo );
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
-    GLuint attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-    glDrawBuffers( 3, attachments );
+    _gBuffer->clear();
 
     _terrain->render();
 
- //   glBindFramebuffer(GL_READ_FRAMEBUFFER, _msaa.fbo);
- //   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _canvas.fbo);
- //   glBlitFramebuffer(0, 0, _width, _height, 0, 0, _width, _height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-    
-    glBindFramebuffer( GL_FRAMEBUFFER, _canvas.fbo );
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+//   glBindFramebuffer(GL_READ_FRAMEBUFFER, _msaa.fbo);
+//   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _canvas.fbo);
+//   glBlitFramebuffer(0, 0, _width, _height, 0, 0, _width, _height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+    _canvas->clear();
     _lighting.render();
-    
-    glBindFramebuffer( GL_READ_FRAMEBUFFER, _gBuffer.fbo );
-    glBlitFramebuffer( 0, 0, _width, _height, 0, 0, _width, _height, GL_DEPTH_BUFFER_BIT, GL_NEAREST );
+
+    _canvas->copyDepth( *_gBuffer );
 
     glPatchParameteri( GL_PATCH_VERTICES, 3 );
     for( size_t i = 0 ; i < _enemies.size() ; ++i )
@@ -159,30 +161,29 @@ void World::render()
 
     _bullets.render();
     _lightwell.render();
-    
+
     bloom.render();
-/*
-    glBindFramebuffer( GL_READ_FRAMEBUFFER, _gBuffer.fbo );
-    glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
-    glReadBuffer( GL_COLOR_ATTACHMENT0 );
-    glBlitFramebuffer( 0, 0, _width, _height, 0, 0, _width/2, _height/2, GL_COLOR_BUFFER_BIT, GL_LINEAR );
+    /*
+        glBindFramebuffer( GL_READ_FRAMEBUFFER, _gBuffer.fbo );
+        glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
+        glReadBuffer( GL_COLOR_ATTACHMENT0 );
+        glBlitFramebuffer( 0, 0, _width, _height, 0, 0, _width/2, _height/2, GL_COLOR_BUFFER_BIT, GL_LINEAR );
 
-    glReadBuffer( GL_COLOR_ATTACHMENT1 );
-    glBlitFramebuffer( 0, 0, _width, _height, _width/2, 0, _width, _height/2, GL_COLOR_BUFFER_BIT, GL_LINEAR );
+        glReadBuffer( GL_COLOR_ATTACHMENT1 );
+        glBlitFramebuffer( 0, 0, _width, _height, _width/2, 0, _width, _height/2, GL_COLOR_BUFFER_BIT, GL_LINEAR );
 
-    glReadBuffer( GL_COLOR_ATTACHMENT2 );
-    glBlitFramebuffer( 0, 0, _width, _height, _width/2, _height/2, _width, _height, GL_COLOR_BUFFER_BIT, GL_LINEAR );
+        glReadBuffer( GL_COLOR_ATTACHMENT2 );
+        glBlitFramebuffer( 0, 0, _width, _height, _width/2, _height/2, _width, _height, GL_COLOR_BUFFER_BIT, GL_LINEAR );
 
-    glBindFramebuffer( GL_READ_FRAMEBUFFER, _canvas.fbo );
-    glReadBuffer( GL_COLOR_ATTACHMENT0 );
-    glDrawBuffer( GL_COLOR_ATTACHMENT0 );
-    glBlitFramebuffer( 0, 0, _width, _height, 0, _height/2, _width/2, _height, GL_COLOR_BUFFER_BIT, GL_LINEAR );
-*/
+        glBindFramebuffer( GL_READ_FRAMEBUFFER, _canvas.fbo );
+        glReadBuffer( GL_COLOR_ATTACHMENT0 );
+        glDrawBuffer( GL_COLOR_ATTACHMENT0 );
+        glBlitFramebuffer( 0, 0, _width, _height, 0, _height/2, _width/2, _height, GL_COLOR_BUFFER_BIT, GL_LINEAR );
+    */
 
     /* post processing and text */
 
-    glBindFramebuffer( GL_FRAMEBUFFER, 0 );
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    Framebuffer::Screen.clear();
     effect.render();
     txt.render();
 }
@@ -221,9 +222,10 @@ void World::onResize( int width, int height )
 {
     _width = width;
     _height = height;
-    _canvas.onResize( width, height );
-    _bloomed.onResize( width, height );
- //   _msaa.onResize( width, height );
+    _canvas->resize( width, height );
+    _bloomed->resize( width, height );
+//   _msaa.onResize( width, height );
     _cam.onResize( width, height );
-   _gBuffer.onResize( width, height ); 
+    _gBuffer->resize( width, height );
+    Framebuffer::Screen.resize( width, height );
 }

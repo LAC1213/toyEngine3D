@@ -2,44 +2,7 @@
 #define POSTEFFECT_H
 
 #include <renderable.h>
-
-class FBO
-{
-public:
-    FBO() {}
-    FBO( int w, int h, bool depth = false );
-    virtual ~FBO();
-
-    bool depthEnabled;
-
-    GLuint texture;
-    GLuint depthRenderbuffer;
-    GLuint fbo;
-
-    int width, height;
-
-    virtual void onResize( int w, int h );
-};
-
-class MultiSampleFBO : public FBO
-{
-public:
-    MultiSampleFBO( int w, int h, GLuint sampleCount );
-    virtual void onResize( int w, int h );   
-    
-    GLuint samples; 
-};
-
-class GBuffer : public FBO
-{
-public:
-    GBuffer( int w, int h );
-    virtual ~GBuffer();
-    virtual void onResize( int w, int h );
-
-    GLuint normalTex;
-    GLuint positionTex;
-};
+#include <framebuffer.h>
 
 class PostEffect : public Renderable
 {
@@ -55,40 +18,40 @@ public:
         BLEND
     };
 
-    PostEffect( Type type, FBO * canvas );
+    PostEffect( Type type, Framebuffer * canvas );
     virtual ~PostEffect();
     
     virtual void render();
     
     void setType( Type type ) { _type = type; }
-    void setCanvas( FBO * canvas ) { _canvas = canvas; }
+    void setCanvas( Framebuffer * canvas ) { _canvas = canvas; }
 protected:
     Type    _type;
-    FBO *   _canvas;
+    Framebuffer *   _canvas;
     GLuint  _vbo;
 };
 
 class Blend : public PostEffect
 {
 public:
-    Blend( FBO * a, FBO * b );
+    Blend( Framebuffer * a, Framebuffer * b );
     virtual void render();
 
 protected:
-    FBO *   _blendFBO;
+    Framebuffer *   _blendFBO;
 };
 
 class Bloom : public PostEffect
 {
 public:
-    Bloom( FBO * in, FBO * out );
+    Bloom( Framebuffer * in, Framebuffer * out );
 
     virtual void render();
 
 private:
-    FBO *   _in;
-    FBO     _first;  //!< pingpong buffer 1
-    FBO     _second; //!< pingpong buffer 2
+    Framebuffer *   _in;
+    Framebuffer *   _first;  //!< pingpong buffer 1
+    Framebuffer *   _second; //!< pingpong buffer 2
 
     PostEffect _filter;
     PostEffect _gaussv;

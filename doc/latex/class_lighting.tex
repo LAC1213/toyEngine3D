@@ -1,0 +1,71 @@
+\hypertarget{class_lighting}{}\section{Lighting Class Reference}
+\label{class_lighting}\index{Lighting@{Lighting}}
+
+
+Inheritance diagram for Lighting\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=146pt]{class_lighting__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for Lighting\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{class_lighting__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_lighting_ac786f1b90379f996f8d99e1e4bcd9e6f}{}{\bfseries Lighting} (\hyperlink{class_perspective_camera}{Perspective\+Camera} $\ast$cam, \hyperlink{class_framebuffer}{Framebuffer} $\ast$g\+Buffer)\label{class_lighting_ac786f1b90379f996f8d99e1e4bcd9e6f}
+
+\item 
+\hypertarget{class_lighting_a139c84b1a180648b41694b47f281981b}{}virtual void {\bfseries render} ()\label{class_lighting_a139c84b1a180648b41694b47f281981b}
+
+\item 
+\hypertarget{class_lighting_a124e1e665b5907faf9c52bd851f1a417}{}void {\bfseries add\+Point\+Light} (\hyperlink{class_point_light}{Point\+Light} $\ast$light)\label{class_lighting_a124e1e665b5907faf9c52bd851f1a417}
+
+\item 
+\hypertarget{class_lighting_a7d78793f7c5e3eb05b222309b7d8c617}{}void {\bfseries remove\+Point\+Light} (\hyperlink{class_point_light}{Point\+Light} $\ast$light)\label{class_lighting_a7d78793f7c5e3eb05b222309b7d8c617}
+
+\end{DoxyCompactItemize}
+\subsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_lighting_add6b069bd3d0f36eee753fe3470fe22d}{}static \hyperlink{class_shader}{Shader} $\ast$ {\bfseries S\+H\+A\+D\+E\+R} = 0\label{class_lighting_add6b069bd3d0f36eee753fe3470fe22d}
+
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_lighting_a85e99efa5af1df4462e6e63c7886701d}{}\hyperlink{class_framebuffer}{Framebuffer} $\ast$ {\bfseries \+\_\+g\+Buffer}\label{class_lighting_a85e99efa5af1df4462e6e63c7886701d}
+
+\item 
+\hypertarget{class_lighting_a05e11ba57df9a979c8913276eb4c2fe0}{}std\+::vector$<$ \hyperlink{class_attribute}{Attribute} $>$ {\bfseries \+\_\+attributes}\label{class_lighting_a05e11ba57df9a979c8913276eb4c2fe0}
+
+\item 
+\hypertarget{class_lighting_adcc02d75999339a316e9ff9c909ba0ee}{}std\+::vector$<$ \hyperlink{class_point_light}{Point\+Light} $\ast$ $>$ {\bfseries \+\_\+lights}\label{class_lighting_adcc02d75999339a316e9ff9c909ba0ee}
+
+\item 
+\hypertarget{class_lighting_ad2ad50701ec4fc496bf786a1c64f6442}{}glm\+::vec3 {\bfseries \+\_\+ambient}\label{class_lighting_ad2ad50701ec4fc496bf786a1c64f6442}
+
+\item 
+\hypertarget{class_lighting_acd98b5fd27f0267fd4106c8749e7c1f0}{}glm\+::vec3 {\bfseries \+\_\+sun\+Dir}\label{class_lighting_acd98b5fd27f0267fd4106c8749e7c1f0}
+
+\item 
+\hypertarget{class_lighting_ae1fb12c3c1bff3ebe4224b5417860e7f}{}glm\+::vec3 {\bfseries \+\_\+sun\+Diffuse}\label{class_lighting_ae1fb12c3c1bff3ebe4224b5417860e7f}
+
+\item 
+\hypertarget{class_lighting_a149d381c877a39f01bfdab7f6842001c}{}glm\+::vec3 {\bfseries \+\_\+sun\+Specular}\label{class_lighting_a149d381c877a39f01bfdab7f6842001c}
+
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/lighting.\+h\item 
+src/lighting.\+cpp\end{DoxyCompactItemize}

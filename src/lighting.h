@@ -2,7 +2,7 @@
 #define LIGHTING_H
 
 #include <renderable.h>
-#include <posteffect.h>
+#include <framebuffer.h>
 
 class PointLight
 {
@@ -17,7 +17,7 @@ class Lighting : public Renderable
 {
 public:
     static Shader * SHADER;
-    Lighting( PerspectiveCamera * cam, GBuffer * gBuffer );
+    Lighting( PerspectiveCamera * cam, Framebuffer * gBuffer );
     ~Lighting();
 
     virtual void render();
@@ -26,7 +26,7 @@ public:
     void removePointLight( PointLight * light );
 
 protected:
-    GBuffer * _gBuffer;
+    Framebuffer * _gBuffer;
     std::vector<Attribute> _attributes;
 
     std::vector<PointLight*> _lights;

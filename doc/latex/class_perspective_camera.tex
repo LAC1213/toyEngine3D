@@ -1,0 +1,95 @@
+\hypertarget{class_perspective_camera}{}\section{Perspective\+Camera Class Reference}
+\label{class_perspective_camera}\index{Perspective\+Camera@{Perspective\+Camera}}
+
+
+Inheritance diagram for Perspective\+Camera\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=183pt]{class_perspective_camera__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for Perspective\+Camera\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=183pt]{class_perspective_camera__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_perspective_camera_abd6326664a8e88335c5de79365a1ea15}{}{\bfseries Perspective\+Camera} (float fov, float aspect, float near, float far)\label{class_perspective_camera_abd6326664a8e88335c5de79365a1ea15}
+
+\item 
+\hypertarget{class_perspective_camera_ac54590aa7444d2bd2bf4b34b6ef45266}{}virtual void {\bfseries set\+Uniforms} (\hyperlink{class_shader}{Shader} $\ast$shader) const \label{class_perspective_camera_ac54590aa7444d2bd2bf4b34b6ef45266}
+
+\item 
+\hypertarget{class_perspective_camera_a5793e6291d90811a6743cac10ae6b0f1}{}void {\bfseries on\+Resize} (int width, int height)\label{class_perspective_camera_a5793e6291d90811a6743cac10ae6b0f1}
+
+\item 
+\hypertarget{class_perspective_camera_a36fa85a3f46042dbaf5819b7388b341a}{}glm\+::vec3 {\bfseries get\+Position} () const \label{class_perspective_camera_a36fa85a3f46042dbaf5819b7388b341a}
+
+\item 
+\hypertarget{class_perspective_camera_acfac6859cf992701454cb802ffb45796}{}void {\bfseries set\+Position} (const glm\+::vec3 \&eye)\label{class_perspective_camera_acfac6859cf992701454cb802ffb45796}
+
+\item 
+\hypertarget{class_perspective_camera_a66f7d8ec9370c792bee1a7c686e0e417}{}void {\bfseries translate} (const glm\+::vec3 \&t)\label{class_perspective_camera_a66f7d8ec9370c792bee1a7c686e0e417}
+
+\item 
+\hypertarget{class_perspective_camera_abb05342b409ac950b411e877af5e30f1}{}float {\bfseries get\+Angle\+Y} () const \label{class_perspective_camera_abb05342b409ac950b411e877af5e30f1}
+
+\item 
+\hypertarget{class_perspective_camera_a6c466eb6fb577bc67a1a27d40ec93fcf}{}void {\bfseries set\+Angle\+Y} (const float \&a)\label{class_perspective_camera_a6c466eb6fb577bc67a1a27d40ec93fcf}
+
+\item 
+\hypertarget{class_perspective_camera_ac3b176a18e12c0927350d3c833e43943}{}void {\bfseries turn\+Y} (const float \&a)\label{class_perspective_camera_ac3b176a18e12c0927350d3c833e43943}
+
+\item 
+\hypertarget{class_perspective_camera_a05fc504e191d0ab3abd0ef8189a19e1f}{}float {\bfseries get\+Angle\+X} () const \label{class_perspective_camera_a05fc504e191d0ab3abd0ef8189a19e1f}
+
+\item 
+\hypertarget{class_perspective_camera_a6af5d666cd398e375e90ac06364d3545}{}void {\bfseries set\+Angle\+X} (const float \&a)\label{class_perspective_camera_a6af5d666cd398e375e90ac06364d3545}
+
+\item 
+\hypertarget{class_perspective_camera_a6bbd0338716891b778c5ce70f1f5fdda}{}void {\bfseries turn\+X} (const float \&a)\label{class_perspective_camera_a6bbd0338716891b778c5ce70f1f5fdda}
+
+\item 
+\hypertarget{class_perspective_camera_aa178b372867ae7fa837d83ed506f1f36}{}glm\+::mat4 {\bfseries get\+View} () const \label{class_perspective_camera_aa178b372867ae7fa837d83ed506f1f36}
+
+\end{DoxyCompactItemize}
+\subsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_perspective_camera_a6f9a19c4ebd1f9037707bae4ddba2249}{}static const std\+::string {\bfseries P\+R\+O\+J\+\_\+\+U\+N\+I\+F\+O\+R\+M\+\_\+\+S\+T\+R} = \char`\"{}proj\char`\"{}\label{class_perspective_camera_a6f9a19c4ebd1f9037707bae4ddba2249}
+
+\item 
+\hypertarget{class_perspective_camera_a97517e41a2a0298b6d832a2fc7fb205b}{}static const std\+::string {\bfseries V\+I\+E\+W\+\_\+\+U\+N\+I\+F\+O\+R\+M\+\_\+\+S\+T\+R} = \char`\"{}view\char`\"{}\label{class_perspective_camera_a97517e41a2a0298b6d832a2fc7fb205b}
+
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_perspective_camera_a1ede24481c69a76465f25a5ac920c1be}{}void {\bfseries update\+View} ()\label{class_perspective_camera_a1ede24481c69a76465f25a5ac920c1be}
+
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_perspective_camera_abd8e00fd34a5b51b431fb8d32196fe20}{}glm\+::vec3 {\bfseries \+\_\+eye}\label{class_perspective_camera_abd8e00fd34a5b51b431fb8d32196fe20}
+
+\item 
+\hypertarget{class_perspective_camera_a789547758df18f7fdc872faf871d085f}{}float \hyperlink{class_perspective_camera_a789547758df18f7fdc872faf871d085f}{\+\_\+angle\+X}\label{class_perspective_camera_a789547758df18f7fdc872faf871d085f}
+
+\begin{DoxyCompactList}\small\item\em angle around X axis \end{DoxyCompactList}\item 
+\hypertarget{class_perspective_camera_a09566695cfe277257cde24cb917e9328}{}float \hyperlink{class_perspective_camera_a09566695cfe277257cde24cb917e9328}{\+\_\+angle\+Y}\label{class_perspective_camera_a09566695cfe277257cde24cb917e9328}
+
+\begin{DoxyCompactList}\small\item\em angle around Y axis \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/camera.\+h\item 
+src/camera.\+cpp\end{DoxyCompactItemize}

@@ -6,7 +6,7 @@
 
 Shader * Lighting::SHADER = 0;
 
-Lighting::Lighting( PerspectiveCamera * cam, GBuffer * gBuffer )
+Lighting::Lighting( PerspectiveCamera * cam, Framebuffer * gBuffer )
     :   _gBuffer( gBuffer ),
         _ambient( 0.1, 0.1, 0.1 ),
         _sunDir( 0, -1, 0 ),
@@ -62,15 +62,15 @@ void Lighting::render()
     glDisable( GL_DEPTH_TEST );
 
     glActiveTexture( GL_TEXTURE0 );
-    glBindTexture( GL_TEXTURE_2D, _gBuffer->texture );
+    _gBuffer->getAttachments()[0]->bind();
     _shader->setUniform( "colorTex", 0 );
 
     glActiveTexture( GL_TEXTURE1 );
-    glBindTexture( GL_TEXTURE_2D, _gBuffer->positionTex );
+    _gBuffer->getAttachments()[1]->bind();
     _shader->setUniform( "positionTex", 1 );
 
     glActiveTexture( GL_TEXTURE2 );
-    glBindTexture( GL_TEXTURE_2D, _gBuffer->normalTex );
+    _gBuffer->getAttachments()[2]->bind();
     _shader->setUniform( "normalTex", 2 );
 
     _shader->setUniform( "ambient", glm::vec3( 0, 0, 0 ) );

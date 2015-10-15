@@ -1,0 +1,19 @@
+digraph "Blend"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="Blend",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node2 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="PostEffect",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$class_post_effect.html"];
+  Node3 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="Renderable",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$class_renderable.html"];
+  Node4 -> Node3 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" _shader" ,fontname="Helvetica"];
+  Node4 [label="Shader",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$class_shader.html"];
+  Node5 -> Node3 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" _cam" ,fontname="Helvetica"];
+  Node5 [label="Camera",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$class_camera.html"];
+  Node4 -> Node2 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" SHADER" ,fontname="Helvetica"];
+  Node6 -> Node2 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" _canvas" ,fontname="Helvetica"];
+  Node6 [label="Framebuffer",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$class_framebuffer.html"];
+  Node6 -> Node6 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" Screen" ,fontname="Helvetica"];
+  Node6 -> Node1 [dir="back",color="darkorchid3",fontsize="10",style="dashed",label=" _blendFBO" ,fontname="Helvetica"];
+}

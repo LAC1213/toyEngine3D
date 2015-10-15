@@ -1,0 +1,15 @@
+digraph "World::onKeyAction"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="World::onKeyAction",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1 -> Node2 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="Mesh::toggleWireframe",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$class_mesh.html#a363f6809aa3269a7021a68421f1bb160"];
+  Node1 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="BulletSpawner::shoot",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$class_bullet_spawner.html#a2ef82c18cb619b1a23073f87453804f5"];
+  Node3 -> Node4 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="PerspectiveCamera::\lgetView",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$class_perspective_camera.html#aa178b372867ae7fa837d83ed506f1f36"];
+  Node1 -> Node5 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="PlayerCamera::jump",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$class_player_camera.html#a07e07be4973f01f696ab9cd2cc1d7fdc"];
+}
