@@ -78,7 +78,7 @@ void Lighting::render()
 
     for( size_t i = 0 ; i < _lights.size() ; ++i )
     {
-        if( i == 0 )
+        if( i == _lights.size() - 1 )
         {
             _shader->setUniform( "ambient", _ambient );
             _shader->setUniform( "sunDir", _sunDir );
@@ -93,14 +93,6 @@ void Lighting::render()
 
         Renderable::render();
     }
-
-
-
-    /*static PostEffect post( PostEffect::NONE, _gBuffer );
-    post.render();
-    static Billboard b( _cam, _gBuffer->texture );
-    b.setPosition( light.position );
-    b.render();*/
 
     glEnable( GL_DEPTH_TEST );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );

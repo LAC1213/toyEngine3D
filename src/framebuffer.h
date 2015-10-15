@@ -27,11 +27,11 @@ public:
     static const Framebuffer * getActiveRead();
 
     void resize( int w, int h );
-    void copyColor( const Framebuffer& fb );
-    void copyDepth( const Framebuffer& fb );
-    void clearColor();
-    void clearDepth();
-    void clear();
+    void copyColor( const Framebuffer& fb ) const;
+    void copyDepth( const Framebuffer& fb ) const;
+    void clearColor() const;
+    void clearDepth() const;
+    void clear() const;
 
     GLuint getFBO() const;
     operator GLuint() { return _fbo; }
@@ -51,6 +51,9 @@ protected:
 private:
     static const Framebuffer * ActiveDraw; //!< last bound draw Framebuffer with bindDraw()
     static const Framebuffer * ActiveRead; //!< last bound read Framebuffer with bindRead()
+
+    Framebuffer( const Framebuffer& fb ) = delete;
+    Framebuffer& operator=( const Framebuffer& fb ) = delete;
 };
 
 #endif //FRAMEBUFFER_H

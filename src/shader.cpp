@@ -12,10 +12,6 @@
 
 using std::max;
 
-Shader::Shader() : _program( 0 )
-{
-}
-
 Shader::~Shader()
 {
     glDeleteProgram( _program );

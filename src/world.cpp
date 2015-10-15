@@ -130,7 +130,7 @@ void World::step( double dt )
 void World::render()
 {
     static Blend effect( _bloomed, _canvas );
-    static Bloom bloom( _canvas, _bloomed );
+    static Bloom bloom( _canvas );
 
     glViewport( 0, 0, _width, _height );
     std::stringstream ss;
@@ -143,7 +143,6 @@ void World::render()
 //    glBindFramebuffer( GL_FRAMEBUFFER, _msaa.fbo );
 
     _gBuffer->clear();
-
     _terrain->render();
 
 //   glBindFramebuffer(GL_READ_FRAMEBUFFER, _msaa.fbo);
@@ -152,16 +151,15 @@ void World::render()
 
     _canvas->clear();
     _lighting.render();
-
+    
     _canvas->copyDepth( *_gBuffer );
-
     glPatchParameteri( GL_PATCH_VERTICES, 3 );
     for( size_t i = 0 ; i < _enemies.size() ; ++i )
         _enemies[i]->render();
-
     _bullets.render();
     _lightwell.render();
 
+    _bloomed->clear();
     bloom.render();
     /*
         glBindFramebuffer( GL_READ_FRAMEBUFFER, _gBuffer.fbo );

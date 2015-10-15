@@ -53,12 +53,11 @@ void PostEffect::render()
     Texture::Null.bind();
 }
 
-Bloom::Bloom( Framebuffer * in, Framebuffer * canvas )
-    :   PostEffect( NONE, canvas ),
-        _in( in ),
+Bloom::Bloom( Framebuffer * in )
+    :   PostEffect( NONE, in ),
         _first( Framebuffer::genScreenBuffer() ),
         _second( Framebuffer::genScreenBuffer() ),
-        _filter( BLOOM_FILTER, _in ),
+        _filter( BLOOM_FILTER, _canvas ),
         _gaussv( GAUSS_V, _first ),
         _gaussh( GAUSS_H, _second )
 {
@@ -66,6 +65,7 @@ Bloom::Bloom( Framebuffer * in, Framebuffer * canvas )
 
 void Bloom::render()
 {
+    const Framebuffer * out = Framebuffer::getActiveDraw();
     _first->clearColor();
     _filter.setType( BLOOM_FILTER );
     _filter.render();
@@ -79,11 +79,12 @@ void Bloom::render()
         _gaussh.render();
     }
 
-    _canvas->clearColor();
+    out->bindDraw();
     _filter.setCanvas( _second );
     _filter.setType( NONE );
     _filter.render();
-    _filter.setCanvas( _in );
+
+    _filter.setCanvas( _canvas );
     _filter.setType( BLOOM_FILTER );
 }
 

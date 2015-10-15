@@ -22,7 +22,6 @@ public:
         LOAD_FULL = 0x03
     };
 
-    Shader();
     Shader( const std::string& shaderDir, LoadFlag loadFlags );
     ~Shader();
     
@@ -37,9 +36,14 @@ public:
     
     operator GLuint() { return _program; }
     GLuint getID() const { return _program; }
+
 private:
     GLuint _program;
     std::map< std::string, GLint> _uniforms;
+
+    Shader( const Shader& shader ) = delete;
+    Shader& operator=( const Shader& shader ) = delete;
+    Shader() = delete;
 };
 
 #endif //SHADER_H

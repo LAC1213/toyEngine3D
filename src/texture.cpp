@@ -1,7 +1,7 @@
 #include <texture.h>
 #include <iostream>
 
-Texture Texture::Null = Texture( 0 );
+Texture Texture::Null( (GLuint)0 );
 const Texture* Texture::Active = &Texture::Null;
 
 /** Default Constructor

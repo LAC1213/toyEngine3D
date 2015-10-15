@@ -1,7 +1,7 @@
 #include <framebuffer.h>
 #include <iostream>
 
-Framebuffer Framebuffer::Screen = Framebuffer( 0 );
+Framebuffer Framebuffer::Screen( 0 );
 const Framebuffer * Framebuffer::ActiveDraw = &Framebuffer::Screen;
 const Framebuffer * Framebuffer::ActiveRead = &Framebuffer::Screen;
 
@@ -166,7 +166,7 @@ void Framebuffer::resize( int w, int h )
 /** glBlitFramebuffer() wrapper which copies color
  * \param fb source Framebuffer
  */
-void Framebuffer::copyColor( const Framebuffer& fb )
+void Framebuffer::copyColor( const Framebuffer& fb ) const
 {
     fb.bindRead();
     bindDraw();
@@ -176,7 +176,7 @@ void Framebuffer::copyColor( const Framebuffer& fb )
 /** glBlitFramebuffer() wrapper which copies depth
  * \param fb source Framebuffer
  */
-void Framebuffer::copyDepth( const Framebuffer& fb )
+void Framebuffer::copyDepth( const Framebuffer& fb ) const
 {
     fb.bindRead();
     bindDraw();
@@ -185,7 +185,7 @@ void Framebuffer::copyDepth( const Framebuffer& fb )
 
 /** glClear() wrapper which clears color
  */
-void Framebuffer::clearColor()
+void Framebuffer::clearColor() const
 {
     bindDraw();
     glClear( GL_COLOR_BUFFER_BIT );
@@ -193,7 +193,7 @@ void Framebuffer::clearColor()
 
 /** glClear() wrapper which clears depth
  */
-void Framebuffer::clearDepth()
+void Framebuffer::clearDepth() const
 {
     bindDraw();
     glClear( GL_DEPTH_BUFFER_BIT );
@@ -201,7 +201,7 @@ void Framebuffer::clearDepth()
 
 /** glClear() wrapper which clears color and depth
  */
-void Framebuffer::clear()
+void Framebuffer::clear() const
 {
     bindDraw();
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );

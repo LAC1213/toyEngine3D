@@ -44,12 +44,11 @@ protected:
 class Bloom : public PostEffect
 {
 public:
-    Bloom( Framebuffer * in, Framebuffer * out );
+    Bloom( Framebuffer * in );
 
     virtual void render();
 
 private:
-    Framebuffer *   _in;
     Framebuffer *   _first;  //!< pingpong buffer 1
     Framebuffer *   _second; //!< pingpong buffer 2
 

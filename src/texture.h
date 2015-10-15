@@ -45,6 +45,9 @@ protected:
 
 private:
     static const Texture * Active; //!< last bound Texture with bind()
+
+    Texture( const Texture& tex ) = delete;
+    Texture& operator=( const Texture& tex ) = delete;
 };
 
 #endif //TEXTURE_H
