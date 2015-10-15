@@ -1,8 +1,0 @@
-var searchData=
-[
-  ['removecollider',['removeCollider',['../class_player_camera.html#ab6b201da5ff54012dc1a83281ce0cb47',1,'PlayerCamera']]],
-  ['removepointlight',['removePointLight',['../class_lighting.html#a7d78793f7c5e3eb05b222309b7d8c617',1,'Lighting']]],
-  ['render',['render',['../class_billboard.html#aacd8d0899c6621377217554d7ac0610a',1,'Billboard::render()'],['../class_enemy.html#a62875c8aba22d278c89caa87af6c7b69',1,'Enemy::render()'],['../class_lighting.html#a139c84b1a180648b41694b47f281981b',1,'Lighting::render()'],['../class_mesh.html#aa196429f3e87ecd53e8770ba979222f4',1,'Mesh::render()'],['../class_particle_system.html#af2ec9e0fe49695569a9524f6a2238e6f',1,'ParticleSystem::render()'],['../class_post_effect.html#a7274d736bac1655cc0e38e5fdf0dcf20',1,'PostEffect::render()'],['../class_blend.html#a5399ccf82cbcb03559bd9176f5959a84',1,'Blend::render()'],['../class_bloom.html#a7754f494e4a503d4483215912efe6687',1,'Bloom::render()'],['../class_renderable.html#a1dce45c4703b60fd30acf824c77df9b6',1,'Renderable::render()'],['../class_terrain.html#a56992faf594dadfdf2264c2f524ea12f',1,'Terrain::render()'],['../class_text.html#a8a365f1337c52ee44e006bd59b82ff28',1,'Text::render()'],['../class_world.html#a150eab10c21532162bb698d72aecec16',1,'World::render()']]],
-  ['renderable',['Renderable',['../class_renderable.html#a97a0f6efd2a058dfb003e64e63bdb255',1,'Renderable::Renderable()'],['../class_renderable.html#a337616d887f84c30a13fa9b37dea736a',1,'Renderable::Renderable(Camera *cam, Shader *shader, GLuint vao, GLuint mode, size_t elements, bool indexed)']]],
-  ['resize',['resize',['../class_framebuffer.html#a9479ea40d39418a623f64d91b151163f',1,'Framebuffer::resize()'],['../class_texture.html#a61b781eed5eba214c0957df09b81fef1',1,'Texture::resize()']]]
-];
