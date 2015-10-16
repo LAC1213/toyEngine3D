@@ -20,9 +20,7 @@ PostEffect::PostEffect( Type type, Framebuffer * canvas )
         -1, 1
     };
 
-    glGenBuffers( 1, &_vbo );
-    glBindBuffer( GL_ARRAY_BUFFER, _vbo );
-    glBufferData( GL_ARRAY_BUFFER, sizeof verts, verts, GL_STATIC_DRAW );
+    _vbo.loadData( verts, sizeof verts );
     std::vector<Attribute> atts;
     atts.push_back( Attribute( _vbo, GL_FLOAT, Attribute::vec2 ) );
     genVAO( atts, 0 );
@@ -31,7 +29,6 @@ PostEffect::PostEffect( Type type, Framebuffer * canvas )
 PostEffect::~PostEffect()
 {
     glDeleteVertexArrays( 1, &_vao );
-    glDeleteBuffers( 1, &_vbo );
 }
 
 void PostEffect::render()
@@ -49,8 +46,6 @@ void PostEffect::render()
     _shader->setUniform( "tex", 0 );
 
     Renderable::render();
-
-    Texture::Null.bind();
 }
 
 Bloom::Bloom( Framebuffer * in )

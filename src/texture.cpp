@@ -1,7 +1,7 @@
 #include <texture.h>
 #include <iostream>
 
-Texture Texture::Null( (GLuint)0 );
+Texture Texture::Null( 0 );
 const Texture* Texture::Active = &Texture::Null;
 
 /** Default Constructor
@@ -38,8 +38,8 @@ Texture::~Texture()
  */
 void Texture::bind() const
 {
-  //  if( Active == this )
-   //     return;
+    if( Active == this )
+        return;
 
     Active = this;
     glBindTexture( _target, _id );

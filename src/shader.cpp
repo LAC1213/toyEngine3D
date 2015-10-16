@@ -12,9 +12,23 @@
 
 using std::max;
 
+const Shader * Shader::Active = 0;
+
+/** Deconstructor which deletes the openGL program object
+ */
 Shader::~Shader()
 {
     glDeleteProgram( _program );
+}
+
+/** glUseProgram() wrapper
+ */
+void Shader::use()
+{
+    if( this == Active )
+        return;
+    glUseProgram( _program );
+    Active = this;
 }
 
 /** Wrapper around glGetUniformLocation() which also caches locations

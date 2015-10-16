@@ -50,7 +50,7 @@ Renderable::~Renderable()
 void Renderable::render()
 {
     glBindVertexArray( _vao );
-    glUseProgram( *_shader );
+    _shader->use();
 
     _cam->setUniforms( _shader );
 
@@ -59,7 +59,6 @@ void Renderable::render()
     else
         glDrawArraysInstanced( _mode, _startIndex, _elements, 1 );
 
-    glUseProgram( 0 );
     glBindVertexArray( 0 );
 }
 

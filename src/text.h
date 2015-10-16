@@ -5,6 +5,8 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
+#include <drawcall.h>
+
 /** Font atlas stored on GPU
  */
 class Font
@@ -58,7 +60,8 @@ public:
     glm::vec2 getPosition() { return _pos; }
 protected:
     Font * _font;
-    GLuint _buffers[3];
+    BufferObject _buffers[3];
+    DrawCall _drawCall;
 
     glm::vec2 _screen;
     glm::vec2 _pos;

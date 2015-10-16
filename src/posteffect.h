@@ -28,7 +28,7 @@ public:
 protected:
     Type    _type;
     Framebuffer *   _canvas;
-    GLuint  _vbo;
+    BufferObject  _vbo;
 };
 
 class Blend : public PostEffect

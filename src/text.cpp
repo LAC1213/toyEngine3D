@@ -141,21 +141,16 @@ Text::Text( Font * font, std::string str, glm::vec2 screen )
         ++i;
     }
 
-    std::vector<Attribute> atts;
-    glGenBuffers(3, _buffers);
-    
-    Attribute a( _buffers[0], GL_FLOAT, Attribute::vec2 );
-    a.loadData( vertices, 8*n*sizeof(float), GL_STATIC_DRAW );
-    atts.push_back(a);
+    _buffers[2].setTarget( GL_ELEMENT_ARRAY_BUFFER );
 
-    Attribute b( _buffers[1], GL_FLOAT, Attribute::vec2 );
-    b.loadData( uvs, 8*n*sizeof(float), GL_STATIC_DRAW );
-    atts.push_back(b);
-
-    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, _buffers[2] );
-    glBufferData( GL_ELEMENT_ARRAY_BUFFER, 6*n*sizeof(unsigned short), indices, GL_STATIC_DRAW );
-    
-    genVAO( atts, _buffers[2] );
+    _buffers[0].loadData( vertices, 8*n*sizeof(float) );
+    _buffers[1].loadData( uvs, 8*n*sizeof(float) );
+    _buffers[2].loadData( indices, 6*n*sizeof(unsigned short) );
+   
+    _drawCall.setElements( _elements );
+    _drawCall.setIndexBuffer( &_buffers[2] );
+    _drawCall.addAttribute( VertexAttribute( &_buffers[0], GL_FLOAT, 2 ) );
+    _drawCall.addAttribute( VertexAttribute( &_buffers[1], GL_FLOAT, 2 ) );
 
     delete[] vertices;
     delete[] uvs;
@@ -164,8 +159,6 @@ Text::Text( Font * font, std::string str, glm::vec2 screen )
 
 Text::~Text()
 {
-    glDeleteBuffers( 3, _buffers );
-    glDeleteVertexArrays( 1, &_vao );
 }
 
 void Text::onResize( int width, int height )
@@ -178,18 +171,17 @@ void Text::render()
     Camera cam;
     _cam = &cam;
 
-    GLint loc = _shader->getUniformLocation( "tex" );
-    glProgramUniform1i( *_shader, loc, 0 );
+    _shader->setUniform( "tex", 0 );
     glActiveTexture( GL_TEXTURE0 );
     glBindTexture( GL_TEXTURE_2D, _font->getAtlas() );
 
     glm::vec2 start;
     start.x = 2*_pos.x/_screen.x;
     start.y = 2*_pos.y/_screen.y;
-    loc = _shader->getUniformLocation( "start" );
-    glProgramUniform2f( *_shader, loc, start.x, start.y );
-
-    Renderable::render();
+    _shader->setUniform( "start", start );
+    
+    _shader->use();
+    _drawCall.execute();
 }
 
 

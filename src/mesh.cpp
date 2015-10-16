@@ -33,6 +33,7 @@ MeshData::~MeshData()
     for(size_t i = 0 ; i < attributes.size() ; ++i)
         glDeleteBuffers(1, &attributes[i].vbo);
     glDeleteBuffers( 1, &indexBuffer );
+    glDeleteVertexArrays( 1, &vao );
     delete shader;
 }
 
@@ -96,6 +97,21 @@ MeshData MeshData::genIcoSphere()
     data.shader = new Shader( "./res/shader/icosphere/", Shader::LOAD_FULL );
     data.elements = 60;
     data.mode = GL_PATCHES;
+
+    glGenVertexArrays(1, &data.vao);
+    glBindVertexArray( data.vao );
+
+    for( size_t i = 0 ; i < data.attributes.size() ; ++i )
+    {
+        glEnableVertexAttribArray( i );
+        glBindBuffer( GL_ARRAY_BUFFER, data.attributes[i].vbo );
+        glVertexAttribPointer( i, data.attributes[i].dim, data.attributes[i].type, GL_FALSE, data.attributes[i].stride, data.attributes[i].offset );
+        glVertexAttribDivisor( i, data.attributes[i].divisor ); 
+    }
+   
+    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, data.indexBuffer ); 
+    glBindVertexArray( 0 );
+    
     return data;
 }
 
@@ -108,7 +124,7 @@ Mesh::Mesh( Camera * cam, MeshData * data, GLuint texture )
 {     
     _shader = data->shader;
     _cam = cam;
-    genVAO( data->attributes, data->indexBuffer );
+    _vao = data->vao;
     _elements = data->elements;
     _mode = data->mode;
     if( data->indexBuffer )
@@ -119,7 +135,6 @@ Mesh::Mesh( Camera * cam, MeshData * data, GLuint texture )
 
 Mesh::~Mesh()
 {
-    glDeleteVertexArrays( 1, &_vao );
 }
 
 void Mesh::toggleWireframe()

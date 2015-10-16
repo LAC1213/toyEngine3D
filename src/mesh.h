@@ -15,6 +15,7 @@ public:
     size_t elements; 
     std::vector<Attribute> attributes;
     GLuint indexBuffer;
+    GLuint vao;
     Shader * shader;
     GLenum mode;
 
