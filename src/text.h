@@ -48,8 +48,6 @@ private:
 class Text : public Renderable
 {
 public:
-    static Shader * SHADER;
-
     Text( Font * font, std::string text, glm::vec2 screen );
     virtual ~Text();
 
@@ -58,7 +56,12 @@ public:
 
     void setPosition( glm::vec2 pos ) { _pos = pos; }
     glm::vec2 getPosition() { return _pos; }
+
+    static void init();
+    static void destroy();
+
 protected:
+    static Shader * _shader;
     Font * _font;
     BufferObject _buffers[3];
     DrawCall _drawCall;

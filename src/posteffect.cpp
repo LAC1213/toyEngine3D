@@ -1,51 +1,38 @@
 #include <posteffect.h>
+#include <engine.h>
 
-Shader * PostEffect::SHADER = 0;
+Shader * PostEffect::_shader = 0;
 
 PostEffect::PostEffect( Type type, Framebuffer * canvas )
     :   _type( type ),
         _canvas( canvas )
 {
-    _shader = SHADER;
-    _elements = 6;
-    _indexed = false;
-    _mode = GL_TRIANGLES;
-
-    GLfloat verts[] = {
-        -1, -1,
-        1, -1,
-        1, 1,
-        -1, -1,
-        1, 1,
-        -1, 1
-    };
-
-    _vbo.loadData( verts, sizeof verts );
-    std::vector<Attribute> atts;
-    atts.push_back( Attribute( _vbo, GL_FLOAT, Attribute::vec2 ) );
-    genVAO( atts, 0 );
 }
 
 PostEffect::~PostEffect()
 {
-    glDeleteVertexArrays( 1, &_vao );
 }
 
 void PostEffect::render()
 {
-    GLint loc = _shader->getUniformLocation( "effect" );
-    glProgramUniform1i( *_shader, loc, _type );
-
-    loc = _shader->getUniformLocation( "screen" );
-    glProgramUniform2f( *_shader, loc, (float) _canvas->getWidth(), (float) _canvas->getHeight() );
-
-    Camera cam;
-    _cam = &cam;
+    _shader->setUniform( "effect", _type );
+    
     glActiveTexture( GL_TEXTURE0 );
     _canvas->getAttachments().front()->bind();
     _shader->setUniform( "tex", 0 );
 
-    Renderable::render();
+    _shader->use();
+    Engine::DrawScreenQuad->execute();
+}
+
+void PostEffect::init()
+{
+    _shader = new Shader( "./res/shader/post/", Shader::LOAD_BASIC );
+}
+
+void PostEffect::destroy()
+{
+    delete _shader;
 }
 
 Bloom::Bloom( Framebuffer * in )
@@ -93,8 +80,7 @@ void Blend::render()
 {
     glActiveTexture( GL_TEXTURE0 + 1 );
     _blendFBO->getAttachments().front()->bind();
-    GLint loc = _shader->getUniformLocation( "blendTex" );
-    glProgramUniform1i( *_shader, loc, 1 );
+    _shader->setUniform( "blendTex", 1 );
 
     PostEffect::render();
 }

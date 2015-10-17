@@ -32,8 +32,8 @@ public:
     Framebuffer *   _canvas;
     Framebuffer *   _bloomed;
 
-    MeshData        _sphereData;
-    GLuint          _groundTex;
+    IcoSphere       _sphereData;
+    Texture *       _groundTex;
     Font            _font;
 
     double          _time;

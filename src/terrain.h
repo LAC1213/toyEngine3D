@@ -12,7 +12,7 @@ public:
     HeightMap( size_t w, size_t h );
     ~HeightMap();
     
-    GLuint texture;
+    const Texture * texture;
     double ** data;
     size_t width;
     size_t height;
@@ -23,8 +23,7 @@ public:
 class Terrain : public Mesh, public Collider 
 {
 public:
-    static Shader * SHADER;
-    Terrain( Camera * cam, HeightMap * heightmap, GLuint texture );
+    Terrain( const Camera * cam, HeightMap * heightmap, const Texture * texture );
     Terrain() {}
     virtual ~Terrain();
 
@@ -32,7 +31,12 @@ public:
     virtual bool contains( glm::vec3 point ) const;
     virtual glm::vec3 correct( glm::vec3 point ) const;
 
+    static void init();
+    static void destroy();
+
 protected:
+    static Shader * SHADER;
+    
     float _width;
     float _depth;
     float _maxHeight;

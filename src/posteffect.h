@@ -7,8 +7,6 @@
 class PostEffect : public Renderable
 {
 public:
-    static Shader * SHADER;
-
     enum Type {
         NONE,
         PIXELATE,
@@ -25,7 +23,13 @@ public:
     
     void setType( Type type ) { _type = type; }
     void setCanvas( Framebuffer * canvas ) { _canvas = canvas; }
+
+    static void init();
+    static void destroy();
+
 protected:
+    static Shader * _shader;
+
     Type    _type;
     Framebuffer *   _canvas;
     BufferObject  _vbo;

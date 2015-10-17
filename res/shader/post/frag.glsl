@@ -7,8 +7,6 @@ out vec4 fragColor;
 uniform sampler2D tex;
 uniform sampler2D blendTex;
 
-uniform vec2 screen = vec2(640, 480);
-
 #define NONE            0
 #define PIXEL           1
 #define GAUSS_V         2
@@ -30,8 +28,8 @@ void main()
     float x, y;
     if(effect == PIXEL)
     {
-        x = vUV.x - mod(vUV.x, n/screen.x);
-        y = vUV.y - mod(vUV.y, n/screen.y);
+        x = vUV.x - mod(vUV.x, n*dx);
+        y = vUV.y - mod(vUV.y, n*dy);
     }
     else
     {

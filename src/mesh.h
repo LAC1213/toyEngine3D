@@ -2,40 +2,68 @@
 #define MESH_H
 
 #include <renderable.h>
+#include <drawcall.h>
+#include <texture.h>
 
-/** represents Mesh Resources stored on GPU
+/** POD for mesh data on cpu ( without textures )
  */
-class MeshData
+struct MeshData 
 {
 public:
-    MeshData() {}
-    MeshData( GLfloat * vertices, GLfloat * normals, GLfloat * uvs, size_t verts, unsigned short * indices, size_t elements );
-    ~MeshData();
+    GLfloat * verts;
+    GLfloat * normals;
+    GLfloat * uvs;
+    size_t vertCount;
 
-    size_t elements; 
-    std::vector<Attribute> attributes;
-    GLuint indexBuffer;
-    GLuint vao;
+    unsigned short * indices;
+    size_t elements;
+};
+
+/** represents mesh resources stored on GPU
+ */
+class MeshObject : public Renderable
+{
+public:
+    MeshObject() {}
+    MeshObject( const MeshData& data, const Texture * tex );
+    virtual ~MeshObject();
+
+    const Texture * texture;
+    std::vector<BufferObject> buffers;
+    DrawCall drawCall;
     Shader * shader;
-    GLenum mode;
 
-    static MeshData genIcoSphere();
+    virtual void render();
+
     static MeshData genCube();
+
+private:
+    MeshObject( const MeshObject& obj ) = delete;
+    MeshObject& operator=( const MeshObject& obj ) = delete;
+};
+
+class IcoSphere : public MeshObject
+{
+public:
+    IcoSphere();
+
+    virtual void render();
 };
 
 class Mesh : public Renderable
 {
 public:
     Mesh() {}
-    Mesh( Camera * cam, MeshData * data, GLuint texture );
+    Mesh( const Camera * cam, MeshObject * meshRenderable );
     virtual ~Mesh();
     
     virtual void render();
     void toggleWireframe();
     
 protected:
+    const Camera *    _cam;
+    MeshObject * _meshObject;
     /* uniforms */
-    GLuint      _texture;
     bool        _wireframe;
     glm::vec4   _diffuseColor;
     glm::mat4   _model;

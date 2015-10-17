@@ -2,12 +2,13 @@
 #define BILLBOARD_H
 
 #include <renderable.h>
+#include <texture.h>
+#include <drawcall.h>
 
 class Billboard : public Renderable
 {
 public:
-    static Shader * SHADER;
-    Billboard( Camera * cam, GLuint texture );
+    Billboard( const Camera * cam, const Texture * texture );
     ~Billboard();
 
     virtual void render();
@@ -17,9 +18,19 @@ public:
     void setSize( glm::vec2 size ) { _scale = size; }
     glm::vec2 getSize() const { return _scale; }
 
+    static void init();
+    static void destroy();
+
 protected:
-    GLuint _texture;
-    Attribute _vbo;
+    static Shader * _shader;
+    
+    BufferObject _pointBuffer;
+    DrawCall _drawCall;
+
+    const Camera * _cam;
+
+    const Texture * _texture;
+    
     glm::vec3 _pos;
     glm::vec2 _scale;
 };

@@ -6,6 +6,7 @@
 #include <sstream>
 #include <iostream>
 #include <framebuffer.h>
+#include <billboard.h>
 
 World::World( GLFWwindow * window, int width, int height )
     :   _window( window ),
@@ -15,7 +16,6 @@ World::World( GLFWwindow * window, int width, int height )
         _gBuffer( Framebuffer::genGeometryBuffer() ),
         _canvas( Framebuffer::genScreenBuffer() ),
         _bloomed( Framebuffer::genScreenBuffer() ),
-        _sphereData( MeshData::genIcoSphere() ),
         _font( "/usr/share/fonts/TTF/DejaVuSansMono.ttf", 14 ),
         _time( 0 ),
         _score( 0 ),
@@ -27,7 +27,7 @@ World::World( GLFWwindow * window, int width, int height )
         _spawnFrequency( 0.2 ),
         _spawnTimer( 1.0/_spawnFrequency )
 {
-    _groundTex = SOIL_load_OGL_texture
+    GLuint tex = SOIL_load_OGL_texture
                  (
                      "./res/textures/ground.jpg",
                      SOIL_LOAD_AUTO,
@@ -35,16 +35,18 @@ World::World( GLFWwindow * window, int width, int height )
                      SOIL_FLAG_INVERT_Y
                  );
 
-    if( 0 == _groundTex )
+    if( 0 == tex )
         errorExit( "SOIL loading error: '%s'\n", SOIL_last_result() );
 
-    glBindTexture(GL_TEXTURE_2D, _groundTex);
+    glBindTexture(GL_TEXTURE_2D, tex);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glGenerateMipmap(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, 0);
+
+    _groundTex = new Texture( tex );
 
     _terrain = new Terrain( &_cam, &_heightmap, _groundTex );
 
@@ -55,7 +57,7 @@ World::World( GLFWwindow * window, int width, int height )
 
 World::~World()
 {
-    glDeleteTextures( 1, &_groundTex );
+    delete _groundTex;
     for( size_t i = 0 ; i < _enemies.size() ; ++i )
         delete _enemies[i];
     delete _terrain;
@@ -184,6 +186,9 @@ void World::render()
     Framebuffer::Screen.clear();
     effect.render();
     txt.render();
+    PostEffect test( PostEffect::NONE, _canvas );
+    test.render();
+
 }
 void World::onKeyAction( int key, int scancode, int action, int mods )
 {

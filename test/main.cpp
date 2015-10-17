@@ -26,6 +26,7 @@
 #include <billboard.h>
 #include <posteffect.h>
 #include <lighting.h>
+#include <engine.h>
 
 static World * gWorld;
 
@@ -108,15 +109,7 @@ int main(int argc, char ** argv)
 
     srand( time(0) );
 
-    if(FT_Init_FreeType(&Font::ft))
-        errorExit("Couldn't initialize freetype");
-
-    Text::SHADER = new Shader( "./res/shader/text/", Shader::LOAD_BASIC );
-    Terrain::SHADER = new Shader( "./res/shader/terrain/", Shader::LOAD_FULL );
-    ParticleSystem::SHADER = new Shader( "./res/shader/particle/", Shader::LOAD_GEOM );
-    Billboard::SHADER = new Shader( "./res/shader/billboard/", Shader::LOAD_GEOM );
-    PostEffect::SHADER = new Shader( "./res/shader/post/", Shader::LOAD_BASIC );   
-    Lighting::SHADER = new Shader( "./res/shader/lighting/", Shader::LOAD_BASIC ); 
+    Engine::init();
 
     int width, height;
     glfwGetFramebufferSize( window, &width, &height );
@@ -145,12 +138,7 @@ int main(int argc, char ** argv)
     glfwDestroyWindow(window);
     glfwTerminate();
 
-    delete Text::SHADER;
-    delete Terrain::SHADER;
-    delete ParticleSystem::SHADER;
-    delete Billboard::SHADER;
-    delete PostEffect::SHADER;
-    delete Lighting::SHADER;
+    Engine::destroy();
 
     return EXIT_SUCCESS;
 }

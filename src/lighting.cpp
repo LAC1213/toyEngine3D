@@ -3,42 +3,22 @@
 #include <iostream>
 
 #include <memory.h>
+#include <engine.h>
 
-Shader * Lighting::SHADER = 0;
+Shader * Lighting::_shader = nullptr;
 
 Lighting::Lighting( PerspectiveCamera * cam, Framebuffer * gBuffer )
-    :   _gBuffer( gBuffer ),
+    :   _cam( cam ),
+        _gBuffer( gBuffer ),
         _ambient( 0.1, 0.1, 0.1 ),
         _sunDir( 0, -1, 0 ),
         _sunDiffuse( 0.2, 0.2, 0.2 ),
         _sunSpecular( 0.1, 0.1, 0.1 )
 {
-    _shader = SHADER;
-    _elements = 6;
-    _indexed = false;
-    _mode = GL_TRIANGLES;
-    _cam = cam;
-
-    GLfloat verts[] = {
-        -1, -1,
-        1, -1,
-        1, 1,
-        -1, -1,
-        1, 1,
-        -1, 1
-    };
-
-    _attributes.push_back( Attribute( GL_FLOAT, Attribute::vec2 ) );
-    _attributes.back().loadData( verts, sizeof verts, GL_STATIC_DRAW );
-
-    genVAO( _attributes, 0 );
 }
 
 Lighting::~Lighting()
 {
-    glDeleteVertexArrays( 1, &_vao );
-    for( size_t i = 0 ; i < _attributes.size() ; ++i )
-        _attributes[i].deleteData();
 }
 
 void Lighting::addPointLight( PointLight * light )
@@ -76,6 +56,10 @@ void Lighting::render()
     _shader->setUniform( "ambient", glm::vec3( 0, 0, 0 ) );
     _shader->setUniform( "sunDir", glm::vec3( 0, 0, 0 ) );
 
+    _cam->setUniforms( _shader );
+
+    _shader->use();
+
     for( size_t i = 0 ; i < _lights.size() ; ++i )
     {
         if( i == _lights.size() - 1 )
@@ -91,9 +75,19 @@ void Lighting::render()
         _shader->setUniform( "specular", _lights[i]->specular );
         _shader->setUniform( "attenuation", _lights[i]->attenuation );
 
-        Renderable::render();
+        Engine::DrawScreenQuad->execute();
     }
 
     glEnable( GL_DEPTH_TEST );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+}
+
+void Lighting::init()
+{
+    _shader = new Shader( "./res/shader/lighting/", Shader::LOAD_BASIC );
+}
+
+void Lighting::destroy()
+{
+    delete _shader;
 }

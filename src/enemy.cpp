@@ -1,7 +1,7 @@
 #include <body.h>
 
-Enemy::Enemy( Camera * cam, MeshData * data, Collider * collider )
-    :   Mesh( cam, data, 0 ),
+Enemy::Enemy( const Camera * cam, MeshObject * data, Collider * collider )
+    :   Mesh( cam, data ),
         Sphere( glm::vec3( 0, 0, 0 ), 0.1 ),
         _collider( collider ),
         _alive( true )

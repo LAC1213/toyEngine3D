@@ -28,8 +28,6 @@ public:
 class ParticleSystem : public Renderable
 {
 public:
-    static Shader * SHADER;
-
     enum BufferIndex {
         POSITION,
         COLOR,
@@ -37,19 +35,24 @@ public:
         SIZE
     };
 
-    ParticleSystem( PerspectiveCamera * cam, GLuint texture );
+    ParticleSystem( PerspectiveCamera * cam, const Texture * texture );
     virtual ~ParticleSystem();
 
     virtual void step( double dt );
     virtual void render();
 
+    static void init();
+    static void destroy();
+
 protected:
+    static Shader * _shader;
     std::vector<Particle> _particles;
-    PerspectiveCamera * _pcam;
+    PerspectiveCamera * _cam;
 
 private:
-    std::vector<Attribute> _buffers;
-    GLuint _texture;
+    std::vector<BufferObject> _buffers;
+    DrawCall _drawCall;
+    const Texture * _texture;
 };
 
 class SmoothTail : public ParticleSystem

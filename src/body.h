@@ -9,7 +9,7 @@
 class Enemy : public Mesh, public Actor, public Sphere
 {
 public:
-    Enemy( Camera * cam, MeshData * data, Collider * collider );
+    Enemy( const Camera * cam, MeshObject * data, Collider * collider );
 
     virtual void step( double dt );
     virtual void render();

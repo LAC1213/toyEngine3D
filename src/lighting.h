@@ -3,6 +3,7 @@
 
 #include <renderable.h>
 #include <framebuffer.h>
+#include <drawcall.h>
 
 class PointLight
 {
@@ -16,7 +17,6 @@ public:
 class Lighting : public Renderable 
 {
 public:
-    static Shader * SHADER;
     Lighting( PerspectiveCamera * cam, Framebuffer * gBuffer );
     ~Lighting();
 
@@ -25,9 +25,15 @@ public:
     void addPointLight( PointLight * light );
     void removePointLight( PointLight * light );
 
+    static void init();
+    static void destroy();
+
 protected:
+    static Shader * _shader;
+
+    const PerspectiveCamera * _cam;
+
     Framebuffer * _gBuffer;
-    std::vector<Attribute> _attributes;
 
     std::vector<PointLight*> _lights;
 

@@ -1,45 +1,30 @@
 #include <mesh.h>
 #include <iostream>
 
-MeshData::MeshData( GLfloat * vertices, GLfloat * normals, GLfloat * uvs, size_t verts, unsigned short * indices, size_t elems )
-    :   elements( elems )
+MeshObject::MeshObject( const MeshData& data, const Texture * tex )
+    :   buffers( 4 )
 {
-    Attribute a( 0, GL_FLOAT, Attribute::vec3 );
-    glGenBuffers( 1, &a.vbo );
-    a.loadData( vertices, 3*verts*sizeof(GLfloat), GL_STATIC_DRAW );
+    buffers[0].loadData( data.verts, 3*data.vertCount*sizeof(GLfloat) );
+    buffers[1].loadData( data.normals, 3*data.vertCount*sizeof(GLfloat) );
+    buffers[2].loadData( data.uvs, 2*data.vertCount*sizeof(GLfloat) );
+    buffers[3].loadData( data.indices, data.elements*sizeof(unsigned short) );
+    buffers[3].setTarget( GL_ELEMENT_ARRAY_BUFFER );
+    drawCall.setIndexBuffer( &buffers[3] );
 
-    Attribute a1( 0, GL_FLOAT, Attribute::vec3 );
-    glGenBuffers( 1, &a1.vbo );
-    glBindBuffer( GL_ARRAY_BUFFER, a1.vbo );
-    glBufferData( GL_ARRAY_BUFFER, 3*verts*sizeof(GLfloat), normals, GL_STATIC_DRAW );
-
-    Attribute a2( 0, GL_FLOAT, Attribute::vec2 );
-    glGenBuffers( 1, &a2.vbo );
-    glBindBuffer( GL_ARRAY_BUFFER, a2.vbo );
-    glBufferData( GL_ARRAY_BUFFER, 2*verts*sizeof(GLfloat), uvs, GL_STATIC_DRAW );
-
-    glGenBuffers( 1, &indexBuffer );
-    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
-    glBufferData( GL_ELEMENT_ARRAY_BUFFER, elements*sizeof(unsigned short), indices, GL_STATIC_DRAW );
-
-    attributes.push_back(a);
-    attributes.push_back(a1);
-    attributes.push_back(a2);
+    drawCall.addAttribute( VertexAttribute( &buffers[0], GL_FLOAT, 3 ) );
+    drawCall.addAttribute( VertexAttribute( &buffers[1], GL_FLOAT, 3 ) );
+    drawCall.addAttribute( VertexAttribute( &buffers[2], GL_FLOAT, 2 ) );
+    
     shader = new Shader( "./res/shader/mesh/", Shader::LOAD_GEOM );
 }
 
-MeshData::~MeshData()
+MeshObject::~MeshObject()
 {
-    for(size_t i = 0 ; i < attributes.size() ; ++i)
-        glDeleteBuffers(1, &attributes[i].vbo);
-    glDeleteBuffers( 1, &indexBuffer );
-    glDeleteVertexArrays( 1, &vao );
     delete shader;
 }
 
-MeshData MeshData::genIcoSphere()
+IcoSphere::IcoSphere()
 {
-    MeshData data;
     float g = (1.0 + sqrt(5.0))/2;
 
     float icoVerts[12*3] = {
@@ -84,53 +69,48 @@ MeshData MeshData::genIcoSphere()
         8, 6, 7,
         9, 8, 1
     };
-
-    Attribute a( 0, GL_FLOAT, Attribute::vec3);
-    glGenBuffers( 1, &data.indexBuffer );
-    glGenBuffers( 1, &a.vbo );
-    a.loadData( icoVerts, sizeof icoVerts, GL_STATIC_DRAW );
-
-    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, data.indexBuffer );
-    glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof icoIndices, icoIndices, GL_STATIC_DRAW );
-
-    data.attributes.push_back( a );
-    data.shader = new Shader( "./res/shader/icosphere/", Shader::LOAD_FULL );
-    data.elements = 60;
-    data.mode = GL_PATCHES;
-
-    glGenVertexArrays(1, &data.vao);
-    glBindVertexArray( data.vao );
-
-    for( size_t i = 0 ; i < data.attributes.size() ; ++i )
-    {
-        glEnableVertexAttribArray( i );
-        glBindBuffer( GL_ARRAY_BUFFER, data.attributes[i].vbo );
-        glVertexAttribPointer( i, data.attributes[i].dim, data.attributes[i].type, GL_FALSE, data.attributes[i].stride, data.attributes[i].offset );
-        glVertexAttribDivisor( i, data.attributes[i].divisor ); 
-    }
-   
-    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, data.indexBuffer ); 
-    glBindVertexArray( 0 );
     
-    return data;
+    texture = 0;
+    buffers = std::vector<BufferObject>(2);
+    shader = new Shader( "./res/shader/icosphere/", Shader::LOAD_FULL );
+    
+    buffers[0].loadData( icoVerts, sizeof icoVerts );
+    buffers[1].loadData( icoIndices, sizeof icoIndices );
+    buffers[1].setTarget( GL_ELEMENT_ARRAY_BUFFER );
+    drawCall.setMode( GL_PATCHES );
+    drawCall.setIndexBuffer( &buffers[1] ); 
+    drawCall.addAttribute( VertexAttribute( &buffers[0], GL_FLOAT, 3 ) );
+    drawCall.setElements( 60 );
 }
 
-Mesh::Mesh( Camera * cam, MeshData * data, GLuint texture )
-    :   _texture( texture ),
+void IcoSphere::render()
+{
+    glPatchParameteri( GL_PATCH_VERTICES, 3 );
+    MeshObject::render();
+}
+
+void MeshObject::render()
+{
+    if( texture )
+    {
+        glActiveTexture( GL_TEXTURE0 );
+        texture->bind();
+        shader->setUniform( "tex", 0 );
+    }
+
+    shader->use();
+
+    drawCall.execute();   
+}
+
+Mesh::Mesh( const Camera * cam, MeshObject * data )
+    :   _cam( cam ),
+        _meshObject( data ),
         _wireframe( true ),
         _diffuseColor( 1, 0.5, 0.2, 1 ),
         _model(1.0f)
         
 {     
-    _shader = data->shader;
-    _cam = cam;
-    _vao = data->vao;
-    _elements = data->elements;
-    _mode = data->mode;
-    if( data->indexBuffer )
-        _indexed = true;
-    else
-        _indexed = false;
 }
 
 Mesh::~Mesh()
@@ -144,22 +124,11 @@ void Mesh::toggleWireframe()
 
 void Mesh::render()
 {
-    GLint loc = _shader->getUniformLocation( "model" );
-    glProgramUniformMatrix4fv( *_shader, loc, 1, GL_FALSE, glm::value_ptr( _model ) );
-
-    loc = _shader->getUniformLocation( "wireframe" );
-    glProgramUniform1i( *_shader, loc, _wireframe );
-
-    loc = _shader->getUniformLocation( "DiffuseMaterial" );
-    glProgramUniform4fv( *_shader, loc, 1, glm::value_ptr( _diffuseColor ) );
-
-    if( _texture )
-    {
-        glActiveTexture( GL_TEXTURE0 );
-        glBindTexture( GL_TEXTURE_2D, _texture );
-        loc = _shader->getUniformLocation( "tex" );
-        glProgramUniform1i( *_shader, loc, 0 );
-    }
+    _meshObject->shader->setUniform( "model", _model );
+    _meshObject->shader->setUniform( "wireframe", _wireframe );
+    _meshObject->shader->setUniform( "DiffuseMaterial", _diffuseColor );
     
-    Renderable::render();
+    _cam->setUniforms( _meshObject->shader );
+
+    _meshObject->render();
 }

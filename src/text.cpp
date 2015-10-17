@@ -73,16 +73,13 @@ Font::~Font()
     glDeleteTextures( 1, &_atlas );
 }
 
-Shader * Text::SHADER = 0;
+Shader * Text::_shader = 0;
 
 Text::Text( Font * font, std::string str, glm::vec2 screen )
     : _font( font ), _screen( screen )
 {
-    _shader = SHADER;
-    _mode = GL_TRIANGLES;
     size_t n = str.length();
-    _elements = 6*n;
-    _indexed = true;
+    GLuint _elements = 6*n;
 
     float * vertices = new float[8*n];
     float * uvs = new float[8*n];
@@ -168,9 +165,6 @@ void Text::onResize( int width, int height )
 
 void Text::render()
 {
-    Camera cam;
-    _cam = &cam;
-
     _shader->setUniform( "tex", 0 );
     glActiveTexture( GL_TEXTURE0 );
     glBindTexture( GL_TEXTURE_2D, _font->getAtlas() );
@@ -184,4 +178,15 @@ void Text::render()
     _drawCall.execute();
 }
 
+void Text::init()
+{
+    if(FT_Init_FreeType(&Font::ft))
+        errorExit("Couldn't initialize freetype");
 
+    _shader = new Shader( "./res/shader/text/", Shader::LOAD_BASIC );
+}
+
+void Text::destroy()
+{
+    delete _shader;
+}

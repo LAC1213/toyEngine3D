@@ -4,7 +4,7 @@
 
 Shader * Terrain::SHADER = 0;
 
-Terrain::Terrain( Camera * cam, HeightMap * heightmap, GLuint texture )
+Terrain::Terrain( const Camera * cam, HeightMap * heightmap, const Texture * texture )
     :   _heightmap( heightmap )
 {
     _width = 25;
@@ -12,16 +12,18 @@ Terrain::Terrain( Camera * cam, HeightMap * heightmap, GLuint texture )
     _maxHeight = 5;
     _quadCount = 25;
 
-    _texture = texture;
+    _meshObject = new MeshObject();
+
+    _meshObject->texture = texture;
     _wireframe = false;
     _diffuseColor = glm::vec4( 0.6, 0.6, 0.6, 1 );
     glm::mat4 s = glm::scale( glm::mat4(1), glm::vec3( _width, _maxHeight, _depth ) );
     _model = glm::translate( glm::mat4(1.0f), glm::vec3( -12.5, -5, -12.5 ) ) * s;
 
-    _shader = SHADER;
-    _mode = GL_PATCHES;
-    _elements = 4 * _quadCount * _quadCount;
-    _indexed = true;
+    _meshObject->shader = SHADER;
+    _meshObject->drawCall.setMode(GL_PATCHES);
+    GLuint _elements = 4 * _quadCount * _quadCount;
+    _meshObject->drawCall.setElements( _elements );
     _cam = cam;
 
     GLfloat * verts = new GLfloat[2 * (_quadCount + 1)*(_quadCount + 1)];
@@ -46,13 +48,13 @@ Terrain::Terrain( Camera * cam, HeightMap * heightmap, GLuint texture )
         }
     }
 
-    glGenBuffers( 2, _buffers );
-    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, _buffers[ 1 ] );
-    glBufferData( GL_ELEMENT_ARRAY_BUFFER, _elements*sizeof( unsigned short ), indices, GL_STATIC_DRAW );
-    std::vector<Attribute> atts;
-    atts.push_back( Attribute( _buffers[0], GL_FLOAT, Attribute::vec2 ) );
-    atts[0].loadData( verts, 2*(_quadCount + 1)*(_quadCount + 1)*sizeof(GLfloat), GL_STATIC_DRAW );
-    genVAO( atts, _buffers[ 1 ] );
+    _meshObject->buffers = std::vector<BufferObject>( 2 );
+    _meshObject->buffers[0].loadData( verts, 2*(_quadCount + 1)*(_quadCount + 1)*sizeof(GLfloat) );
+    _meshObject->buffers[1].setTarget( GL_ELEMENT_ARRAY_BUFFER );
+    _meshObject->buffers[1].loadData( indices, _elements*sizeof( unsigned short ) );
+
+    _meshObject->drawCall.addAttribute( VertexAttribute( &_meshObject->buffers[0], GL_FLOAT, 2 ) );
+    _meshObject->drawCall.setIndexBuffer( &_meshObject->buffers[1] );
 
     delete[] verts;
     delete[] indices;
@@ -60,21 +62,28 @@ Terrain::Terrain( Camera * cam, HeightMap * heightmap, GLuint texture )
 
 Terrain::~Terrain()
 {
-    std::cout << "del terrain" << std::endl;
-    glDeleteBuffers( 2, _buffers );
-    glDeleteVertexArrays( 1, &_vao );
+    delete _meshObject;
 }
 
 void Terrain::render()
 {
     glPatchParameteri( GL_PATCH_VERTICES, 4 );
 
-    GLint loc = _shader->getUniformLocation( "heightmap" );
-    glProgramUniform1i( *_shader, loc, 1 );
+    _meshObject->shader->setUniform( "heightmap", 1 );
     glActiveTexture( GL_TEXTURE1 );
-    glBindTexture( GL_TEXTURE_2D, _heightmap->texture );
+    _heightmap->texture->bind();
 
     Mesh::render();
+}
+
+void Terrain::init()
+{
+    SHADER = new Shader( "./res/shader/terrain/" , Shader::LOAD_FULL );
+}
+
+void Terrain::destroy()
+{
+    delete SHADER;
 }
 
 static double getRnd()
@@ -86,7 +95,7 @@ static double getRnd()
 }
 
 /* stack overflow copy paste :P */
-void diamondSquare( double ** data, unsigned int size )
+static void diamondSquare( double ** data, unsigned int size )
 {
 //value 2^n+1
     unsigned int DATA_SIZE = size;
@@ -205,7 +214,7 @@ HeightMap HeightMap::genRandom( unsigned int pow )
 
     HeightMap heightmap( width, width );
     heightmap.data = data;
-    heightmap.texture = tex;
+    heightmap.texture = new Texture( tex );
     return heightmap;
 }
 
@@ -229,5 +238,5 @@ HeightMap::~HeightMap()
     for( size_t i = 0 ; i < width ; ++i )
         delete[] data[i];
     delete[] data;
-    glDeleteTextures( 1, &texture );
+    delete texture;
 }

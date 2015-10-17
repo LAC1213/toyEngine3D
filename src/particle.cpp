@@ -3,16 +3,18 @@
 #include <random>
 #include <algorithm>
 
-Shader * ParticleSystem::SHADER = 0;
+Shader * ParticleSystem::_shader = 0;
 
-ParticleSystem::ParticleSystem( PerspectiveCamera * cam, GLuint texture ) 
-    :   _pcam( cam ),
+ParticleSystem::ParticleSystem( PerspectiveCamera * cam, const Texture * texture ) 
+    :   _cam( cam ),
+        _buffers( 4 ),
+        _drawCall( GL_POINTS ),
         _texture( texture )
 {
-    _buffers.push_back( Attribute( GL_FLOAT, Attribute::vec3 ) ); // position
-    _buffers.push_back( Attribute( GL_FLOAT, Attribute::vec4 ) ); // color
-    _buffers.push_back( Attribute( GL_FLOAT, Attribute::vec2 ) ); // uv
-    _buffers.push_back( Attribute( GL_FLOAT, Attribute::scalar ) ); //size
+    _drawCall.addAttribute( VertexAttribute( &_buffers[POSITION], GL_FLOAT, 3 ) ); // position
+    _drawCall.addAttribute( VertexAttribute( &_buffers[COLOR], GL_FLOAT, 4 ) ); // color
+    _drawCall.addAttribute( VertexAttribute( &_buffers[UV], GL_FLOAT, 2 ) ); // uv
+    _drawCall.addAttribute( VertexAttribute( &_buffers[SIZE], GL_FLOAT, 1 ) ); // size
 
     /*Particle test;
     test.position = Curve<glm::vec3>( glm::vec3( 0, 0, 10 ), glm::vec3( 0, 1, 0 ), glm::vec3( 0, -1, 0 ) );
@@ -20,21 +22,10 @@ ParticleSystem::ParticleSystem( PerspectiveCamera * cam, GLuint texture )
     test.uv = Curve<glm::vec2>( glm::vec2( 0, 0 ) );
     test.life = 100;
     _particles.push_back( test );*/
-
-    _indexed = false;
-    genVAO( _buffers, 0 );
-    _mode = GL_POINTS;
-    _shader = SHADER;
-    _cam = cam;
 }
 
 ParticleSystem::~ParticleSystem()
 {
-    for( size_t i = 0 ; i < _buffers.size() ; ++i )
-    {
-        _buffers[i].deleteData();
-    }
-    glDeleteVertexArrays( 1, &_vao );
 }
 
 void ParticleSystem::step( double dt )
@@ -61,7 +52,7 @@ void ParticleSystem::step( double dt )
     std::vector<GLfloat> sizes;
     sizes.reserve( _particles.size() );
 
-    _elements = 0;
+    GLuint elements = 0;
 
     for( size_t i = 0 ; i < _particles.size() ; ++i )
     {
@@ -77,14 +68,16 @@ void ParticleSystem::step( double dt )
             uvs.push_back( _particles[i].uv.f.x );
             uvs.push_back( _particles[i].uv.f.y );
             sizes.push_back( _particles[i].size.f );
-            ++_elements;
+            ++elements;
         }
     }
 
-    _buffers[ POSITION ].loadData( positions.data(), positions.size()*sizeof(GLfloat), GL_DYNAMIC_DRAW );
-    _buffers[ COLOR ].loadData( colors.data(), colors.size()*sizeof(GLfloat), GL_DYNAMIC_DRAW );
-    _buffers[ UV ].loadData( uvs.data(), uvs.size()*sizeof(GLfloat), GL_DYNAMIC_DRAW );
-    _buffers[ SIZE ].loadData( sizes.data(), sizes.size()*sizeof(GLfloat), GL_DYNAMIC_DRAW );
+    _drawCall.setElements( elements );
+
+    _buffers[ POSITION ].loadData( positions.data(), positions.size()*sizeof(GLfloat));
+    _buffers[ COLOR ].loadData( colors.data(), colors.size()*sizeof(GLfloat));
+    _buffers[ UV ].loadData( uvs.data(), uvs.size()*sizeof(GLfloat) );
+    _buffers[ SIZE ].loadData( sizes.data(), sizes.size()*sizeof(GLfloat) );
 }
 
 void ParticleSystem::render()
@@ -92,24 +85,33 @@ void ParticleSystem::render()
     if( _texture )
     {
         glActiveTexture( GL_TEXTURE0 );
-        glBindTexture( GL_TEXTURE_2D, _texture );
-        GLint loc = _shader->getUniformLocation( "tex" );
-        glProgramUniform1i( *_shader, loc, 0 );
+        _texture->bind();
+        _shader->setUniform( "tex", 0 );
     }
 
     glm::mat4 model(1);
-    GLint loc =_shader->getUniformLocation( "model" );
-    glProgramUniformMatrix4fv( *_shader, loc, 1, GL_FALSE, glm::value_ptr(model) );
+    _shader->setUniform( "model", model );
     
     glBlendFunc( GL_SRC_ALPHA, GL_ONE );
     glDepthMask( GL_FALSE );
-    
-    Renderable::render();
+   
+    _cam->setUniforms( _shader ); 
+    _shader->use();
+    _drawCall.execute();
     
     glDepthMask( GL_TRUE );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 }
 
+void ParticleSystem::init()
+{
+    _shader = new Shader( "./res/shader/particle/", Shader::LOAD_GEOM );
+}
+
+void ParticleSystem::destroy()
+{
+    delete _shader;
+}
 
 SmoothTail::SmoothTail( PerspectiveCamera * cam ) 
     :   ParticleSystem( cam, 0 ),
@@ -207,8 +209,8 @@ void BulletSpawner::step( double dt )
 
 void BulletSpawner::shoot()
 {
-    glm::vec3 pos = glm::vec3(glm::inverse(_pcam->getView()) * glm::vec4( 0, 0.002, 0, 1 ));
-    glm::vec3 dir = glm::inverse(glm::mat3(_pcam->getView())) * glm::vec3( 0, 0, -8 );
+    glm::vec3 pos = glm::vec3(glm::inverse(_cam->getView()) * glm::vec4( 0, 0.002, 0, 1 ));
+    glm::vec3 dir = glm::inverse(glm::mat3(_cam->getView())) * glm::vec3( 0, 0, -8 );
     
     Particle bullet;
     bullet.position = Curve<glm::vec3>( pos, dir );
