@@ -62,7 +62,7 @@ GLFWwindow * initContext()
     GLFWwindow * window = glfwCreateWindow(1000, 800, "Window Title", NULL, NULL);
     if (!window)
         errorExit("Couldn't create glfw window.");
-    glfwSetWindowPos(window, 1400, 200);
+    glfwSetWindowPos(window, 2800, 200);
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPos(window, 0, 0);
@@ -120,7 +120,7 @@ int main(int argc, char ** argv)
     glfwSetCursorPosCallback( window, onMouseMove );
     glfwSetFramebufferSizeCallback( window, onResize );
 
-    double t0, dt;
+    double t0 = 0, dt;
 
     while( !glfwWindowShouldClose( window ) )
     {

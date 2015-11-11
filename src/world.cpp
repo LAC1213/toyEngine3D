@@ -20,11 +20,13 @@ World::World( GLFWwindow * window, int width, int height )
         _time( 0 ),
         _score( 0 ),
         _cam( _window, (float)_width / _height ),
+        _cubeData( MeshObject::genCube() ),
+        _cube( &_cam, _cubeData ),
         _lighting( &_cam, _gBuffer ),
         _bullets( &_cam, &_enemies ),
         _lightwell( &_cam, glm::vec3( 0, 0, 0 ) ),
         _heightmap( HeightMap::genRandom( 11 ) ),
-        _spawnFrequency( 0.2 ),
+        _spawnFrequency( 0.1 ),
         _spawnTimer( 1.0/_spawnFrequency )
 {
     GLuint tex = SOIL_load_OGL_texture
@@ -49,9 +51,21 @@ World::World( GLFWwindow * window, int width, int height )
     _groundTex = new Texture( tex );
 
     _terrain = new Terrain( &_cam, &_heightmap, _groundTex );
+    static PointLight p;
+    p.position = glm::vec3( 0, 0, 0 );
+    p.diffuse = glm::vec3( 1, 1, 1 );
+    p.specular = glm::vec3( 1, 1, 1 );
+    p.attenuation = glm::vec3( 0.1, 0.1, 1 );
+    _lighting.addPointLight( &p );
+
+    _cubeData->texture = _groundTex;
+    _cube.toggleWireframe();
+    _cube.scale.f = glm::vec3( 0.1, 0.1, 0.1 );
+    _cube.rotation.df.y = 1;
+    _cube.position.f = glm::vec3( 1, -1, 1 );
 
     _cam.addCollider( _terrain );
-    _canvas->enableDepthBuffer();
+    _canvas->enableDepthRenderBuffer();
     onResize( width, height );
 }
 
@@ -73,6 +87,7 @@ void World::step( double dt )
 
     _fps = 1.0/dt;
 
+    _cube.step( dt );
     _bullets.step( dt );
     _lightwell.step( dt );
     _cam.step( dt );
@@ -141,21 +156,16 @@ void World::render()
     Text txt( &_font, ss.str(), glm::vec2( _width, _height ) );
     txt.setPosition( glm::vec2( 5, 2 ) );
 
-    /* render scene with msaa */
-//    glBindFramebuffer( GL_FRAMEBUFFER, _msaa.fbo );
-
+    glDisable( GL_BLEND );
     _gBuffer->clear();
     _terrain->render();
-
-//   glBindFramebuffer(GL_READ_FRAMEBUFFER, _msaa.fbo);
-//   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _canvas.fbo);
-//   glBlitFramebuffer(0, 0, _width, _height, 0, 0, _width, _height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    _cube.render();
+    glEnable( GL_BLEND );
 
     _canvas->clear();
+    _canvas->copyDepth( *_gBuffer );
     _lighting.render();
     
-    _canvas->copyDepth( *_gBuffer );
-    glPatchParameteri( GL_PATCH_VERTICES, 3 );
     for( size_t i = 0 ; i < _enemies.size() ; ++i )
         _enemies[i]->render();
     _bullets.render();
@@ -163,31 +173,12 @@ void World::render()
 
     _bloomed->clear();
     bloom.render();
-    /*
-        glBindFramebuffer( GL_READ_FRAMEBUFFER, _gBuffer.fbo );
-        glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
-        glReadBuffer( GL_COLOR_ATTACHMENT0 );
-        glBlitFramebuffer( 0, 0, _width, _height, 0, 0, _width/2, _height/2, GL_COLOR_BUFFER_BIT, GL_LINEAR );
-
-        glReadBuffer( GL_COLOR_ATTACHMENT1 );
-        glBlitFramebuffer( 0, 0, _width, _height, _width/2, 0, _width, _height/2, GL_COLOR_BUFFER_BIT, GL_LINEAR );
-
-        glReadBuffer( GL_COLOR_ATTACHMENT2 );
-        glBlitFramebuffer( 0, 0, _width, _height, _width/2, _height/2, _width, _height, GL_COLOR_BUFFER_BIT, GL_LINEAR );
-
-        glBindFramebuffer( GL_READ_FRAMEBUFFER, _canvas.fbo );
-        glReadBuffer( GL_COLOR_ATTACHMENT0 );
-        glDrawBuffer( GL_COLOR_ATTACHMENT0 );
-        glBlitFramebuffer( 0, 0, _width, _height, 0, _height/2, _width/2, _height, GL_COLOR_BUFFER_BIT, GL_LINEAR );
-    */
 
     /* post processing and text */
 
     Framebuffer::Screen.clear();
     effect.render();
     txt.render();
-    PostEffect test( PostEffect::NONE, _canvas );
-    test.render();
 
 }
 void World::onKeyAction( int key, int scancode, int action, int mods )

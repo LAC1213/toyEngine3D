@@ -6,7 +6,7 @@
 #include <collider.h>
 #include <lighting.h>
 
-class Enemy : public Mesh, public Actor, public Sphere
+class Enemy : public Mesh, public Sphere
 {
 public:
     Enemy( const Camera * cam, MeshObject * data, Collider * collider );

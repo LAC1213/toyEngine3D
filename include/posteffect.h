@@ -52,9 +52,14 @@ public:
 
     virtual void render();
 
+    void setBlursteps( unsigned int blurs );
+    unsigned int getBlursteps() const;
+
 private:
     Framebuffer *   _first;  //!< pingpong buffer 1
     Framebuffer *   _second; //!< pingpong buffer 2
+
+    unsigned int _blurs;
 
     PostEffect _filter;
     PostEffect _gaussv;

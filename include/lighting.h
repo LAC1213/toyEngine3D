@@ -4,6 +4,7 @@
 #include <renderable.h>
 #include <framebuffer.h>
 #include <drawcall.h>
+#include <mesh.h>
 
 class PointLight
 {

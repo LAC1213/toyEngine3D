@@ -17,6 +17,11 @@ PerspectiveCamera::PerspectiveCamera( float fov, float aspect, float near, float
      _proj = glm::perspective( fov, aspect, near, far );
 }
 
+void PerspectiveCamera::lookAt( glm::vec3 p )
+{
+    _view = glm::lookAt( _eye, p, glm::vec3( 0, 1, 0 ) );
+}
+
 void PerspectiveCamera::setUniforms( Shader * shader ) const
 {
     GLint loc = shader->getUniformLocation( PROJ_UNIFORM_STR );
@@ -87,8 +92,8 @@ void PlayerCamera::step( double dt )
 
 void PlayerCamera::jump()
 {
-    if( !_canJump )
-        return;
+//    if( !_canJump )
+//        return;
     _position.df.y = 1;
     _canJump = false;
 }

@@ -2,20 +2,21 @@
 #include <billboard.h>
 #include <iostream>
 
-#include <memory.h>
 #include <engine.h>
+#include <posteffect.h>
 
 Shader * Lighting::_shader = nullptr;
 
 Lighting::Lighting( PerspectiveCamera * cam, Framebuffer * gBuffer )
     :   _cam( cam ),
         _gBuffer( gBuffer ),
-        _ambient( 0.1, 0.1, 0.1 ),
-        _sunDir( 0, -1, 0 ),
-        _sunDiffuse( 0.2, 0.2, 0.2 ),
-        _sunSpecular( 0.1, 0.1, 0.1 )
+        _ambient( 0.01, 0.01, 0.01 ),
+        _sunDir( 0.3, -1, 0 ),
+        _sunDiffuse( 0.05, 0.05, 0.05 ),
+        _sunSpecular( 0.05, 0.05, 0.05 )
 {
 }
+
 
 Lighting::~Lighting()
 {
@@ -38,6 +39,12 @@ void Lighting::removePointLight( PointLight * light )
 
 void Lighting::render()
 {
+    const Framebuffer * target = Framebuffer::getActiveDraw();
+
+    /* render lighting */
+    glViewport( 0, 0, target->getWidth(), target->getHeight() );
+    target->bindDraw();
+
     glBlendFunc(GL_ONE, GL_ONE);
     glDisable( GL_DEPTH_TEST );
 
@@ -55,13 +62,13 @@ void Lighting::render()
 
     _shader->setUniform( "ambient", glm::vec3( 0, 0, 0 ) );
     _shader->setUniform( "sunDir", glm::vec3( 0, 0, 0 ) );
-
     _cam->setUniforms( _shader );
 
     _shader->use();
 
     for( size_t i = 0 ; i < _lights.size() ; ++i )
     {
+
         if( i == _lights.size() - 1 )
         {
             _shader->setUniform( "ambient", _ambient );
@@ -69,7 +76,6 @@ void Lighting::render()
             _shader->setUniform( "sunDiffuse", _sunDiffuse );
             _shader->setUniform( "sunSpecular", _sunSpecular );
         }
-
         _shader->setUniform( "lightPos", _lights[i]->position );
         _shader->setUniform( "diffuse", _lights[i]->diffuse );
         _shader->setUniform( "specular", _lights[i]->specular );

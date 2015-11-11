@@ -11,16 +11,18 @@ uniform mat4 view;
 uniform float baseLOD = 32;
 uniform sampler2D heightmap;
 
-void main()
+vec4 getPoint( vec2 coord )
 {
-    tcPosition[ID] = vPosition[ID];
+    return vec4(coord.x, texture( heightmap, coord ).r, coord.y, 1);
+}
 
-    vec2 p = vPosition[ID];
-    float d = length( view * model * vec4(p.x, texture( heightmap, p ).r ,p.y, 1 ));
-
+float getLOD( vec3 a, vec3 b )
+{
+    float d = length( 0.5*( a + b ) );
     float lod;
-
-    if( d < 4 )
+    if( d < 2 )
+        lod = 64;
+    else if( d < 4 )
         lod = 32;
     else if ( d < 8 )
         lod = 16;
@@ -32,12 +34,24 @@ void main()
         lod = 2;
     else
         lod = 1;
+    return lod;
+}
 
-    gl_TessLevelInner[0] = lod;
-    gl_TessLevelInner[1] = lod;
-    gl_TessLevelOuter[0] = lod;
-    gl_TessLevelOuter[1] = lod;
-    gl_TessLevelOuter[2] = lod;
-    gl_TessLevelOuter[3] = lod;
+void main()
+{
+    tcPosition[ID] = vPosition[ID];
+
+    vec3 p0 = vec3( view * model * getPoint( vPosition[0] ) );
+    vec3 p1 = vec3( view * model * getPoint( vPosition[1] ) );
+    vec3 p2 = vec3( view * model * getPoint( vPosition[2] ) );
+    vec3 p3 = vec3( view * model * getPoint( vPosition[3] ) );
+
+    gl_TessLevelOuter[0] = getLOD( p0, p1 );
+    gl_TessLevelOuter[3] = getLOD( p1, p2 );
+    gl_TessLevelOuter[2] = getLOD( p2, p3 );
+    gl_TessLevelOuter[1] = getLOD( p3, p1 );
+    float inner = 0.25*( gl_TessLevelOuter[0] + gl_TessLevelOuter[1] + gl_TessLevelOuter[2] + gl_TessLevelOuter[3] );
+    gl_TessLevelInner[0] = inner;
+    gl_TessLevelInner[1] = inner;
 }
 

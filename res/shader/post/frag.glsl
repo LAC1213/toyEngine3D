@@ -30,6 +30,7 @@ void main()
     {
         x = vUV.x - mod(vUV.x, n*dx);
         y = vUV.y - mod(vUV.y, n*dy);
+        fragColor = texture( tex, vec2( x, y ) );
     }
     else
     {
@@ -81,22 +82,14 @@ void main()
     if( effect == BLEND )
     {
         fragColor.rgb = texture( tex, vUV ).rgb + texture( blendTex, vUV ).rgb;
-        fragColor.rgb = fragColor.rgb / ( fragColor.rgb + vec3(1.0) );
-        fragColor.rgb = pow( fragColor.rgb, vec3(1.0/2.2) );
-        fragColor.a = 1;
-        return;
-    }
+        //HDR reduction
+    fragColor.rgb = fragColor.rgb / (vec3(1) + fragColor.rgb);
+    //gamma correction
+    fragColor.rgb = pow( fragColor.rgb, vec3(1.0/2.2) );
+    fragColor.a = 1;}
 
     if(effect == NONE)
     {
         fragColor = texture(tex, vUV);
-    }
-    else
-    {
-        vec4 color = vec4(0, 0, 0, 0);
-        for(float i = -n/2 ; i < n/2 ; ++i)
-            for(float j = -n/2 ; j < n/2 ; ++j)
-                color += texture(tex, vec2(x + i*dx, y + j*dy));
-        fragColor = 1.0/n/n * color;
     }
 }

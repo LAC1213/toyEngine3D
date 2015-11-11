@@ -27,11 +27,11 @@ void main()
 
     vec2 tex_offset = 1.0 / textureSize( heightmap, 0 ); 
 
-    vec3 a = getPoint( p + vec2( tex_offset.x, 0 ) ).xyz;
-    vec3 b = getPoint( p + vec2( 0, tex_offset.y ) ).xyz;
-    vec4 obj = getPoint( p );
+    vec3 a = (model * getPoint( p + vec2( tex_offset.x, 0 ) )).xyz;
+    vec3 b = (model * getPoint( p + vec2( 0, tex_offset.y ) )).xyz;
+    vec4 obj = model * getPoint( p );
     teNormal = cross( b - vec3(obj), a - vec3(obj) );
     tePosition = obj.xyz;
-    gl_Position = proj * view * model * obj;
+    gl_Position = proj * view * obj;
 }
 

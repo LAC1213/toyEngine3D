@@ -10,7 +10,8 @@ const Framebuffer * Framebuffer::ActiveRead = &Framebuffer::Screen;
 Framebuffer::Framebuffer() 
     :   _width( Screen.getWidth() ),
         _height( Screen.getHeight() ),
-        _depthRBO( 0 )
+        _depthRBO( 0 ),
+        _depthTexture( 0 )
 {
     glGenFramebuffers( 1, &_fbo );
 }
@@ -29,7 +30,8 @@ Framebuffer::Framebuffer( GLuint fbo )
 Framebuffer::Framebuffer( int w, int h )
     :   _width( w ),
         _height( h ),
-        _depthRBO( 0 )
+        _depthRBO( 0 ),
+        _depthTexture( 0 )
 {
     glGenFramebuffers( 1, &_fbo );    
 }
@@ -62,9 +64,21 @@ void Framebuffer::addAttachment()
     glDrawBuffers( _attachments.size(), attachments );
 }
 
+/** Create Depth Texture and add it to the Framebuffer
+ */
+void Framebuffer::enableDepthTexture( GLenum internalFormat )
+{
+    _depthTexture = new Texture();
+    _depthTexture->setInternalFormat( internalFormat );
+    _depthTexture->setFormat( GL_DEPTH_COMPONENT );
+    _depthTexture->resize( _width, _height );
+    bindDraw();
+    glFramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, *_depthTexture, 0 );
+}
+
 /** Create Depth Renderbuffer and add it to the Frambuffer
  */
-void Framebuffer::enableDepthBuffer( GLenum internalFormat )
+void Framebuffer::enableDepthRenderBuffer( GLenum internalFormat )
 {
     glGenRenderbuffers(1, &_depthRBO);
     glBindRenderbuffer(GL_RENDERBUFFER, _depthRBO);
@@ -74,7 +88,7 @@ void Framebuffer::enableDepthBuffer( GLenum internalFormat )
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRBO);
 }
 
-/** Generate a Framebuffer with 3 color attachments and depth renderbuffer.
+/** Generate a Framebuffer with 3 color attachments and depth renderbuffer
  *  attachment 0: RGBA16F, colors
  *  attachment 1: RGB32F, positions
  *  attachment 2: RGB32F, normals
@@ -83,7 +97,7 @@ void Framebuffer::enableDepthBuffer( GLenum internalFormat )
 Framebuffer * Framebuffer::genGeometryBuffer()
 {
     Framebuffer * fb = new Framebuffer();
-    fb->enableDepthBuffer();
+    fb->enableDepthRenderBuffer();
     // colors
     fb->addAttachment();
     fb->getAttachments().back()->setInternalFormat( GL_RGBA16F );
@@ -205,6 +219,13 @@ void Framebuffer::clear() const
 {
     bindDraw();
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+}
+
+/** Get depth Texture
+ */
+const Texture * Framebuffer::getDepthTexture() const
+{
+    return _depthTexture;
 }
 
 /** Get openGL ID

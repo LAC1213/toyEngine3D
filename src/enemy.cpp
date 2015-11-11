@@ -10,7 +10,6 @@ Enemy::Enemy( const Camera * cam, MeshObject * data, Collider * collider )
     scale.f = glm::vec3( _radius, _radius, _radius );
 
     _light.attenuation = glm::vec3( 8, 4, 4 );
-    _light.specular = glm::vec3( 0.1, 0.1, 0.1 );
 }
 
 void Enemy::step( double dt )
@@ -18,7 +17,9 @@ void Enemy::step( double dt )
     rotation.df.x = -sqrt(position.df.x*position.df.x + position.df.z*position.df.z)/scale.f.y;
     if( position.df.x*position.df.x + position.df.z*position.df.z  > 0 )
         rotation.f.y = atan2( position.df.x, position.df.z );
-    Actor::step( dt );
+    
+    Mesh::step( dt );
+    
     position.f += _collider->correct( position.f - glm::vec3( 0, scale.f.y, 0 ) );
 
     if( scale.f.x < 0.01 )
@@ -27,6 +28,7 @@ void Enemy::step( double dt )
     _center = position.f;
     _light.position = _center;
     _light.diffuse = glm::vec3(_diffuseColor);
+    _light.specular = _light.diffuse;
 }
 
 void Enemy::render()
@@ -37,7 +39,6 @@ void Enemy::render()
 
 void Enemy::onHit()
 {
-    //_diffuseColor = glm::vec4( 0.1, 0.1, 0.1, 1 );
     scale.df = glm::vec3( -0.01, -0.01, -0.01 );
     position.df = glm::vec3(0);
     position.ddf = glm::vec3( 0, -1, 0 );

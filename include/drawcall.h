@@ -36,6 +36,7 @@ public:
     void setInstances( GLuint instances );
 
     GLuint getVAO() const { return _vao; }
+    void operator()() { execute(); }
 
 protected:
     GLenum  _mode;

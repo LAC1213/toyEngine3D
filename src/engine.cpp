@@ -5,6 +5,7 @@
 #include <particle.h>
 #include <text.h>
 #include <terrain.h>
+#include <mesh.h>
 
 BufferObject *    Engine::QuadBuffer = nullptr;
 DrawCall *        Engine::DrawScreenQuad = nullptr;
@@ -32,6 +33,7 @@ void Engine::init()
     ParticleSystem::init();
     Text::init();
     Terrain::init();
+    MeshObject::init();
 }
 
 void Engine::destroy()
@@ -42,6 +44,7 @@ void Engine::destroy()
     ParticleSystem::destroy();
     Text::destroy();
     Terrain::destroy();
+    MeshObject::destroy();
 
     delete QuadBuffer;
     delete DrawScreenQuad;

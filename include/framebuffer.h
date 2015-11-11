@@ -15,7 +15,8 @@ public:
     ~Framebuffer();
 
     void addAttachment();
-    void enableDepthBuffer( GLenum internalFormat = GL_DEPTH_COMPONENT16 );
+    void enableDepthTexture( GLenum internalFormat = GL_DEPTH_COMPONENT16 );
+    void enableDepthRenderBuffer( GLenum internalFormat = GL_DEPTH_COMPONENT16 );
 
     static Framebuffer * genGeometryBuffer();
     static Framebuffer * genScreenBuffer();
@@ -33,6 +34,7 @@ public:
     void clearDepth() const;
     void clear() const;
 
+    const Texture * getDepthTexture() const;
     GLuint getFBO() const;
     operator GLuint() { return _fbo; }
     std::vector<Texture*>& getAttachments();
@@ -46,6 +48,7 @@ protected:
 
     GLuint _fbo; //!< openGL ID
     GLuint _depthRBO; //!< depth Renderbuffer openGL ID
+    Texture * _depthTexture; //!< depth Texture
     std::vector<Texture*> _attachments; //!< Color attachment textures, get deleted in destructor
 
 private:

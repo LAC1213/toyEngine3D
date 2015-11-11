@@ -28,6 +28,8 @@ public:
     virtual void setUniforms( Shader * shader ) const;
     void onResize( int width, int height );
 
+    void lookAt( glm::vec3 p );
+
     glm::vec3 getPosition() const { return _eye; }
     void setPosition( const glm::vec3& eye ) { _eye = eye; updateView(); }
     void translate( const glm::vec3& t ) {     _eye += t; updateView(); }

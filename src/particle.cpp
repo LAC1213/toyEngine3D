@@ -165,9 +165,9 @@ void LightWell::spawnParticle()
         vz = -vz;
 
     part.position = Curve<glm::vec3>( _pos , glm::vec3( vx, 1.4 + rnd(), vz), glm::vec3( 0, -2, 0 ));
-    part.color = Curve<glm::vec4>( glm::vec4( 0.5, 2, 1.5, 1 ) );
+    part.color = Curve<glm::vec4>( glm::vec4( 1, 4, 3, 4 ) );
     part.uv = Curve<glm::vec2>( glm::vec2( 0, 0 ) );
-    part.size = Curve<GLfloat> ( 0.1f, 0, -0.03);
+    part.size = Curve<GLfloat> ( 0.05f, 0, -0.003);
     part.life = 4;
 
     for( size_t i = 0 ; i < _particles.size() ; ++i )
@@ -185,8 +185,9 @@ void LightWell::step( double dt )
    // static std::random_device rd;
    // static std::mt19937 mt( rd() );
    // static std::uniform_real_distribution<float> dist( -0.05, 0.05 );
+    constexpr double spawnrate = 1000; //per second
     
-    for( int i = 0 ; i < 300*dt ; ++i )
+    for( int i = 0 ; i < spawnrate*dt ; ++i )
         spawnParticle();
     
     ParticleSystem::step( dt );

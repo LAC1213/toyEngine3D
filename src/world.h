@@ -40,6 +40,8 @@ public:
     size_t          _score;
 
     PlayerCamera    _cam;
+    MeshObject *    _cubeData;
+    Mesh            _cube;
     Lighting        _lighting;
     BulletSpawner   _bullets;
     LightWell       _lightwell;

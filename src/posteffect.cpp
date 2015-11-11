@@ -1,5 +1,6 @@
 #include <posteffect.h>
 #include <engine.h>
+#include <iostream>
 
 Shader * PostEffect::_shader = 0;
 
@@ -39,10 +40,24 @@ Bloom::Bloom( Framebuffer * in )
     :   PostEffect( NONE, in ),
         _first( Framebuffer::genScreenBuffer() ),
         _second( Framebuffer::genScreenBuffer() ),
+        _blurs( 4 ),
         _filter( BLOOM_FILTER, _canvas ),
         _gaussv( GAUSS_V, _first ),
         _gaussh( GAUSS_H, _second )
 {
+}
+
+void Bloom::setBlursteps( unsigned int blurs )
+{
+    if( blurs == 0 )
+        std::cerr << "must have at least one Blur step" << std::endl;
+    else
+        _blurs = blurs;
+}
+
+unsigned int Bloom::getBlursteps() const
+{
+    return _blurs;
 }
 
 void Bloom::render()
@@ -52,7 +67,7 @@ void Bloom::render()
     _filter.setType( BLOOM_FILTER );
     _filter.render();
 
-    for( int i = 0 ; i < 7; ++i )
+    for( int i = 0 ; i < _blurs; ++i )
     {
         _second->clearColor();
         _gaussv.render();

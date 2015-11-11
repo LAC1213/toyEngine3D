@@ -4,6 +4,7 @@
 #include <renderable.h>
 #include <drawcall.h>
 #include <texture.h>
+#include <actor.h>
 
 /** POD for mesh data on cpu ( without textures )
  */
@@ -35,7 +36,13 @@ public:
 
     virtual void render();
 
-    static MeshData genCube();
+    static MeshObject * genCube();
+
+    static void init();
+    static void destroy();
+
+protected:
+    static Shader * SHADER;
 
 private:
     MeshObject( const MeshObject& obj ) = delete;
@@ -50,15 +57,20 @@ public:
     virtual void render();
 };
 
-class Mesh : public Renderable
+class Mesh : public Renderable, public Actor
 {
 public:
     Mesh() {}
-    Mesh( const Camera * cam, MeshObject * meshRenderable );
+    Mesh( const Camera * cam, MeshObject * meshObject );
     virtual ~Mesh();
     
     virtual void render();
+    virtual void step( float dt );
+
     void toggleWireframe();
+
+    void setCam( const Camera * cam );
+    const Camera * getCam() const;
     
 protected:
     const Camera *    _cam;
