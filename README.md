@@ -4,7 +4,7 @@ My Homemade engine that I develop whenever I do something further with opengl.
 
 ## Use
 
-You have to setup a opengl context yourself. Then you need to `#include engine.h` and call `Engine::init()`. Additionally you have to set the width and height of the screen framebuffer by calling `Framebuffer::Screen.resize(width, height)`
+You have to setup a opengl context yourself. Then you need to `#include <engine.h>` and call `Engine::init()`. Additionally you have to set the width and height of the screen framebuffer by calling `Framebuffer::Screen.resize( width, height )`
 After you are done cleanup with `Engine::destroy()`
 
 ## Example
@@ -16,6 +16,7 @@ Hello Cube example:
 
     ...
 
+    /* initalize */
     Engine::init();
     Framebuffer::Screen.resize( width, height );
 
@@ -29,10 +30,13 @@ Hello Cube example:
     cube.rotation.df.y = 5;
     cube.toggleWireframe();
 
+    ...
+
+    /* render cube */
     glViewport( 0, 0, width, height );
     Framebuffer::Screen.clear();
     cube.render();
-    // swap buffers
+    /* swap buffers */
 ```
 
 
