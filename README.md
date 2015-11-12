@@ -44,6 +44,12 @@ Hello Cube example:
     Framebuffer::Screen.clear();
     cube.render();
     /* swap buffers */
+
+    ...
+
+    /* clean up after yourself */
+    delete cubeData;
+    Engine::destroy();
 ```
 
 
