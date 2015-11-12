@@ -154,6 +154,7 @@ void World::render()
     ss.precision(5);
     ss << "Score: " << _score << " Spheres: " << _enemies.size() << "  Time: " << _time << " FPS: " << _fps;
     Text txt( &_font, ss.str(), glm::vec2( _width, _height ) );
+    txt.setColor( glm::vec4(0.3, 1, 0.6, 0.6) );
     txt.setPosition( glm::vec2( 5, 2 ) );
 
     glDisable( GL_BLEND );

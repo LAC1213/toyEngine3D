@@ -255,7 +255,6 @@ Mesh::Mesh( const Camera * cam, MeshObject * data )
         _wireframe( true ),
         _diffuseColor( 1, 0.5, 0.2, 1 ),
         _model(1.0)
-
 {
 }
 

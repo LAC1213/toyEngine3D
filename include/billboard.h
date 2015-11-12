@@ -23,14 +23,14 @@ public:
 
 protected:
     static Shader * _shader;
-    
+
     BufferObject _pointBuffer;
     DrawCall _drawCall;
 
     const Camera * _cam;
 
     const Texture * _texture;
-    
+
     glm::vec3 _pos;
     glm::vec2 _scale;
 };

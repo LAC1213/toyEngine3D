@@ -44,7 +44,7 @@ private:
 
     int _size;
 };
-    
+
 class Text : public Renderable
 {
 public:
@@ -52,10 +52,13 @@ public:
     virtual ~Text();
 
     virtual void render();
-    virtual void onResize( int width, int height );
+    virtual void resize( int width, int height );
 
-    void setPosition( glm::vec2 pos ) { _pos = pos; }
-    glm::vec2 getPosition() { return _pos; }
+    void setPosition( glm::vec2 pos );
+    glm::vec2 getPosition() const;
+
+    void setColor( glm::vec4 c );
+    glm::vec4 getColor() const;
 
     static void init();
     static void destroy();
@@ -66,6 +69,7 @@ protected:
     BufferObject _buffers[3];
     DrawCall _drawCall;
 
+    glm::vec4 _color;
     glm::vec2 _screen;
     glm::vec2 _pos;
 };

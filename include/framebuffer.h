@@ -20,7 +20,7 @@ public:
 
     static Framebuffer * genGeometryBuffer();
     static Framebuffer * genScreenBuffer();
-    
+
     void bindDraw() const;
     void bindRead() const;
 

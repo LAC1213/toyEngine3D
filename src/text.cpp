@@ -76,7 +76,7 @@ Font::~Font()
 Shader * Text::_shader = 0;
 
 Text::Text( Font * font, std::string str, glm::vec2 screen )
-    : _font( font ), _screen( screen )
+    : _font( font ), _screen( screen ), _color(1, 1, 1, 1)
 {
     size_t n = str.length();
     GLuint _elements = 6*n;
@@ -143,7 +143,7 @@ Text::Text( Font * font, std::string str, glm::vec2 screen )
     _buffers[0].loadData( vertices, 8*n*sizeof(float) );
     _buffers[1].loadData( uvs, 8*n*sizeof(float) );
     _buffers[2].loadData( indices, 6*n*sizeof(unsigned short) );
-   
+
     _drawCall.setElements( _elements );
     _drawCall.setIndexBuffer( &_buffers[2] );
     _drawCall.addAttribute( VertexAttribute( &_buffers[0], GL_FLOAT, 2 ) );
@@ -158,7 +158,7 @@ Text::~Text()
 {
 }
 
-void Text::onResize( int width, int height )
+void Text::resize( int width, int height )
 {
     _screen = glm::vec2( width, height );
 }
@@ -169,11 +169,13 @@ void Text::render()
     glActiveTexture( GL_TEXTURE0 );
     glBindTexture( GL_TEXTURE_2D, _font->getAtlas() );
 
+    _shader->setUniform( "textColor", _color );
+
     glm::vec2 start;
     start.x = 2*_pos.x/_screen.x;
     start.y = 2*_pos.y/_screen.y;
     _shader->setUniform( "start", start );
-    
+
     _shader->use();
     _drawCall.execute();
 }
@@ -189,4 +191,24 @@ void Text::init()
 void Text::destroy()
 {
     delete _shader;
+}
+
+void Text::setPosition( glm::vec2 pos )
+{
+    _pos = pos;
+}
+
+glm::vec2 Text::getPosition() const
+{
+    return _pos;
+}
+
+void Text::setColor( glm::vec4 c )
+{
+    _color = c;
+}
+
+glm::vec4 Text::getColor() const
+{
+    return _color;
 }

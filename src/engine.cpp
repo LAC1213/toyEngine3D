@@ -7,6 +7,8 @@
 #include <terrain.h>
 #include <mesh.h>
 
+#include <unistd.h>
+
 BufferObject *    Engine::QuadBuffer = nullptr;
 DrawCall *        Engine::DrawScreenQuad = nullptr;
 
@@ -27,6 +29,11 @@ void Engine::init()
     DrawScreenQuad->setElements( 6 );
     DrawScreenQuad->addAttribute( VertexAttribute( QuadBuffer, GL_FLOAT, 2 ) );
 
+    char wd[4096];
+    getcwd(wd, sizeof wd);
+    char * resPath = getenv("ENGINE_ROOT");
+    if( resPath ) 
+        chdir( resPath );
     Lighting::init();
     PostEffect::init();
     Billboard::init();
@@ -34,6 +41,7 @@ void Engine::init()
     Text::init();
     Terrain::init();
     MeshObject::init();
+    chdir(wd);
 }
 
 void Engine::destroy()

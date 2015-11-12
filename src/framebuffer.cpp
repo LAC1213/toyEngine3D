@@ -33,7 +33,7 @@ Framebuffer::Framebuffer( int w, int h )
         _depthRBO( 0 ),
         _depthTexture( 0 )
 {
-    glGenFramebuffers( 1, &_fbo );    
+    glGenFramebuffers( 1, &_fbo );
 }
 
 /** Deconstructor, deletes all openGL objects, including the color attachments, associated with the Framebuffer
