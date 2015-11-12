@@ -2,6 +2,13 @@
 
 My Homemade engine that I develop whenever I do something further with opengl.
 
+## Depends
+
+1. [glm](http://glm.g-truc.net/0.9.7/index.html)
+2. [freetype](http://www.freetype.org/)
+3. [SOIL](http://www.lonesock.net/soil.html)
+4. OpenGL (GL GLU GLEW)
+
 ## Use
 
 You have to setup a opengl context yourself. Then you need to `#include <engine.h>` and call `Engine::init()`. Additionally you have to set the width and height of the screen framebuffer by calling `Framebuffer::Screen.resize( width, height )`
@@ -11,7 +18,7 @@ After you are done cleanup with `Engine::destroy()`
 
 Hello Cube example:
 
-```C
+```C++
     #include <engine.h>
 
     ...
