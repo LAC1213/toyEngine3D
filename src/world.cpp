@@ -60,9 +60,9 @@ World::World( GLFWwindow * window, int width, int height )
 
     _cubeData->texture = _groundTex;
     _cube.toggleWireframe();
-    _cube.scale.f = glm::vec3( 0.1, 0.1, 0.1 );
-    _cube.rotation.df.y = 1;
-    _cube.position.f = glm::vec3( 1, -1, 1 );
+    _cube.scale.setConstant( glm::vec3( 0.1, 0.1, 0.1 ) );
+    _cube.rotation.setLinear( glm::vec3( 0, 1, 0 ) );
+    _cube.position.setConstant( glm::vec3( 1, -1, 1 ) );
 
     _cam.addCollider( _terrain );
     _canvas->enableDepthRenderBuffer();
@@ -103,7 +103,7 @@ void World::step( double dt )
                 std::cout << "loose" << std::endl;
             }
 
-            if( glm::length(_enemies[i]->position.f - _cam.getPosition()) < 3 )
+            if( glm::length(_enemies[i]->position.getValue() - _cam.getPosition()) < 3 )
             {
                 _enemies[i]->setColor( glm::vec4(8, 0, 0, 1 ));
             }
@@ -132,12 +132,12 @@ void World::step( double dt )
         _spawnTimer = 1.0/_spawnFrequency;
         static const float speed = 0.3;
         Enemy * e = new Enemy( &_cam, &_sphereData, _terrain );
-        e->position.f = glm::vec3( spawnArea.x + rnd()*spawnArea.z, 0, spawnArea.y + rnd()*spawnArea.w );
-        e->position.df.x = speed*(rnd() - 0.5);
-        e->position.df.z = sqrt( speed*speed - e->position.df.x*e->position.df.x );
+        e->position.setConstant( glm::vec3( spawnArea.x + rnd()*spawnArea.z, 0, spawnArea.y + rnd()*spawnArea.w ) );
+        glm::vec3 v = e->position.getLinear();
+        v = glm::vec3(speed*(rnd() - 0.5), 0, sqrt( speed*speed - v.x*v.x ));
         if( rnd() > 0.5 )
-            e->position.df.z *= -1;
-
+            v.z *= -1;
+        e->position.setLinear( v );
         _enemies.push_back( e );
         _cam.addCollider( e );
         _lighting.addPointLight( &e->pointLight() );
@@ -166,7 +166,7 @@ void World::render()
     _canvas->clear();
     _canvas->copyDepth( *_gBuffer );
     _lighting.render();
-    
+
     for( size_t i = 0 ; i < _enemies.size() ; ++i )
         _enemies[i]->render();
     _bullets.render();

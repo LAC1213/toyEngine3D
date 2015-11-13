@@ -58,16 +58,16 @@ void ParticleSystem::step( double dt )
     {
         if( _particles[i].life > 0 )
         {
-            positions.push_back( _particles[i].position.f.x );
-            positions.push_back( _particles[i].position.f.y );
-            positions.push_back( _particles[i].position.f.z );
-            colors.push_back( _particles[i].color.f.x );
-            colors.push_back( _particles[i].color.f.y );
-            colors.push_back( _particles[i].color.f.z );
-            colors.push_back( _particles[i].color.f.w );
-            uvs.push_back( _particles[i].uv.f.x );
-            uvs.push_back( _particles[i].uv.f.y );
-            sizes.push_back( _particles[i].size.f );
+            positions.push_back( _particles[i].position.getValue().x );
+            positions.push_back( _particles[i].position.getValue().y );
+            positions.push_back( _particles[i].position.getValue().z );
+            colors.push_back( _particles[i].color.getValue().x );
+            colors.push_back( _particles[i].color.getValue().y );
+            colors.push_back( _particles[i].color.getValue().z );
+            colors.push_back( _particles[i].color.getValue().w );
+            uvs.push_back( _particles[i].uv.getValue().x );
+            uvs.push_back( _particles[i].uv.getValue().y );
+            sizes.push_back( _particles[i].size );
             ++elements;
         }
     }
@@ -130,10 +130,10 @@ void SmoothTail::step( double dt )
     _pos.step( dt );
 
     Particle part;
-    part.position = Curve<glm::vec3>( _pos.f + glm::vec3( rnd(), rnd(), rnd() ));
-    part.color = Curve<glm::vec4>( glm::vec4( 0.8, 0.8, 1, 1 ), glm::vec4( 0.05f, 0.05f, 0, -0.2 ) );
-    part.uv = Curve<glm::vec2>( glm::vec2( 0, 0 ) );
-    part.size = Curve<GLfloat> ( 0.1f, 0, -0.2);
+    part.position = QuadraticCurve<glm::vec3>( _pos.getValue() + glm::vec3( rnd(), rnd(), rnd() ));
+    part.color = QuadraticCurve<glm::vec4>( glm::vec4( 0.8, 0.8, 1, 1 ), glm::vec4( 0.05f, 0.05f, 0, -0.2 ) );
+    part.uv = QuadraticCurve<glm::vec2>( glm::vec2( 0, 0 ) );
+    part.size = QuadraticCurve<GLfloat> ( 0.1f, 0, -0.2);
     part.life = 4;
 
     for( size_t i = 0 ; i < _particles.size() ; ++i )
@@ -164,10 +164,10 @@ void LightWell::spawnParticle()
     if( rnd() > 0 )
         vz = -vz;
 
-    part.position = Curve<glm::vec3>( _pos , glm::vec3( vx, 1.4 + rnd(), vz), glm::vec3( 0, -2, 0 ));
-    part.color = Curve<glm::vec4>( glm::vec4( 1, 4, 3, 4 ) );
-    part.uv = Curve<glm::vec2>( glm::vec2( 0, 0 ) );
-    part.size = Curve<GLfloat> ( 0.05f, 0, -0.003);
+    part.position = QuadraticCurve<glm::vec3>( _pos , glm::vec3( vx, 1.4 + rnd(), vz), glm::vec3( 0, -2, 0 ));
+    part.color = QuadraticCurve<glm::vec4>( glm::vec4( 1, 4, 3, 4 ) );
+    part.uv = QuadraticCurve<glm::vec2>( glm::vec2( 0, 0 ) );
+    part.size = QuadraticCurve<GLfloat> ( 0.05f, 0, -0.003);
     part.life = 4;
 
     for( size_t i = 0 ; i < _particles.size() ; ++i )
@@ -203,7 +203,7 @@ void BulletSpawner::step( double dt )
 {
     for( size_t i = 0 ; i < _particles.size() ; ++i )
         for( size_t j = 0 ; j < _enemies->size() ; ++j )
-            if( (*_enemies)[j]->contains(_particles[i].position.f ))
+            if( (*_enemies)[j]->contains(_particles[i].position ))
                 (*_enemies)[j]->onHit();  
     ParticleSystem::step( dt ); 
 }
@@ -214,10 +214,10 @@ void BulletSpawner::shoot()
     glm::vec3 dir = glm::inverse(glm::mat3(_cam->getView())) * glm::vec3( 0, 0, -8 );
     
     Particle bullet;
-    bullet.position = Curve<glm::vec3>( pos, dir );
-    bullet.color = Curve<glm::vec4>( glm::vec4( 0.6, 1, 2, 4 ) );
-    bullet.uv = Curve<glm::vec2>( glm::vec2( 0, 0 ) );
-    bullet.size = Curve<GLfloat>( 0.01f );
+    bullet.position = QuadraticCurve<glm::vec3>( pos, dir );
+    bullet.color = QuadraticCurve<glm::vec4>( glm::vec4( 0.6, 1, 2, 4 ) );
+    bullet.uv = QuadraticCurve<glm::vec2>( glm::vec2( 0, 0 ) );
+    bullet.size = QuadraticCurve<GLfloat>( 0.01f );
     bullet.life = 4;
    
     for( size_t i = 0 ; i < _particles.size() ; ++i )

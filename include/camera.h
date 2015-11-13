@@ -77,8 +77,8 @@ protected:
     std::vector<Collider*> _colliders;
     GLFWwindow * _window;
 
-    Curve<glm::vec3> _position;
-    Curve<glm::vec2> _rotation;
+    QuadraticCurve<glm::vec3> _position;
+    QuadraticCurve<glm::vec2> _rotation;
 };
 
 #endif // CAMERA_H

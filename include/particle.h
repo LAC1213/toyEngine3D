@@ -9,10 +9,10 @@
 class Particle  
 {
 public:
-    Curve<glm::vec3> position;
-    Curve<glm::vec2> uv; //!< for texture animation
-    Curve<glm::vec4> color;
-    Curve<GLfloat> size;
+    QuadraticCurve<glm::vec3> position;
+    QuadraticCurve<glm::vec2> uv; //!< for texture animation
+    QuadraticCurve<glm::vec4> color;
+    QuadraticCurve<GLfloat> size;
     float life;
 
     virtual void step( double dt )
@@ -63,7 +63,7 @@ public:
     virtual void step( double dt );
 
 protected:
-    Curve<glm::vec3> _pos;
+    QuadraticCurve<glm::vec3> _pos;
 };
 
 class LightWell : public ParticleSystem

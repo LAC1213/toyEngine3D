@@ -14,7 +14,7 @@ PerspectiveCamera::PerspectiveCamera( float fov, float aspect, float near, float
         _near( near ),
         _far( far )
 {
-     _proj = glm::perspective( fov, aspect, near, far );
+    _proj = glm::perspective( fov, aspect, near, far );
 }
 
 void PerspectiveCamera::lookAt( glm::vec3 p )
@@ -47,7 +47,8 @@ PlayerCamera::PlayerCamera( GLFWwindow * window, float aspect )
     :   PerspectiveCamera( 45, aspect, 0.01f, 100.f ),
         _window( window )
 {
-    _position.ddf.y = -2;
+    auto old = _position.getQuadratic();
+    _position.setQuadratic( glm::vec3( old.x, -2, old.z ));
 }
 
 void PlayerCamera::addCollider( Collider * collider )
@@ -74,16 +75,16 @@ void PlayerCamera::step( double dt )
 
     for( size_t i = 0 ; i < _colliders.size() ; ++i )
     {
-        glm::vec3 d = _colliders[i]->correct( _position.f - glm::vec3( 0, 0.04, 0 ) );
-        _position.f += d;
+        glm::vec3 d = _colliders[i]->correct( _position.getValue() - glm::vec3( 0, 0.04, 0 ) );
+        _position.setConstant(d + _position.getValue());
         if( glm::dot( d, d ) > 0 )
         {
             _canJump = true;
-            _position.df = glm::vec3(0, 0, 0);
+            _position.setLinear(glm::vec3(0, 0, 0));
         }
     }
 
-    _eye = _position.f;
+    _eye = _position;
     //_angleX = _rotation.f.x;
     //_angleY = _rotation.f.y;
 
@@ -94,38 +95,37 @@ void PlayerCamera::jump()
 {
 //    if( !_canJump )
 //        return;
-    _position.df.y = 1;
+    auto old = _position.getLinear();
+    _position.setLinear( glm::vec3( old.x, 1, old.z) );
     _canJump = false;
 }
 
 void PlayerCamera::pollInput()
 {
-    _position.df.x = 0;
-    _position.df.z = 0;
+    glm::vec2 v;
     constexpr float ds = 0.8;
-        if(glfwGetKey(_window, GLFW_KEY_D) == GLFW_PRESS)
-        {
-            _position.df.x += cos(_angleY);
-            _position.df.z += sin(_angleY);
-        }
-        if(glfwGetKey(_window, GLFW_KEY_A) == GLFW_PRESS)
-        {
-            _position.df.x += -cos(_angleY);
-            _position.df.z += -sin(_angleY);
-        }
-        if(glfwGetKey(_window, GLFW_KEY_S) == GLFW_PRESS)
-        {
-            _position.df.x += -sin(_angleY);
-            _position.df.z += cos(_angleY);
-        }
-        if(glfwGetKey(_window, GLFW_KEY_W) == GLFW_PRESS)
-        {
-            _position.df.x += sin(_angleY);
-            _position.df.z += -cos(_angleY);
-        }
-    glm::vec2 v( _position.df.x, _position.df.z );
-    if( _position.df.x != 0 || _position.df.z != 0 )
+    if(glfwGetKey(_window, GLFW_KEY_D) == GLFW_PRESS)
+    {
+        v.x += cos(_angleY);
+        v.y += sin(_angleY);
+    }
+    if(glfwGetKey(_window, GLFW_KEY_A) == GLFW_PRESS)
+    {
+        v.x += -cos(_angleY);
+        v.y += -sin(_angleY);
+    }
+    if(glfwGetKey(_window, GLFW_KEY_S) == GLFW_PRESS)
+    {
+        v.x += -sin(_angleY);
+        v.y += cos(_angleY);
+    }
+    if(glfwGetKey(_window, GLFW_KEY_W) == GLFW_PRESS)
+    {
+        v.x += sin(_angleY);
+        v.y += -cos(_angleY);
+    }
+    if( v.x != 0 || v.y != 0 )
         v = ds*glm::normalize(v);
-    _position.df.x = v.x;
-    _position.df.z = v.y;
+    float y = _position.getLinear().y;
+    _position.setLinear( glm::vec3(v.x, y, v.y) );
 }

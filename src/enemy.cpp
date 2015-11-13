@@ -6,26 +6,30 @@ Enemy::Enemy( const Camera * cam, MeshObject * data, Collider * collider )
         _collider( collider ),
         _alive( true )
 {
-    position.ddf = glm::vec3( 0, -1, 0 );
-    scale.f = glm::vec3( _radius, _radius, _radius );
+    position.setQuadratic( glm::vec3( 0, -1, 0 ) );
+    scale.setConstant( glm::vec3( _radius, _radius, _radius ) );
 
     _light.attenuation = glm::vec3( 8, 4, 4 );
 }
 
 void Enemy::step( double dt )
 {
-    rotation.df.x = -sqrt(position.df.x*position.df.x + position.df.z*position.df.z)/scale.f.y;
-    if( position.df.x*position.df.x + position.df.z*position.df.z  > 0 )
-        rotation.f.y = atan2( position.df.x, position.df.z );
-    
     Mesh::step( dt );
     
-    position.f += _collider->correct( position.f - glm::vec3( 0, scale.f.y, 0 ) );
+    glm::vec3 p = position.getValue();
+    glm::vec3 v = position.getLinear();
+    glm::vec3 rv = rotation.getLinear();
+    glm::vec3 r = rotation.getValue();
+    rotation.setLinear( glm::vec3(-sqrt(v.x*v.x + v.z*v.z)/scale.getValue().y, rv.y, rv.z));
+    if( v.x*v.x + v.z*v.z  > 0 )
+        rotation.setConstant( glm::vec3(r.x, atan2( v.x, v.z ), r.z) );
+    
+    position.setConstant(p + _collider->correct( position.getValue() - glm::vec3( 0, scale.getValue().y, 0 )) );
 
-    if( scale.f.x < 0.01 )
+    if( scale.getValue().x < 0.01 )
        _alive = false; 
 
-    _center = position.f;
+    _center = position;
     _light.position = _center;
     _light.diffuse = glm::vec3(_diffuseColor);
     _light.specular = _light.diffuse;
@@ -39,7 +43,7 @@ void Enemy::render()
 
 void Enemy::onHit()
 {
-    scale.df = glm::vec3( -0.01, -0.01, -0.01 );
-    position.df = glm::vec3(0);
-    position.ddf = glm::vec3( 0, -1, 0 );
+    scale.setLinear( glm::vec3( -0.01, -0.01, -0.01 ) );
+    position.setLinear( glm::vec3(0) );
+    position.setQuadratic( glm::vec3( 0, -1, 0 ) );
 }
