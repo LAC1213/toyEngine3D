@@ -1,4 +1,4 @@
-#include <body.h>
+#include <internal/body.h>
 
 Enemy::Enemy( const Camera * cam, MeshObject * data, Collider * collider )
     :   Mesh( cam, data ),

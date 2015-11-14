@@ -2,6 +2,7 @@
 #include <iostream>
 
 Shader * MeshObject::SHADER = 0;
+Shader * IcoSphere::SHADER = 0;
 
 MeshObject::MeshObject( const MeshData& data, const Texture * tex )
     :   buffers( 4 )
@@ -218,7 +219,7 @@ IcoSphere::IcoSphere()
 
     texture = 0;
     buffers = std::vector<BufferObject>(2);
-    shader = new Shader( "./res/shader/icosphere/", Shader::LOAD_FULL );
+    shader = SHADER;
 
     buffers[0].loadData( icoVerts, sizeof icoVerts );
     buffers[1].loadData( icoIndices, sizeof icoIndices );
@@ -233,6 +234,16 @@ void IcoSphere::render()
 {
     glPatchParameteri( GL_PATCH_VERTICES, 3 );
     MeshObject::render();
+}
+
+void IcoSphere::init()
+{
+    SHADER = new Shader( "./res/shader/icosphere/", Shader::LOAD_FULL );
+}
+
+void IcoSphere::destroy()
+{
+    delete SHADER;
 }
 
 void MeshObject::render()

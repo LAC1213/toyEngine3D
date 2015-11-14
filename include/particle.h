@@ -4,7 +4,7 @@
 #include <mesh.h>
 #include <actor.h>
 #include <vector>
-#include <body.h>
+#include <internal/body.h>
 
 class Particle  
 {

@@ -45,17 +45,20 @@ public:
 
     void setConstant( T c ) 
     {
-        this->_value = c;
+        _constant = c;
+        reset();
     }
     
     void setLinear( T l )
     {
         _linear = l;
+        reset();
     }
     
     void setQuadratic( T q )
     {
         _quadratic = q;
+        reset();
     }
     
     T getConstant() 
@@ -77,6 +80,12 @@ private:
     T _constant;
     T _linear;
     T _quadratic;
+    
+    void reset()
+    {
+        this->_value = _constant;
+        this->_t = 0;
+    }
 };
 
 template<class T>

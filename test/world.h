@@ -3,7 +3,7 @@
 
 #include <camera.h>
 #include <mesh.h>
-#include <body.h>
+#include <internal/body.h>
 #include <terrain.h>
 #include <posteffect.h>
 #include <text.h>

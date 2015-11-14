@@ -9,11 +9,18 @@
 
 #include <unistd.h>
 
-BufferObject *    Engine::QuadBuffer = nullptr;
-DrawCall *        Engine::DrawScreenQuad = nullptr;
-
-void Engine::init()
+namespace Engine
 {
+
+BufferObject * QuadBuffer = nullptr;
+DrawCall * DrawScreenQuad = nullptr;
+
+static bool initialized = false;
+
+void init()
+{
+    if( initialized ) return;
+    
     QuadBuffer = new BufferObject();
     GLfloat quadVerts[] = {
         -1, -1,
@@ -34,6 +41,7 @@ void Engine::init()
     char * resPath = getenv("ENGINE_ROOT");
     if( resPath ) 
         chdir( resPath );
+    
     Lighting::init();
     PostEffect::init();
     Billboard::init();
@@ -41,11 +49,15 @@ void Engine::init()
     Text::init();
     Terrain::init();
     MeshObject::init();
+    IcoSphere::init();
     chdir(wd);
+    initialized = true;
 }
 
-void Engine::destroy()
+void destroy()
 {
+    if( !initialized ) return;
+    
     Lighting::destroy();
     PostEffect::destroy();
     Billboard::destroy();
@@ -53,7 +65,11 @@ void Engine::destroy()
     Text::destroy();
     Terrain::destroy();
     MeshObject::destroy();
+    IcoSphere::destroy();
 
     delete QuadBuffer;
     delete DrawScreenQuad;
+    initialized = false;
+}
+
 }

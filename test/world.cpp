@@ -1,6 +1,6 @@
 #include <world.h>
 #include <SOIL/SOIL.h>
-#include <util.h>
+#include <internal/util.h>
 #include <lighting.h>
 
 #include <sstream>

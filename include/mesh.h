@@ -55,6 +55,12 @@ public:
     IcoSphere();
 
     virtual void render();
+
+    static void init();
+    static void destroy();
+    
+protected:
+    static Shader * SHADER;
 };
 
 class Mesh : public Renderable, public Actor

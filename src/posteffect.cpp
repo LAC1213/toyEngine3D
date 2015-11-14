@@ -67,7 +67,7 @@ void Bloom::render()
     _filter.setType( BLOOM_FILTER );
     _filter.render();
 
-    for( int i = 0 ; i < _blurs; ++i )
+    for( unsigned int i = 0 ; i < _blurs; ++i )
     {
         _second->clearColor();
         _gaussv.render();

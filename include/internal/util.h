@@ -1,5 +1,5 @@
-#ifndef UTIL_H
-#define UTIL_H
+#ifndef INTERNAL_UTIL_H
+#define INTERNAL_UTIL_H
 
 #include <stdarg.h>
 
@@ -8,4 +8,4 @@
 
 void __errorExit( const char * file, const char * func, unsigned int line, const char * format, ... );
 
-#endif //UTIL_H
+#endif //INTERNAL_UTIL_H

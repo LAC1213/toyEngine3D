@@ -15,14 +15,15 @@
 #include <camera.h>
 #include <billboard.h>
 
-class Engine
+namespace Engine
 {
-public:
-    static void init();
-    static void destroy();
 
-    static BufferObject * QuadBuffer;
-    static DrawCall   *   DrawScreenQuad;
-};
+void init();
+void destroy();
+
+extern BufferObject * QuadBuffer;
+extern DrawCall *     DrawScreenQuad;
+
+}
 
 #endif //ENGINE_H

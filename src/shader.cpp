@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <error.h>
 
-#include <util.h>
+#include <internal/util.h>
 #include <string.h>
 #include <glm/gtc/type_ptr.hpp>
 
