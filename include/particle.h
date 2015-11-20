@@ -81,13 +81,14 @@ protected:
 class BulletSpawner : public ParticleSystem
 {
 public:
-    BulletSpawner( PerspectiveCamera * cam, std::vector<Enemy*>* enemies );
+    BulletSpawner( PlayerCamera * cam, std::vector<Enemy*>* enemies );
 
     virtual void step( double dt );
     virtual void shoot();
 
 private:
     std::vector<Enemy*>* _enemies;
+    PlayerCamera * _playerCam;
 };
 
 #endif //PARTICLE_H

@@ -67,17 +67,26 @@ public:
 
     void addCollider( Collider * collider );
     void removeCollider( Collider * collider );
+    
+    void setPivot( const glm::vec3& p ) { _pivot = p; }
+    const glm::vec3& getPivot() const { return _pivot; }
+    glm::vec3 getPivotPoint() const { return _pivotPoint.getValue(); }
+    
+    void onMouseMove( double dx, double dy );
 
     virtual void step( double dt );
     void jump();
+    
 protected: 
     void pollInput();
     bool    _canJump;
 
+    glm::vec3 _pivot;
+    QuadraticCurve<glm::vec3> _pivotPoint;
+    
     std::vector<Collider*> _colliders;
     GLFWwindow * _window;
 
-    QuadraticCurve<glm::vec3> _position;
     QuadraticCurve<glm::vec2> _rotation;
 };
 

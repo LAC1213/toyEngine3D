@@ -126,7 +126,7 @@ bool Shader::setUniform( const std::string& name, const glm::mat4& val )
  *  geometry shader: geom.glsl
  *  tesseval shader: eval.glsl
  *  tesscontrol shader: cont.glsl
- *  
+ *
  *  These flags are used to specify the shader type:
  *  LOAD_BASIC : load fragment + vertex shader (always the case)
  *  LOAD_GEOM : load geometry shader

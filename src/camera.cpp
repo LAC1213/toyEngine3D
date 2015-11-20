@@ -24,10 +24,8 @@ void PerspectiveCamera::lookAt( glm::vec3 p )
 
 void PerspectiveCamera::setUniforms( Shader * shader ) const
 {
-    GLint loc = shader->getUniformLocation( PROJ_UNIFORM_STR );
-    glProgramUniformMatrix4fv( *shader, loc, 1, GL_FALSE, glm::value_ptr(_proj) );
-    loc = shader->getUniformLocation( VIEW_UNIFORM_STR );
-    glProgramUniformMatrix4fv( *shader, loc, 1, GL_FALSE, glm::value_ptr(_view) );
+    shader->setUniform( PROJ_UNIFORM_STR, _proj );
+    shader->setUniform( VIEW_UNIFORM_STR, _view );
 }
 
 void PerspectiveCamera::onResize( int width, int height )
@@ -43,12 +41,15 @@ void PerspectiveCamera::updateView()
     _view = rx * ry * t;
 }
 
+//////////////////////////////////////////////////////////////////
+
 PlayerCamera::PlayerCamera( GLFWwindow * window, float aspect )
     :   PerspectiveCamera( 45, aspect, 0.01f, 100.f ),
+        _pivot( 0, -0.1, 0.3 ),
         _window( window )
 {
-    auto old = _position.getQuadratic();
-    _position.setQuadratic( glm::vec3( old.x, -2, old.z ));
+    auto old = _pivotPoint.getQuadratic();
+    _pivotPoint.setQuadratic( glm::vec3( old.x, -2, old.z ));
 }
 
 void PlayerCamera::addCollider( Collider * collider )
@@ -70,34 +71,48 @@ void PlayerCamera::step( double dt )
 {
     pollInput();
 
-    _position.step( dt );
+    _pivotPoint.step( dt );
     _rotation.step( dt );
 
     for( size_t i = 0 ; i < _colliders.size() ; ++i )
     {
-        glm::vec3 d = _colliders[i]->correct( _position.getValue() - glm::vec3( 0, 0.04, 0 ) );
-        _position.setConstant(d + _position.getValue());
+        glm::vec3 d = _colliders[i]->correct( _pivotPoint.getValue() - glm::vec3( 0, 0.01, 0) );
+        _pivotPoint.setConstant(d + _pivotPoint.getValue());
         if( glm::dot( d, d ) > 0 )
         {
             _canJump = true;
-            _position.setLinear(glm::vec3(0, 0, 0));
+            _pivotPoint.setLinear(glm::vec3(0, 0, 0));
         }
     }
-
-    _eye = _position;
-    //_angleX = _rotation.f.x;
-    //_angleY = _rotation.f.y;
-
-    updateView();
+    
+    _eye = _pivotPoint.getValue() - _pivot;
+    lookAt( _pivotPoint );
 }
 
 void PlayerCamera::jump()
 {
-//    if( !_canJump )
-//        return;
-    auto old = _position.getLinear();
-    _position.setLinear( glm::vec3( old.x, 1, old.z) );
+    if( !_canJump )
+        return;
+    auto old = _pivotPoint.getLinear();
+    _pivotPoint.setLinear( glm::vec3( old.x, 1, old.z) );
     _canJump = false;
+}
+
+void PlayerCamera::onMouseMove( double dx, double dy )
+{
+    constexpr double dphi = 0.001;
+    
+    _angleY += dphi*dx;
+    _angleX -= dphi*dy;
+    
+    double r = glm::length( _pivot );
+    _pivot.y = sin( _angleX );
+    _pivot.x = cos( _angleY );
+    _pivot.z = sin( _angleY );
+    _pivot *= r/glm::length( _pivot );
+    
+    _eye = _pivotPoint.getValue() - _pivot;
+    lookAt( _pivotPoint.getValue() );
 }
 
 void PlayerCamera::pollInput()
@@ -106,26 +121,26 @@ void PlayerCamera::pollInput()
     constexpr float ds = 0.8;
     if(glfwGetKey(_window, GLFW_KEY_D) == GLFW_PRESS)
     {
-        v.x += cos(_angleY);
-        v.y += sin(_angleY);
+        v.x = 1;
     }
     if(glfwGetKey(_window, GLFW_KEY_A) == GLFW_PRESS)
     {
-        v.x += -cos(_angleY);
-        v.y += -sin(_angleY);
+        v.x = -1;
     }
     if(glfwGetKey(_window, GLFW_KEY_S) == GLFW_PRESS)
     {
-        v.x += -sin(_angleY);
-        v.y += cos(_angleY);
+        v.y = 1;
     }
     if(glfwGetKey(_window, GLFW_KEY_W) == GLFW_PRESS)
     {
-        v.x += sin(_angleY);
-        v.y += -cos(_angleY);
+        v.y = -1;
     }
-    if( v.x != 0 || v.y != 0 )
+    if( glm::dot(v, v) > 0 )
         v = ds*glm::normalize(v);
-    float y = _position.getLinear().y;
-    _position.setLinear( glm::vec3(v.x, y, v.y) );
+    
+    glm::mat4 m = glm::inverse( getView() );
+    glm::vec3 v1 = glm::mat3(m) * glm::vec3(v.x, 0, v.y);
+  
+    float y = _pivotPoint.getLinear().y;
+    _pivotPoint.setLinear( glm::vec3(v1.x, y, v1.z) );
 }

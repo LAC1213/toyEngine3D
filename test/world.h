@@ -42,6 +42,7 @@ public:
     PlayerCamera    _cam;
     MeshObject *    _cubeData;
     Mesh            _cube;
+    Mesh            _player;
     Lighting        _lighting;
     BulletSpawner   _bullets;
     LightWell       _lightwell;

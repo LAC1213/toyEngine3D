@@ -8,6 +8,7 @@
 #include <mesh.h>
 
 #include <unistd.h>
+#include <internal/util.h>
 
 namespace Engine
 {
@@ -20,7 +21,7 @@ static bool initialized = false;
 void init()
 {
     if( initialized ) return;
-    
+
     QuadBuffer = new BufferObject();
     GLfloat quadVerts[] = {
         -1, -1,
@@ -36,12 +37,19 @@ void init()
     DrawScreenQuad->setElements( 6 );
     DrawScreenQuad->addAttribute( VertexAttribute( QuadBuffer, GL_FLOAT, 2 ) );
 
-    char wd[4096];
-    getcwd(wd, sizeof wd);
     char * resPath = getenv("ENGINE_ROOT");
-    if( resPath ) 
+    if( resPath )
+    {
         chdir( resPath );
-    
+        info( "engine root " + std::string( resPath ) );
+    }
+    else
+    {
+        char wd[4096];
+        getcwd(wd, sizeof wd);
+        info( "engine root " + std::string( wd ) );
+    }
+
     Lighting::init();
     PostEffect::init();
     Billboard::init();
@@ -49,15 +57,13 @@ void init()
     Text::init();
     Terrain::init();
     MeshObject::init();
-    IcoSphere::init();
-    chdir(wd);
     initialized = true;
 }
 
 void destroy()
 {
     if( !initialized ) return;
-    
+
     Lighting::destroy();
     PostEffect::destroy();
     Billboard::destroy();
@@ -65,7 +71,6 @@ void destroy()
     Text::destroy();
     Terrain::destroy();
     MeshObject::destroy();
-    IcoSphere::destroy();
 
     delete QuadBuffer;
     delete DrawScreenQuad;

@@ -193,9 +193,10 @@ void LightWell::step( double dt )
     ParticleSystem::step( dt );
 }
 
-BulletSpawner::BulletSpawner( PerspectiveCamera * cam, std::vector<Enemy*>* enemies ) 
+BulletSpawner::BulletSpawner( PlayerCamera * cam, std::vector<Enemy*>* enemies ) 
     :   ParticleSystem( cam, 0 ),
-        _enemies( enemies )
+        _enemies( enemies ),
+        _playerCam( cam )
 {
 }
 
@@ -210,7 +211,7 @@ void BulletSpawner::step( double dt )
 
 void BulletSpawner::shoot()
 {
-    glm::vec3 pos = glm::vec3(glm::inverse(_cam->getView()) * glm::vec4( 0, 0.002, 0, 1 ));
+    glm::vec3 pos = _playerCam->getPosition(); 
     glm::vec3 dir = glm::inverse(glm::mat3(_cam->getView())) * glm::vec3( 0, 0, -8 );
     
     Particle bullet;

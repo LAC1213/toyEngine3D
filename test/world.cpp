@@ -22,6 +22,7 @@ World::World( GLFWwindow * window, int width, int height )
         _cam( _window, (float)_width / _height ),
         _cubeData( MeshObject::genCube() ),
         _cube( &_cam, _cubeData ),
+        _player( &_cam, &_sphereData ),
         _lighting( &_cam, _gBuffer ),
         _bullets( &_cam, &_enemies ),
         _lightwell( &_cam, glm::vec3( 0, 0, 0 ) ),
@@ -63,6 +64,9 @@ World::World( GLFWwindow * window, int width, int height )
     _cube.scale.setConstant( glm::vec3( 0.1, 0.1, 0.1 ) );
     _cube.rotation.setLinear( glm::vec3( 0, 1, 0 ) );
     _cube.position.setConstant( glm::vec3( 1, -1, 1 ) );
+    
+    _player.toggleWireframe();
+    _player.scale.setConstant( glm::vec3( 0.01, 0.01, 0.01 ));
 
     _cam.addCollider( _terrain );
     _canvas->enableDepthRenderBuffer();
@@ -87,17 +91,19 @@ void World::step( double dt )
 
     _fps = 1.0/dt;
 
+    _cam.step( dt );
+    _player.position.setConstant( _cam.getPivotPoint() );
+    _player.step(1);
     _cube.step( dt );
     _bullets.step( dt );
     _lightwell.step( dt );
-    _cam.step( dt );
 
     for( size_t i = 0 ; i < _enemies.size() ; ++i )
     {
         if( _enemies[i]->isAlive() )
         {
             _enemies[i]->step( dt );
-            if( _enemies[i]->contains( _cam.getPosition() ) )
+            if( _enemies[i]->contains( _cam.getPivotPoint() ) )
             {
                 _score = 0;
                 std::cout << "loose" << std::endl;
@@ -161,6 +167,7 @@ void World::render()
     _gBuffer->clear();
     _terrain->render();
     _cube.render();
+    _player.render();
     glEnable( GL_BLEND );
 
     _canvas->clear();
@@ -207,9 +214,7 @@ void World::onKeyAction( int key, int scancode, int action, int mods )
 
 void World::onMouseMove( double x, double y )
 {
-    const double dphi = 0.001;
-    _cam.turnX( dphi*y );
-    _cam.turnY( dphi*x );
+    _cam.onMouseMove( x, y );
     glfwSetCursorPos(_window, 0, 0);
 }
 

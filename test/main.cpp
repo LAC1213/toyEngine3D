@@ -130,7 +130,7 @@ int main(int argc, char ** argv)
         world.step( dt );
 
         world.render();
-        
+
         glfwSwapBuffers( window );
         glfwPollEvents();
     }
