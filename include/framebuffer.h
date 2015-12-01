@@ -36,7 +36,10 @@ public:
 
     const Texture * getDepthTexture() const;
     GLuint getFBO() const;
-    operator GLuint() { return _fbo; }
+    operator GLuint()
+    {
+        return _fbo;
+    }
     std::vector<Texture*>& getAttachments();
 
     int getWidth() const;

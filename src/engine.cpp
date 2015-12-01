@@ -9,6 +9,7 @@
 
 #include <unistd.h>
 #include <internal/util.h>
+#include <internal/config.h>
 
 namespace Engine
 {
@@ -23,7 +24,8 @@ void init()
     if( initialized ) return;
 
     QuadBuffer = new BufferObject();
-    GLfloat quadVerts[] = {
+    GLfloat quadVerts[] =
+    {
         -1, -1,
         1, -1,
         1, 1,
@@ -37,7 +39,7 @@ void init()
     DrawScreenQuad->setElements( 6 );
     DrawScreenQuad->addAttribute( VertexAttribute( QuadBuffer, GL_FLOAT, 2 ) );
 
-    char * resPath = getenv("ENGINE_ROOT");
+    char * resPath = getenv( "ENGINE_ROOT" );
     if( resPath )
     {
         chdir( resPath );
@@ -46,16 +48,26 @@ void init()
     else
     {
         char wd[4096];
-        getcwd(wd, sizeof wd);
+        getcwd( wd, sizeof wd );
         info( "engine root " + std::string( wd ) );
     }
 
-    Lighting::init();
-    PostEffect::init();
-    Billboard::init();
-    ParticleSystem::init();
-    Text::init();
-    Terrain::init();
+    Config conf;
+    conf.loadFile( "engine.cfg" );
+    conf.setGroup( "Modules" );
+
+    if( conf.getBool("Lighting") )
+        Lighting::init();
+    if( conf.getBool("PostEffect") )
+        PostEffect::init();
+    if( conf.getBool("Billboard") )
+        Billboard::init();
+    if( conf.getBool("Particles") )
+        ParticleSystem::init();
+    if( conf.getBool("Text") )
+        Text::init();
+    if( conf.getBool("Terrain") )
+        Terrain::init();
     MeshObject::init();
     initialized = true;
 }

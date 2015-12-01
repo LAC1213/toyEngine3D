@@ -5,7 +5,7 @@
 Shader * Text::_shader = 0;
 
 Text::Text( Font * font, std::string str, glm::vec2 screen )
-    : _color(1, 1, 1, 1), _font( font ), _screen( screen )
+    : _color( 1, 1, 1, 1 ), _font( font ), _screen( screen )
 {
     size_t n = str.length();
     GLuint _elements = 6*n;
@@ -14,7 +14,7 @@ Text::Text( Font * font, std::string str, glm::vec2 screen )
     float * uvs = new float[8*n];
     unsigned short * indices = new unsigned short[6*n];
 
-    memset(indices, 0, 6*n*sizeof(unsigned short));
+    memset( indices, 0, 6*n*sizeof( unsigned short ) );
 
     float x = -1;
     float y = 1 - 2*_font->getSize()/_screen.y;
@@ -36,7 +36,7 @@ Text::Text( Font * font, std::string str, glm::vec2 screen )
         y += info[idx].ay * sy;
 
         /* Skip glyphs that have no pixels */
-        if(!w || !h)
+        if( !w || !h )
             continue;
 
         indices[6*i] = 4*i;
@@ -69,9 +69,9 @@ Text::Text( Font * font, std::string str, glm::vec2 screen )
 
     _buffers[2].setTarget( GL_ELEMENT_ARRAY_BUFFER );
 
-    _buffers[0].loadData( vertices, 8*n*sizeof(float) );
-    _buffers[1].loadData( uvs, 8*n*sizeof(float) );
-    _buffers[2].loadData( indices, 6*n*sizeof(unsigned short) );
+    _buffers[0].loadData( vertices, 8*n*sizeof( float ) );
+    _buffers[1].loadData( uvs, 8*n*sizeof( float ) );
+    _buffers[2].loadData( indices, 6*n*sizeof( unsigned short ) );
 
     _drawCall.setElements( _elements );
     _drawCall.setIndexBuffer( &_buffers[2] );
@@ -111,8 +111,8 @@ void Text::render()
 
 void Text::init()
 {
-    if(FT_Init_FreeType(&Font::ft))
-        errorExit("Couldn't initialize freetype");
+    if( FT_Init_FreeType( &Font::ft ) )
+        errorExit( "Couldn't initialize freetype" );
 
     _shader = new Shader( "./res/shader/text/", Shader::LOAD_BASIC );
 }

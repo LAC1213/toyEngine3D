@@ -24,7 +24,7 @@ class DrawCall
 public:
     DrawCall( GLenum mode = GL_TRIANGLES );
     ~DrawCall();
-    
+
     void execute() const;
 
     void addAttribute( const VertexAttribute& attrib );
@@ -35,8 +35,14 @@ public:
     void setMode( GLenum mode );
     void setInstances( GLuint instances );
 
-    GLuint getVAO() const { return _vao; }
-    void operator()() { execute(); }
+    GLuint getVAO() const
+    {
+        return _vao;
+    }
+    void operator()()
+    {
+        execute();
+    }
 
 protected:
     GLenum  _mode;

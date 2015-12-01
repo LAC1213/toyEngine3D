@@ -16,11 +16,16 @@ public:
 
     virtual void onHit();
 
-    PointLight& pointLight() { return _light; }
+    PointLight& pointLight()
+    {
+        return _light;
+    }
 
-    bool isAlive() const { return _alive; }
+    bool isAlive() const
+    {
+        return _alive;
+    }
 
-    void setColor( glm::vec4 color ) { _diffuseColor = color; }
 protected:
     Collider *  _collider;
     PointLight  _light;

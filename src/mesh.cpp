@@ -6,10 +6,10 @@ Shader * MeshObject::SHADER = 0;
 MeshObject::MeshObject( const MeshData& data, const Texture * tex )
     :   buffers( 4 )
 {
-    buffers[0].loadData( data.verts, 3*data.vertCount*sizeof(GLfloat) );
-    buffers[1].loadData( data.normals, 3*data.vertCount*sizeof(GLfloat) );
-    buffers[2].loadData( data.uvs, 2*data.vertCount*sizeof(GLfloat) );
-    buffers[3].loadData( data.indices, data.elements*sizeof(unsigned short) );
+    buffers[0].loadData( data.verts, 3*data.vertCount*sizeof( GLfloat ) );
+    buffers[1].loadData( data.normals, 3*data.vertCount*sizeof( GLfloat ) );
+    buffers[2].loadData( data.uvs, 2*data.vertCount*sizeof( GLfloat ) );
+    buffers[3].loadData( data.indices, data.elements*sizeof( unsigned short ) );
     buffers[3].setTarget( GL_ELEMENT_ARRAY_BUFFER );
     drawCall.setIndexBuffer( &buffers[3] );
 
@@ -27,7 +27,8 @@ MeshObject::~MeshObject()
 
 MeshObject * MeshObject::genCube()
 {
-    GLfloat verts[] {
+    GLfloat verts[]
+    {
         -1.0,-1.0,-1.0, // triangle 1 : begin
         -1.0,-1.0, 1.0,
         -1.0, 1.0, 1.0, // triangle 1 : end
@@ -66,7 +67,8 @@ MeshObject * MeshObject::genCube()
         1.0,-1.0, 1.0
     };
 
-    GLfloat normals[] {
+    GLfloat normals[]
+    {
         -1.0, 0, 0, // triangle 1 : begin
         -1.0, 0, 0,
         -1.0, 0, 0, // triangle 1 : end
@@ -105,47 +107,48 @@ MeshObject * MeshObject::genCube()
         0,-0, 1.0
     };
 
-    GLfloat uvs[] = {
+    GLfloat uvs[] =
+    {
         0, 0,
         1, 0,
-        0, 1, 
+        0, 1,
         0, 0,
         1, 0,
-        0, 1, 
+        0, 1,
         0, 0,
         1, 0,
-        0, 1, 
+        0, 1,
         0, 0,
         1, 0,
-        0, 1, 
+        0, 1,
         0, 0,
         1, 0,
-        0, 1, 
+        0, 1,
         0, 0,
         1, 0,
-        0, 1, 
+        0, 1,
         0, 0,
         1, 0,
-        0, 1, 
+        0, 1,
         0, 0,
         1, 0,
-        0, 1, 
+        0, 1,
         0, 0,
         1, 0,
-        0, 1, 
+        0, 1,
         0, 0,
         1, 0,
-        0, 1, 
+        0, 1,
         0, 0,
         1, 0,
-        0, 1, 
+        0, 1,
         0, 0,
         1, 0,
-        0, 1 
+        0, 1
     };
 
     MeshObject * cube = new MeshObject();
-    cube->buffers = std::vector<BufferObject>(2);
+    cube->buffers = std::vector<BufferObject>( 2 );
     cube->buffers[0].loadData( verts, sizeof verts );
     cube->buffers[1].loadData( normals, sizeof normals );
     cube->buffers[2].loadData( uvs, sizeof uvs );
@@ -161,7 +164,7 @@ MeshObject * MeshObject::genCube()
 
 void MeshObject::init()
 {
-    SHADER = new Shader( "./res/shader/mesh/", Shader::LOAD_GEOM );  
+    SHADER = new Shader( "./res/shader/mesh/", Shader::LOAD_GEOM );
 }
 
 void MeshObject::destroy()
@@ -171,9 +174,10 @@ void MeshObject::destroy()
 
 IcoSphere::IcoSphere()
 {
-    float g = (1.0 + sqrt(5.0))/2;
+    constexpr float g = ( 1.0 + sqrt( 5.0 ) )/2;
 
-    float icoVerts[12*3] = {
+    float icoVerts[12*3] =
+    {
         -1, g,  0,
         1,  g,  0,
         -1, -g, 0,
@@ -190,7 +194,8 @@ IcoSphere::IcoSphere()
         -g, 0, 1
     };
 
-    unsigned short icoIndices[20*3] = {
+    unsigned short icoIndices[20*3] =
+    {
         0, 11, 5,
         0, 5, 1,
         0, 1, 7,
@@ -217,7 +222,7 @@ IcoSphere::IcoSphere()
     };
 
     texture = 0;
-    buffers = std::vector<BufferObject>(2);
+    buffers = std::vector<BufferObject>( 2 );
     shader = new Shader( "./res/shader/icosphere/", Shader::LOAD_FULL );
 
     buffers[0].loadData( icoVerts, sizeof icoVerts );
@@ -259,7 +264,7 @@ Mesh::Mesh( const Camera * cam, MeshObject * data )
         _meshObject( data ),
         _wireframe( true ),
         _diffuseColor( 1, 0.5, 0.2, 1 ),
-        _model(1.0)
+        _model( 1.0 )
 {
 }
 

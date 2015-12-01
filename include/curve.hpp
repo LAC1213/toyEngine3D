@@ -16,12 +16,12 @@ public:
     {
         return _value;
     }
-    
+
     operator T()
     {
         return _value;
     }
-    
+
 protected:
     float _t;
     T _value;
@@ -32,10 +32,11 @@ class QuadraticCurve : public Curve<T>
 {
 public:
     QuadraticCurve() {}
-    QuadraticCurve( T c, T l = T(), T q = T() ) : _constant(c), _linear(l), _quadratic(q) {
+    QuadraticCurve( T c, T l = T(), T q = T() ) : _constant( c ), _linear( l ), _quadratic( q )
+    {
         this->_value = _constant;
     }
-    
+
     virtual void step( float dt )
     {
         Curve<T>::step( dt );
@@ -43,44 +44,44 @@ public:
         this->_value += _linear*dt;
     }
 
-    void setConstant( T c ) 
+    void setConstant( T c )
     {
         _constant = c;
         reset();
     }
-    
+
     void setLinear( T l )
     {
         _linear = l;
         reset();
     }
-    
+
     void setQuadratic( T q )
     {
         _quadratic = q;
         reset();
     }
-    
-    T getConstant() 
+
+    T getConstant()
     {
         return _constant;
     }
-    
+
     T getLinear()
     {
         return _linear;
     }
-    
+
     T getQuadratic()
     {
         return _quadratic;
     }
-    
+
 private:
     T _constant;
     T _linear;
     T _quadratic;
-    
+
     void reset()
     {
         this->_value = _constant;
@@ -95,7 +96,7 @@ public:
     virtual void step( float dt )
     {
         Curve<T>::step( dt );
-        this->_value = 1/(1 + exp(-this->_t));
+        this->_value = 1/( 1 + exp( -this->_t ) );
     }
 };
 
@@ -144,7 +145,7 @@ public:
 private:
     Curve<T> * a;
     Curve<T> * b;
-    
+
 };
 
 #endif // CURVE_H

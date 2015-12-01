@@ -15,16 +15,26 @@ public:
     glm::vec3 attenuation;
 };
 
-class Lighting : public Renderable 
+class Lighting : public Renderable
 {
 public:
-    Lighting( PerspectiveCamera * cam, Framebuffer * gBuffer );
+    Lighting ( PerspectiveCamera * cam, Framebuffer * gBuffer );
     ~Lighting();
 
     virtual void render();
 
-    void addPointLight( PointLight * light );
-    void removePointLight( PointLight * light );
+    void addPointLight ( PointLight * light );
+    void removePointLight ( PointLight * light );
+
+    void setAmbient ( const glm::vec3& col );
+    void setSunDir ( const glm::vec3& dir );
+    void setSunDiffuse ( const glm::vec3& col );
+    void setSunSpecular ( const glm::vec3& col );
+
+    const glm::vec3& getAmbient() const;
+    const glm::vec3& getSunDir() const;
+    const glm::vec3& getSunDiffuse() const;
+    const glm::vec3& getSunSpecular() const;
 
     static void init();
     static void destroy();

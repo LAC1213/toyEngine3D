@@ -17,16 +17,16 @@ Terrain::Terrain( const Camera * cam, HeightMap * heightmap, const Texture * tex
     _meshObject->texture = texture;
     _wireframe = false;
     _diffuseColor = glm::vec4( 0.6, 0.6, 0.6, 1 );
-    glm::mat4 s = glm::scale( glm::mat4(1), glm::vec3( _width, _maxHeight, _depth ) );
-    _model = glm::translate( glm::mat4(1.0f), glm::vec3( -12.5, -5, -12.5 ) ) * s;
+    glm::mat4 s = glm::scale( glm::mat4( 1 ), glm::vec3( _width, _maxHeight, _depth ) );
+    _model = glm::translate( glm::mat4( 1.0f ), glm::vec3( -12.5, -5, -12.5 ) ) * s;
 
     _meshObject->shader = SHADER;
-    _meshObject->drawCall.setMode(GL_PATCHES);
+    _meshObject->drawCall.setMode( GL_PATCHES );
     GLuint _elements = 4 * _quadCount * _quadCount;
     _meshObject->drawCall.setElements( _elements );
     _cam = cam;
 
-    GLfloat * verts = new GLfloat[2 * (_quadCount + 1)*(_quadCount + 1)];
+    GLfloat * verts = new GLfloat[2 * ( _quadCount + 1 )*( _quadCount + 1 )];
     unsigned short * indices = new unsigned short[ _elements ];
 
     for( size_t i = 0 ; i < _quadCount + 1 ; ++i )
@@ -34,8 +34,8 @@ Terrain::Terrain( const Camera * cam, HeightMap * heightmap, const Texture * tex
         for( size_t j = 0 ; j < _quadCount + 1 ; ++j )
         {
             size_t index = i*_quadCount + i + j;
-            verts[ 2*index ] = ((float)i)/_quadCount;
-            verts[ 2*index + 1 ] = ((float)j)/_quadCount;
+            verts[ 2*index ] = ( ( float )i )/_quadCount;
+            verts[ 2*index + 1 ] = ( ( float )j )/_quadCount;
 
             if( i < _quadCount && j < _quadCount )
             {
@@ -49,7 +49,7 @@ Terrain::Terrain( const Camera * cam, HeightMap * heightmap, const Texture * tex
     }
 
     _meshObject->buffers = std::vector<BufferObject>( 2 );
-    _meshObject->buffers[0].loadData( verts, 2*(_quadCount + 1)*(_quadCount + 1)*sizeof(GLfloat) );
+    _meshObject->buffers[0].loadData( verts, 2*( _quadCount + 1 )*( _quadCount + 1 )*sizeof( GLfloat ) );
     _meshObject->buffers[1].setTarget( GL_ELEMENT_ARRAY_BUFFER );
     _meshObject->buffers[1].loadData( indices, _elements*sizeof( unsigned short ) );
 
@@ -88,10 +88,10 @@ void Terrain::destroy()
 
 static double getRnd()
 {
-   // static std::random_device rd;
-   // static std::mt19937 mt(rd());
-   // static std::uniform_real_distribution<double> dist(0, 1);
-    return (double)rand() / RAND_MAX;
+    // static std::random_device rd;
+    // static std::mt19937 mt(rd());
+    // static std::uniform_real_distribution<double> dist(0, 1);
+    return ( double )rand() / RAND_MAX;
 }
 
 /* stack overflow copy paste :P */
@@ -109,22 +109,25 @@ static void diamondSquare( double ** data, unsigned int size )
     //for the new value in range of h
 //side length is distance of a single square side
 //or distance of diagonal in diamond
-    for(unsigned int sideLength = DATA_SIZE-1;
+    for( unsigned int sideLength = DATA_SIZE-1;
             //side length must be >= 2 so we always have
             //a new value (if its 1 we overwrite existing values
             //on the last iteration)
             sideLength >= 2;
             //each iteration we are looking at smaller squares
             //diamonds, and we decrease the variation of the offset
-            sideLength /=2, h/= 2.0) {
+            sideLength /=2, h/= 2.0 )
+    {
         //half the length of the side of a square
         //or distance from diamond center to one corner
         //(just to make calcs below a little clearer)
         int halfSide = sideLength/2;
 
         //generate the new square values
-        for(unsigned int x=0; x<DATA_SIZE-1; x+=sideLength) {
-            for(unsigned int y=0; y<DATA_SIZE-1; y+=sideLength) {
+        for( unsigned int x=0; x<DATA_SIZE-1; x+=sideLength )
+        {
+            for( unsigned int y=0; y<DATA_SIZE-1; y+=sideLength )
+            {
                 //x, y is upper left corner of square
                 //calculate average of existing corners
                 double avg = data[x][y] + //top left
@@ -138,7 +141,7 @@ static void diamondSquare( double ** data, unsigned int size )
                     //We calculate random value in range of 2h
                     //and then subtract h so the end value is
                     //in the range (-h, +h)
-                    avg + (getRnd()*2*h) - h;
+                    avg + ( getRnd()*2*h ) - h;
             }
         }
 
@@ -147,35 +150,37 @@ static void diamondSquare( double ** data, unsigned int size )
         //by half side
         //NOTE: if the data shouldn't wrap then x < DATA_SIZE
         //to generate the far edge values
-        for(unsigned int x=0; x<DATA_SIZE-1; x+=halfSide) {
+        for( unsigned int x=0; x<DATA_SIZE-1; x+=halfSide )
+        {
             //and y is x offset by half a side, but moved by
             //the full side length
             //NOTE: if the data shouldn't wrap then y < DATA_SIZE
             //to generate the far edge values
-            for(unsigned int y=(x+halfSide)%sideLength; y<DATA_SIZE-1; y+=sideLength) {
+            for( unsigned int y=( x+halfSide )%sideLength; y<DATA_SIZE-1; y+=sideLength )
+            {
                 //x, y is center of diamond
                 //note we must use mod  and add DATA_SIZE for subtraction
                 //so that we can wrap around the array to find the corners
                 double avg =
-                    data[(x-halfSide+DATA_SIZE)%DATA_SIZE][y] + //left of center
-                    data[(x+halfSide)%DATA_SIZE][y] + //right of center
-                    data[x][(y+halfSide)%DATA_SIZE] + //below center
-                    data[x][(y-halfSide+DATA_SIZE)%DATA_SIZE]; //above center
+                    data[( x-halfSide+DATA_SIZE )%DATA_SIZE][y] + //left of center
+                    data[( x+halfSide )%DATA_SIZE][y] + //right of center
+                    data[x][( y+halfSide )%DATA_SIZE] + //below center
+                    data[x][( y-halfSide+DATA_SIZE )%DATA_SIZE]; //above center
                 avg /= 4.0;
 
                 //new value = average plus random offset
                 //We calculate random value in range of 2h
                 //and then subtract h so the end value is
                 //in the range (-h, +h)
-                avg = avg + (getRnd()*2*h) - h;
+                avg = avg + ( getRnd()*2*h ) - h;
                 //update value for center of diamond
                 data[x][y] = avg;
 
                 //wrap values on the edges, remove
                 //this and adjust loop condition above
                 //for non-wrapping values.
-                if(x == 0)  data[DATA_SIZE-1][y] = avg;
-                if(y == 0)  data[x][DATA_SIZE-1] = avg;
+                if( x == 0 )  data[DATA_SIZE-1][y] = avg;
+                if( y == 0 )  data[x][DATA_SIZE-1] = avg;
             }
         }
     }
@@ -205,10 +210,10 @@ HeightMap HeightMap::genRandom( unsigned int pow )
     glBindTexture( GL_TEXTURE_2D, tex );
 
     glTexImage2D( GL_TEXTURE_2D, 0, GL_R16F, width, width, 0, GL_RED, GL_UNSIGNED_SHORT, heights );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
 
     delete[] heights;
 
@@ -222,9 +227,9 @@ HeightMap::HeightMap( const HeightMap& copy )
     :   width( copy.width ),
         height( copy.height )
 {
-    memcpy( data, copy.data, width*sizeof(*data) );
+    memcpy( data, copy.data, width*sizeof( *data ) );
     for( size_t i = 0 ; i < width ; ++i )
-        memcpy( data[i], copy.data[i], height*sizeof(**data) );
+        memcpy( data[i], copy.data[i], height*sizeof( **data ) );
 }
 
 HeightMap::HeightMap( size_t w, size_t h )

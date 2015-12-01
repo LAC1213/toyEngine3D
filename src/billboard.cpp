@@ -5,12 +5,12 @@ Shader * Billboard::_shader = 0;
 Billboard::Billboard( const Camera * cam, const Texture * texture )
     :   _drawCall( GL_POINTS ),
         _cam( cam ),
-        _texture( texture ), 
+        _texture( texture ),
         _scale( 1, 1 )
 {
-    _pointBuffer.loadData( glm::value_ptr( _pos ), 3*sizeof(GLfloat) );
+    _pointBuffer.loadData( glm::value_ptr( _pos ), 3*sizeof( GLfloat ) );
     _drawCall.setElements( 1 );
-    _drawCall.addAttribute( VertexAttribute( &_pointBuffer, GL_FLOAT, 3) ); 
+    _drawCall.addAttribute( VertexAttribute( &_pointBuffer, GL_FLOAT, 3 ) );
 }
 
 Billboard::~Billboard()
@@ -20,7 +20,7 @@ Billboard::~Billboard()
 void Billboard::setPosition( glm::vec3 pos )
 {
     _pos = pos;
-    _pointBuffer.loadData( glm::value_ptr( _pos ), 3*sizeof(GLfloat) );
+    _pointBuffer.loadData( glm::value_ptr( _pos ), 3*sizeof( GLfloat ) );
 }
 
 void Billboard::render()

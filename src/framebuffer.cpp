@@ -7,7 +7,7 @@ const Framebuffer * Framebuffer::ActiveRead = &Framebuffer::Screen;
 
 /** Default Constructor, creates Framebuffer with no depth and no attachments and size of screen
  */
-Framebuffer::Framebuffer() 
+Framebuffer::Framebuffer()
     :   _width( Screen.getWidth() ),
         _height( Screen.getHeight() ),
         _depthRBO( 0 ),
@@ -41,9 +41,9 @@ Framebuffer::Framebuffer( int w, int h )
 Framebuffer::~Framebuffer()
 {
     if( _fbo )
-       glDeleteFramebuffers( 1, &_fbo );
+        glDeleteFramebuffers( 1, &_fbo );
     if( _depthRBO )
-       glDeleteRenderbuffers( 1, &_depthRBO ); 
+        glDeleteRenderbuffers( 1, &_depthRBO );
     for( size_t i = 0 ; i < _attachments.size() ; ++i )
         delete _attachments[i];
 }
@@ -56,8 +56,8 @@ void Framebuffer::addAttachment()
     t->resize( _width, _height );
     _attachments.push_back( t );
     bindDraw();
-    glFramebufferTexture2D( GL_FRAMEBUFFER, 
-            GL_COLOR_ATTACHMENT0 + _attachments.size() - 1, GL_TEXTURE_2D, *_attachments.back(), 0 );
+    glFramebufferTexture2D( GL_FRAMEBUFFER,
+                            GL_COLOR_ATTACHMENT0 + _attachments.size() - 1, GL_TEXTURE_2D, *_attachments.back(), 0 );
     GLuint attachments[_attachments.size()];
     for( size_t i = 0 ; i < _attachments.size() ; ++i )
         attachments[i] = GL_COLOR_ATTACHMENT0 + i;
@@ -80,12 +80,12 @@ void Framebuffer::enableDepthTexture( GLenum internalFormat )
  */
 void Framebuffer::enableDepthRenderBuffer( GLenum internalFormat )
 {
-    glGenRenderbuffers(1, &_depthRBO);
-    glBindRenderbuffer(GL_RENDERBUFFER, _depthRBO);
-    glRenderbufferStorage(GL_RENDERBUFFER, internalFormat, _width, _height);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glGenRenderbuffers( 1, &_depthRBO );
+    glBindRenderbuffer( GL_RENDERBUFFER, _depthRBO );
+    glRenderbufferStorage( GL_RENDERBUFFER, internalFormat, _width, _height );
+    glBindRenderbuffer( GL_RENDERBUFFER, 0 );
     bindDraw();
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRBO);
+    glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRBO );
 }
 
 /** Generate a Framebuffer with 3 color attachments and depth renderbuffer
@@ -107,7 +107,7 @@ Framebuffer * Framebuffer::genGeometryBuffer()
     fb->getAttachments().back()->setInternalFormat( GL_RGB32F );
     fb->getAttachments().back()->setFormat( GL_RGB );
     // normals
-    fb->addAttachment(); 
+    fb->addAttachment();
     fb->getAttachments().back()->setInternalFormat( GL_RGB32F );
     fb->getAttachments().back()->setFormat( GL_RGB );
     return fb;
@@ -171,9 +171,9 @@ void Framebuffer::resize( int w, int h )
 
     if( _depthRBO )
     {
-        glBindRenderbuffer(GL_RENDERBUFFER, _depthRBO);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, w, h);
-        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+        glBindRenderbuffer( GL_RENDERBUFFER, _depthRBO );
+        glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, w, h );
+        glBindRenderbuffer( GL_RENDERBUFFER, 0 );
     }
 }
 
@@ -237,7 +237,7 @@ GLuint Framebuffer::getFBO() const
 
 /** Get vector of attached textures
  */
-std::vector<Texture*>& Framebuffer::getAttachments() 
+std::vector<Texture*>& Framebuffer::getAttachments()
 {
     return _attachments;
 }

@@ -5,7 +5,7 @@
 
 Shader * ParticleSystem::_shader = 0;
 
-ParticleSystem::ParticleSystem( PerspectiveCamera * cam, const Texture * texture ) 
+ParticleSystem::ParticleSystem( PerspectiveCamera * cam, const Texture * texture )
     :   _cam( cam ),
         _buffers( 4 ),
         _drawCall( GL_POINTS ),
@@ -35,14 +35,14 @@ void ParticleSystem::step( double dt )
         _particles[i].step( dt );
     }
 
-   /* auto cmp = [this] ( Particle a, Particle b ) 
-    { 
-        glm::vec3 v1 = a.position.f - _pcam->getPosition();
-        glm::vec3 v2 = b.position.f - _pcam->getPosition();
-        return v1.length() < v2.length();
-    };
-    std::sort( _particles.begin(), _particles.end(), cmp );*/
-    
+    /* auto cmp = [this] ( Particle a, Particle b )
+     {
+         glm::vec3 v1 = a.position.f - _pcam->getPosition();
+         glm::vec3 v2 = b.position.f - _pcam->getPosition();
+         return v1.length() < v2.length();
+     };
+     std::sort( _particles.begin(), _particles.end(), cmp );*/
+
     std::vector<GLfloat> positions;
     positions.reserve( 3*_particles.size() );
     std::vector<GLfloat> colors;
@@ -74,10 +74,10 @@ void ParticleSystem::step( double dt )
 
     _drawCall.setElements( elements );
 
-    _buffers[ POSITION ].loadData( positions.data(), positions.size()*sizeof(GLfloat));
-    _buffers[ COLOR ].loadData( colors.data(), colors.size()*sizeof(GLfloat));
-    _buffers[ UV ].loadData( uvs.data(), uvs.size()*sizeof(GLfloat) );
-    _buffers[ SIZE ].loadData( sizes.data(), sizes.size()*sizeof(GLfloat) );
+    _buffers[ POSITION ].loadData( positions.data(), positions.size()*sizeof( GLfloat ) );
+    _buffers[ COLOR ].loadData( colors.data(), colors.size()*sizeof( GLfloat ) );
+    _buffers[ UV ].loadData( uvs.data(), uvs.size()*sizeof( GLfloat ) );
+    _buffers[ SIZE ].loadData( sizes.data(), sizes.size()*sizeof( GLfloat ) );
 }
 
 void ParticleSystem::render()
@@ -89,16 +89,16 @@ void ParticleSystem::render()
         _shader->setUniform( "tex", 0 );
     }
 
-    glm::mat4 model(1);
+    glm::mat4 model( 1 );
     _shader->setUniform( "model", model );
-    
+
     glBlendFunc( GL_SRC_ALPHA, GL_ONE );
     glDepthMask( GL_FALSE );
-   
-    _cam->setUniforms( _shader ); 
+
+    _cam->setUniforms( _shader );
     _shader->use();
     _drawCall.execute();
-    
+
     glDepthMask( GL_TRUE );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 }
@@ -113,7 +113,7 @@ void ParticleSystem::destroy()
     delete _shader;
 }
 
-SmoothTail::SmoothTail( PerspectiveCamera * cam ) 
+SmoothTail::SmoothTail( PerspectiveCamera * cam )
     :   ParticleSystem( cam, 0 ),
         _pos( glm::vec3( -10, 0, 0 ), glm::vec3( 2, 0, 0 ) )
 {
@@ -121,19 +121,22 @@ SmoothTail::SmoothTail( PerspectiveCamera * cam )
 
 void SmoothTail::step( double dt )
 {
-   // static std::random_device rd;
-   // static std::mt19937 mt( rd() );
-   // static std::uniform_real_distribution<float> dist( -0.05, 0.05 );
-    
-    auto rnd = [] () { return 0.1*(float) rand() / RAND_MAX - 0.05; };
+    // static std::random_device rd;
+    // static std::mt19937 mt( rd() );
+    // static std::uniform_real_distribution<float> dist( -0.05, 0.05 );
+
+    auto rnd = [] ()
+    {
+        return 0.1*( float ) rand() / RAND_MAX - 0.05;
+    };
 
     _pos.step( dt );
 
     Particle part;
-    part.position = QuadraticCurve<glm::vec3>( _pos.getValue() + glm::vec3( rnd(), rnd(), rnd() ));
+    part.position = QuadraticCurve<glm::vec3>( _pos.getValue() + glm::vec3( rnd(), rnd(), rnd() ) );
     part.color = QuadraticCurve<glm::vec4>( glm::vec4( 0.8, 0.8, 1, 1 ), glm::vec4( 0.05f, 0.05f, 0, -0.2 ) );
     part.uv = QuadraticCurve<glm::vec2>( glm::vec2( 0, 0 ) );
-    part.size = QuadraticCurve<GLfloat> ( 0.1f, 0, -0.2);
+    part.size = QuadraticCurve<GLfloat> ( 0.1f, 0, -0.2 );
     part.life = 4;
 
     for( size_t i = 0 ; i < _particles.size() ; ++i )
@@ -148,7 +151,7 @@ void SmoothTail::step( double dt )
     ParticleSystem::step( dt );
 }
 
-LightWell::LightWell( PerspectiveCamera * cam, glm::vec3 pos ) 
+LightWell::LightWell( PerspectiveCamera * cam, glm::vec3 pos )
     :   ParticleSystem( cam, 0 ),
         _pos( pos )
 {
@@ -156,7 +159,10 @@ LightWell::LightWell( PerspectiveCamera * cam, glm::vec3 pos )
 
 void LightWell::spawnParticle()
 {
-    auto rnd = [] () { return 2*(float) rand() / RAND_MAX - 1; };
+    auto rnd = [] ()
+    {
+        return 2*( float ) rand() / RAND_MAX - 1;
+    };
 
     Particle part;
     float vx = rnd();
@@ -164,10 +170,10 @@ void LightWell::spawnParticle()
     if( rnd() > 0 )
         vz = -vz;
 
-    part.position = QuadraticCurve<glm::vec3>( _pos , glm::vec3( vx, 1.4 + rnd(), vz), glm::vec3( 0, -2, 0 ));
+    part.position = QuadraticCurve<glm::vec3>( _pos , glm::vec3( vx, 1.4 + rnd(), vz ), glm::vec3( 0, -2, 0 ) );
     part.color = QuadraticCurve<glm::vec4>( glm::vec4( 1, 4, 3, 4 ) );
     part.uv = QuadraticCurve<glm::vec2>( glm::vec2( 0, 0 ) );
-    part.size = QuadraticCurve<GLfloat> ( 0.05f, 0, -0.003);
+    part.size = QuadraticCurve<GLfloat> ( 0.05f, 0, -0.003 );
     part.life = 4;
 
     for( size_t i = 0 ; i < _particles.size() ; ++i )
@@ -182,18 +188,18 @@ void LightWell::spawnParticle()
 
 void LightWell::step( double dt )
 {
-   // static std::random_device rd;
-   // static std::mt19937 mt( rd() );
-   // static std::uniform_real_distribution<float> dist( -0.05, 0.05 );
+    // static std::random_device rd;
+    // static std::mt19937 mt( rd() );
+    // static std::uniform_real_distribution<float> dist( -0.05, 0.05 );
     constexpr double spawnrate = 1000; //per second
-    
+
     for( int i = 0 ; i < spawnrate*dt ; ++i )
         spawnParticle();
-    
+
     ParticleSystem::step( dt );
 }
 
-BulletSpawner::BulletSpawner( PlayerCamera * cam, std::vector<Enemy*>* enemies ) 
+BulletSpawner::BulletSpawner( PlayerCamera * cam, std::vector<Enemy*>* enemies )
     :   ParticleSystem( cam, 0 ),
         _enemies( enemies ),
         _playerCam( cam )
@@ -204,26 +210,26 @@ void BulletSpawner::step( double dt )
 {
     for( size_t i = 0 ; i < _particles.size() ; ++i )
         for( size_t j = 0 ; j < _enemies->size() ; ++j )
-            if( (*_enemies)[j]->contains(_particles[i].position ))
-                (*_enemies)[j]->onHit();  
-    ParticleSystem::step( dt ); 
+            if( ( *_enemies )[j]->contains( _particles[i].position ) )
+                ( *_enemies )[j]->onHit();
+    ParticleSystem::step( dt );
 }
 
 void BulletSpawner::shoot()
 {
-    glm::vec3 pos = _playerCam->getPosition(); 
-    glm::vec3 dir = glm::inverse(glm::mat3(_cam->getView())) * glm::vec3( 0, 0, -8 );
-    
+    glm::vec3 pos = _playerCam->getPosition();
+    glm::vec3 dir = glm::inverse( glm::mat3( _cam->getView() ) ) * glm::vec3( 0, 0, -8 );
+
     Particle bullet;
     bullet.position = QuadraticCurve<glm::vec3>( pos, dir );
     bullet.color = QuadraticCurve<glm::vec4>( glm::vec4( 0.6, 1, 2, 4 ) );
     bullet.uv = QuadraticCurve<glm::vec2>( glm::vec2( 0, 0 ) );
     bullet.size = QuadraticCurve<GLfloat>( 0.01f );
     bullet.life = 4;
-   
+
     for( size_t i = 0 ; i < _particles.size() ; ++i )
         if( _particles[i].life <= 0 )
             _particles.erase( _particles.begin() + i );
-    
+
     _particles.push_back( bullet );
 }

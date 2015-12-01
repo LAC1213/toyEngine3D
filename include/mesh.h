@@ -73,6 +73,8 @@ public:
     void setCam( const Camera * cam );
     const Camera * getCam() const;
     
+    void setColor( glm::vec4 color ) { _diffuseColor = color; }
+    
 protected:
     const Camera *    _cam;
     MeshObject * _meshObject;

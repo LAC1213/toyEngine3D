@@ -64,11 +64,11 @@ void DrawCall::execute() const
 void DrawCall::addAttribute( const VertexAttribute& attrib )
 {
     glBindVertexArray( _vao );
-    
+
     attrib.data_->bind();
     glEnableVertexAttribArray( _attribIndex );
-    glVertexAttribPointer( _attribIndex, attrib.length_, attrib.type_, 
-            attrib.normalize_, attrib.stride_, attrib.offset_ );
+    glVertexAttribPointer( _attribIndex, attrib.length_, attrib.type_,
+                           attrib.normalize_, attrib.stride_, attrib.offset_ );
     if( attrib.divisor_ )
         glVertexAttribDivisor( _attribIndex, attrib.divisor_ );
 

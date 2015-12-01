@@ -20,7 +20,10 @@ public:
     GLuint getID() const;
     GLenum getTarget() const;
     GLenum getHint() const;
-    operator GLuint() { return _id; }
+    operator GLuint()
+    {
+        return _id;
+    }
 
 protected:
     GLuint _id;

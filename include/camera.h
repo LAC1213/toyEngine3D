@@ -30,19 +30,55 @@ public:
 
     void lookAt( glm::vec3 p );
 
-    glm::vec3 getPosition() const { return _eye; }
-    void setPosition( const glm::vec3& eye ) { _eye = eye; updateView(); }
-    void translate( const glm::vec3& t ) {     _eye += t; updateView(); }
-   
-    float getAngleY() const { return _angleY; } 
-    void setAngleY( const float& a ) { _angleY = a; updateView(); }
-    void turnY( const float& a ) {     _angleY += a; updateView(); }
+    glm::vec3 getPosition() const
+    {
+        return _eye;
+    }
+    void setPosition( const glm::vec3& eye )
+    {
+        _eye = eye;
+        updateView();
+    }
+    void translate( const glm::vec3& t )
+    {
+        _eye += t;
+        updateView();
+    }
 
-    float getAngleX() const { return _angleX; }
-    void setAngleX( const float& a ) { _angleX = a; updateView(); }
-    void turnX( const float& a ) {     _angleX += a; updateView(); }
+    float getAngleY() const
+    {
+        return _angleY;
+    }
+    void setAngleY( const float& a )
+    {
+        _angleY = a;
+        updateView();
+    }
+    void turnY( const float& a )
+    {
+        _angleY += a;
+        updateView();
+    }
 
-    glm::mat4 getView() const { return _view; }
+    float getAngleX() const
+    {
+        return _angleX;
+    }
+    void setAngleX( const float& a )
+    {
+        _angleX = a;
+        updateView();
+    }
+    void turnX( const float& a )
+    {
+        _angleX += a;
+        updateView();
+    }
+
+    glm::mat4 getView() const
+    {
+        return _view;
+    }
 
 protected:
     glm::vec3   _eye;
@@ -52,11 +88,11 @@ protected:
 
 private:
     glm::mat4   _proj;
-    glm::mat4   _view;   
+    glm::mat4   _view;
 
     float       _fov;
     float       _near;
-    float       _far; 
+    float       _far;
 };
 
 class PlayerCamera : public PerspectiveCamera
@@ -67,23 +103,36 @@ public:
 
     void addCollider( Collider * collider );
     void removeCollider( Collider * collider );
-    
-    void setPivot( const glm::vec3& p ) { _pivot = p; }
-    const glm::vec3& getPivot() const { return _pivot; }
-    glm::vec3 getPivotPoint() const { return _pivotPoint.getValue(); }
-    
+
+    void setPivot( const glm::vec3& p )
+    {
+        _pivot = p;
+    }
+    const glm::vec3& getPivot() const
+    {
+        return _pivot;
+    }
+    glm::vec3 getPivotPoint() const
+    {
+        return _pivotPoint.getValue();
+    }
+    QuadraticCurve<glm::vec3> getPivotPointCurve() const
+    {
+        return _pivotPoint;
+    }
+
     void onMouseMove( double dx, double dy );
 
     virtual void step( double dt );
     void jump();
-    
-protected: 
+
+protected:
     void pollInput();
     bool    _canJump;
 
     glm::vec3 _pivot;
     QuadraticCurve<glm::vec3> _pivotPoint;
-    
+
     std::vector<Collider*> _colliders;
     GLFWwindow * _window;
 

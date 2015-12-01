@@ -17,7 +17,7 @@ PostEffect::~PostEffect()
 void PostEffect::render()
 {
     _shader->setUniform( "effect", _type );
-    
+
     glActiveTexture( GL_TEXTURE0 );
     _canvas->getAttachments().front()->bind();
     _shader->setUniform( "tex", 0 );

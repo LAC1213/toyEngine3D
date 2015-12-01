@@ -16,7 +16,8 @@ public:
     Font( std::string name, int fontSize );
     ~Font();
 
-    struct CharInfo {
+    struct CharInfo
+    {
         float ax;
         float ay;
 
@@ -29,12 +30,27 @@ public:
         float tx;
     };
 
-    CharInfo * getCharInfo() { return _info; }
-    GLuint getAtlas() const { return _atlas; }
-    unsigned int getAtlasHeight() const { return _atlasHeight; }
-    unsigned int getAtlasWidth() const { return _atlasWidth; }
+    CharInfo * getCharInfo()
+    {
+        return _info;
+    }
+    GLuint getAtlas() const
+    {
+        return _atlas;
+    }
+    unsigned int getAtlasHeight() const
+    {
+        return _atlasHeight;
+    }
+    unsigned int getAtlasWidth() const
+    {
+        return _atlasWidth;
+    }
 
-    int getSize() const { return _size; }
+    int getSize() const
+    {
+        return _size;
+    }
 private:
     GLuint _atlas;
     unsigned int _atlasWidth;
