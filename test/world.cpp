@@ -62,7 +62,6 @@ World::World ( GLFWwindow * window, int width, int height )
     _lighting.addPointLight ( &p );
     _lighting.setAmbient ( glm::vec3 ( 0.3, 0.3, 0.3 ) );
     _cubeData->texture = _groundTex;
-    _cube.toggleWireframe();
     _cube.scale.setConstant ( glm::vec3 ( 0.1, 0.1, 0.1 ) );
     _cube.rotation.setLinear ( glm::vec3 ( 0, 1, 0 ) );
     _cube.position.setConstant ( glm::vec3 ( 1, -1, 1 ) );
@@ -174,12 +173,21 @@ void World::render()
     Text txt ( &_font, ss.str(), glm::vec2 ( _width, _height ) );
     txt.setColor ( glm::vec4 ( 0.3, 1, 0.6, 0.6 ) );
     txt.setPosition ( glm::vec2 ( 5, 2 ) );
+    
+    static Shader testshader( "./res/shader/mesh_instanced", Shader::LOAD_GEOM );
 
     glDisable ( GL_BLEND );
     _gBuffer->clear();
     _terrain->render();
-    _cube.render();
     _player.render();
+    
+    Shader * old = _cubeData->shader;
+    _cubeData->shader = &testshader;
+    _cubeData->drawCall.setInstances( 10 );
+    _cube.render();
+    _cubeData->drawCall.setInstances( 0 );
+    _cubeData->shader = old;
+    
     glEnable ( GL_BLEND );
 
     _canvas->clear();
@@ -223,7 +231,6 @@ void World::onKeyAction ( int key, int scancode, int action, int mods )
             break;
         }
     }
-
 }
 
 void World::onMouseMove ( double x, double y )

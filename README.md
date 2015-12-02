@@ -8,6 +8,7 @@ My Homemade engine that I develop whenever I do something further with opengl.
 2. [freetype](http://www.freetype.org/)
 3. [SOIL](http://www.lonesock.net/soil.html)
 4. OpenGL (GL GLU GLEW)
+5. glibc
 
 ## Use
 

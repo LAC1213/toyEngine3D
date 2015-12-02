@@ -1,6 +1,8 @@
 #include <internal/config.h>
 #include <iostream>
 
+#include <unistd.h>
+
 Config::Config()
 {
     _keyFile = g_key_file_new();
@@ -26,7 +28,7 @@ void Config::setGroup ( const std::string& str )
     _curGrp = str;
 }
 
-std::string Config::getString ( const std::string& name ) 
+std::string Config::getString ( const std::string& name )
 {
     std::string res = g_key_file_get_string ( _keyFile, _curGrp.c_str(), name.c_str(), &_error );
     if ( !_error )
@@ -38,7 +40,7 @@ std::string Config::getString ( const std::string& name )
     return "";
 }
 
-bool Config::getBool( const std::string& name ) 
+bool Config::getBool( const std::string& name )
 {
 
     bool res = g_key_file_get_boolean ( _keyFile, _curGrp.c_str(), name.c_str(), &_error );

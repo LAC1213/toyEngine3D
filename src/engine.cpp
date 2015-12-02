@@ -14,6 +14,8 @@
 namespace Engine
 {
 
+std::string Root = ".";
+
 BufferObject * QuadBuffer = nullptr;
 DrawCall * DrawScreenQuad = nullptr;
 
@@ -43,13 +45,15 @@ void init()
     if( resPath )
     {
         chdir( resPath );
-        info( "engine root " + std::string( resPath ) );
+        info( "engine root at " + std::string( resPath ) );
+        Root = std::string(resPath);
     }
     else
     {
         char wd[4096];
         getcwd( wd, sizeof wd );
-        info( "engine root " + std::string( wd ) );
+        info( "engine root at " + std::string( wd ) );
+        Root = std::string(wd);
     }
 
     Config conf;

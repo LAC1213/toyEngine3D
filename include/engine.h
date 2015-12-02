@@ -15,8 +15,11 @@
 #include <camera.h>
 #include <billboard.h>
 
+#include <string>
+
 namespace Engine
 {
+extern std::string Root;
 
 void init();
 void destroy();
