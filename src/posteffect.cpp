@@ -28,12 +28,12 @@ void PostEffect::render()
 
 void PostEffect::init()
 {
-    _shader = new Shader( "./res/shader/post/", Shader::LOAD_BASIC );
+    _shader = Engine::ShaderManager->request( "./res/shader/post/", Shader::LOAD_BASIC );
 }
 
 void PostEffect::destroy()
 {
-    delete _shader;
+    Engine::ShaderManager->release( _shader );
 }
 
 Bloom::Bloom( Framebuffer * in )

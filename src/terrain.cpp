@@ -2,14 +2,16 @@
 #include <iostream>
 #include <random>
 
+#include <engine.h>
+
 Shader * Terrain::SHADER = 0;
 
-Terrain::Terrain( const Camera * cam, HeightMap * heightmap, const Texture * texture )
+Terrain::Terrain( HeightMap * heightmap, const Texture * texture )
     :   _heightmap( heightmap )
 {
     _width = 25;
     _depth = 25;
-    _maxHeight = 5;
+    _maxHeight = 15;
     _quadCount = 25;
 
     _meshObject = new MeshObject();
@@ -24,7 +26,6 @@ Terrain::Terrain( const Camera * cam, HeightMap * heightmap, const Texture * tex
     _meshObject->drawCall.setMode( GL_PATCHES );
     GLuint _elements = 4 * _quadCount * _quadCount;
     _meshObject->drawCall.setElements( _elements );
-    _cam = cam;
 
     GLfloat * verts = new GLfloat[2 * ( _quadCount + 1 )*( _quadCount + 1 )];
     unsigned short * indices = new unsigned short[ _elements ];
@@ -78,12 +79,12 @@ void Terrain::render()
 
 void Terrain::init()
 {
-    SHADER = new Shader( "./res/shader/terrain/" , Shader::LOAD_FULL );
+    SHADER = Engine::ShaderManager->request( "./res/shader/terrain/" , Shader::LOAD_FULL );
 }
 
 void Terrain::destroy()
 {
-    delete SHADER;
+    Engine::ShaderManager->release( SHADER );
 }
 
 static double getRnd()

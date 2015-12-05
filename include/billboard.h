@@ -8,7 +8,7 @@
 class Billboard : public Renderable
 {
 public:
-    Billboard( const Camera * cam, const Texture * texture );
+    Billboard( const Texture * texture );
     ~Billboard();
 
     virtual void render();
@@ -35,8 +35,6 @@ protected:
 
     BufferObject _pointBuffer;
     DrawCall _drawCall;
-
-    const Camera * _cam;
 
     const Texture * _texture;
 

@@ -18,7 +18,7 @@ public:
 class Lighting : public Renderable
 {
 public:
-    Lighting ( PerspectiveCamera * cam, Framebuffer * gBuffer );
+    Lighting ( Framebuffer * gBuffer );
     ~Lighting();
 
     virtual void render();
@@ -41,8 +41,6 @@ public:
 
 protected:
     static Shader * _shader;
-
-    const PerspectiveCamera * _cam;
 
     Framebuffer * _gBuffer;
 

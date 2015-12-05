@@ -23,13 +23,13 @@ public:
 class Terrain : public Mesh, public Collider 
 {
 public:
-    Terrain( const Camera * cam, HeightMap * heightmap, const Texture * texture );
+    Terrain( HeightMap * heightmap, const Texture * texture );
     Terrain() {}
     virtual ~Terrain();
 
     virtual void render();
-    virtual bool contains( glm::vec3 point ) const;
-    virtual glm::vec3 correct( glm::vec3 point ) const;
+    virtual bool contains( const glm::vec3& point ) const;
+    virtual glm::vec3 correct( const glm::vec3& point ) const;
 
     static void init();
     static void destroy();

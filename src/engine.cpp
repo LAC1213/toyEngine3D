@@ -11,20 +11,49 @@
 #include <internal/util.h>
 #include <internal/config.h>
 
+PhysicsVars::PhysicsVars()
+{
+    broadphase = new btDbvtBroadphase();
+    collisionConfig = new btDefaultCollisionConfiguration();
+    dispatcher = new btCollisionDispatcher(collisionConfig);
+    solver = new btSequentialImpulseConstraintSolver();
+    dynamicsWorld = new btDiscreteDynamicsWorld( dispatcher, broadphase, solver, collisionConfig);
+    dynamicsWorld->setGravity(btVector3(0, -1, 0));
+}
+
+PhysicsVars::~PhysicsVars()
+{
+    delete broadphase;
+    delete collisionConfig;
+    delete dispatcher;
+    delete solver;
+    delete dynamicsWorld;
+}
+
 namespace Engine
 {
 
 std::string Root = ".";
+PhysicsVars * Physics = nullptr;
+
+Camera * ActiveCam = nullptr;
 
 BufferObject * QuadBuffer = nullptr;
 DrawCall * DrawScreenQuad = nullptr;
+MeshObject * CubeObject = nullptr;
+btCollisionShape * CubeShape = nullptr;
+
+Shader::Manager * ShaderManager = nullptr;
 
 static bool initialized = false;
 
 void init()
 {
     if( initialized ) return;
+    /* init physics */
+    Physics = new PhysicsVars;
 
+    /* init graphics */
     QuadBuffer = new BufferObject();
     GLfloat quadVerts[] =
     {
@@ -59,6 +88,8 @@ void init()
     Config conf;
     conf.loadFile( "engine.cfg" );
     conf.setGroup( "Modules" );
+    
+    ShaderManager = new Shader::Manager;
 
     if( conf.getBool("Lighting") )
         Lighting::init();
@@ -72,13 +103,24 @@ void init()
         Text::init();
     if( conf.getBool("Terrain") )
         Terrain::init();
+
     MeshObject::init();
+    CubeObject = MeshObject::genCube();
+    CubeShape = new btBoxShape( btVector3(1, 1, 1) );
+
+    static Camera nullCam;
+    ActiveCam = &nullCam;
+
     initialized = true;
 }
 
 void destroy()
 {
     if( !initialized ) return;
+
+    delete ShaderManager;
+    
+    delete Physics;
 
     Lighting::destroy();
     PostEffect::destroy();
@@ -90,6 +132,8 @@ void destroy()
 
     delete QuadBuffer;
     delete DrawScreenQuad;
+    delete CubeObject;
+    delete CubeShape;
     initialized = false;
 }
 

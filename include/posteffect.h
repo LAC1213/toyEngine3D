@@ -3,6 +3,7 @@
 
 #include <renderable.h>
 #include <framebuffer.h>
+#include <bufferobject.h>
 
 class PostEffect : public Renderable
 {

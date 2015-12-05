@@ -1,10 +1,11 @@
 #include <billboard.h>
 
+#include <engine.h>
+
 Shader * Billboard::_shader = 0;
 
-Billboard::Billboard( const Camera * cam, const Texture * texture )
+Billboard::Billboard( const Texture * texture )
     :   _drawCall( GL_POINTS ),
-        _cam( cam ),
         _texture( texture ),
         _scale( 1, 1 )
 {
@@ -30,17 +31,16 @@ void Billboard::render()
     _shader->setUniform( "tex", 0 );
     _shader->setUniform( "scale", _scale );
 
-    _cam->setUniforms( _shader );
     _shader->use();
     _drawCall.execute();
 }
 
 void Billboard::init()
 {
-    _shader = new Shader( "./res/shader/billboard/", Shader::LOAD_GEOM );
+    _shader = Engine::ShaderManager->request( "./res/shader/billboard/", Shader::LOAD_GEOM );
 }
 
 void Billboard::destroy()
 {
-    delete _shader;
+    Engine::ShaderManager->release( _shader );
 }

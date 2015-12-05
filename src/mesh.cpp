@@ -1,6 +1,8 @@
 #include <mesh.h>
 #include <iostream>
 
+#include <engine.h>
+
 Shader * MeshObject::SHADER = 0;
 
 MeshObject::MeshObject( const MeshData& data, const Texture * tex )
@@ -29,42 +31,42 @@ MeshObject * MeshObject::genCube()
 {
     GLfloat verts[]
     {
-        -1.0,-1.0,-1.0, // triangle 1 : begin
-        -1.0,-1.0, 1.0,
-        -1.0, 1.0, 1.0, // triangle 1 : end
-        1.0, 1.0,-1.0, // triangle 2 : begin
-        -1.0,-1.0,-1.0,
-        -1.0, 1.0,-1.0, // triangle 2 : end
-        1.0,-1.0, 1.0,
-        -1.0,-1.0,-1.0,
-        1.0,-1.0,-1.0,
-        1.0, 1.0,-1.0,
-        1.0,-1.0,-1.0,
-        -1.0,-1.0,-1.0,
-        -1.0,-1.0,-1.0,
-        -1.0, 1.0, 1.0,
-        -1.0, 1.0,-1.0,
-        1.0,-1.0, 1.0,
-        -1.0,-1.0, 1.0,
-        -1.0,-1.0,-1.0,
-        -1.0, 1.0, 1.0,
-        -1.0,-1.0, 1.0,
-        1.0,-1.0, 1.0,
-        1.0, 1.0, 1.0,
-        1.0,-1.0,-1.0,
-        1.0, 1.0,-1.0,
-        1.0,-1.0,-1.0,
-        1.0, 1.0, 1.0,
-        1.0,-1.0, 1.0,
-        1.0, 1.0, 1.0,
-        1.0, 1.0,-1.0,
-        -1.0, 1.0,-1.0,
-        1.0, 1.0, 1.0,
-        -1.0, 1.0,-1.0,
-        -1.0, 1.0, 1.0,
-        1.0, 1.0, 1.0,
-        -1.0, 1.0, 1.0,
-        1.0,-1.0, 1.0
+        -1.0f,-1.0f,-1.0f, // triangle 1 : begin
+        -1.0f,-1.0f, 1.0f,
+        -1.0f, 1.0f, 1.0f, // triangle 1 : end
+        1.0f, 1.0f,-1.0f, // triangle 2 : begin
+        -1.0f,-1.0f,-1.0f,
+        -1.0f, 1.0f,-1.0f, // triangle 2 : end
+        1.0f,-1.0f, 1.0f,
+        -1.0f,-1.0f,-1.0f,
+        1.0f,-1.0f,-1.0f,
+        1.0f, 1.0f,-1.0f,
+        1.0f,-1.0f,-1.0f,
+        -1.0f,-1.0f,-1.0f,
+        -1.0f,-1.0f,-1.0f,
+        -1.0f, 1.0f, 1.0f,
+        -1.0f, 1.0f,-1.0f,
+        1.0f,-1.0f, 1.0f,
+        -1.0f,-1.0f, 1.0f,
+        -1.0f,-1.0f,-1.0f,
+        -1.0f, 1.0f, 1.0f,
+        -1.0f,-1.0f, 1.0f,
+        1.0f,-1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f,
+        1.0f,-1.0f,-1.0f,
+        1.0f, 1.0f,-1.0f,
+        1.0f,-1.0f,-1.0f,
+        1.0f, 1.0f, 1.0f,
+        1.0f,-1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f,
+        1.0f, 1.0f,-1.0f,
+        -1.0f, 1.0f,-1.0f,
+        1.0f, 1.0f, 1.0f,
+        -1.0f, 1.0f,-1.0f,
+        -1.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f,
+        -1.0f, 1.0f, 1.0f,
+        1.0f,-1.0f, 1.0f
     };
 
     GLfloat normals[]
@@ -109,42 +111,50 @@ MeshObject * MeshObject::genCube()
 
     GLfloat uvs[] =
     {
-        0, 0,
         1, 0,
         0, 1,
         0, 0,
+
+        1, 0,
+        1, 1,
+        0, 1,
+
         1, 0,
         0, 1,
         0, 0,
+
+        1, 0,
+        1, 1,
+        0, 1,
         1, 0,
         0, 1,
         0, 0,
+
+        1, 0,
+        1, 1,
+        0, 1,
         1, 0,
         0, 1,
         0, 0,
+
+        1, 0,
+        1, 1,
+        0, 1,
         1, 0,
         0, 1,
         0, 0,
+
+        1, 0,
+        1, 1,
+        0, 1,
+
         1, 0,
         0, 1,
         0, 0,
+
         1, 0,
+        1, 1,
         0, 1,
-        0, 0,
-        1, 0,
-        0, 1,
-        0, 0,
-        1, 0,
-        0, 1,
-        0, 0,
-        1, 0,
-        0, 1,
-        0, 0,
-        1, 0,
-        0, 1,
-        0, 0,
-        1, 0,
-        0, 1
     };
 
     MeshObject * cube = new MeshObject();
@@ -164,12 +174,12 @@ MeshObject * MeshObject::genCube()
 
 void MeshObject::init()
 {
-    SHADER = new Shader( "./res/shader/mesh/", Shader::LOAD_GEOM );
+    SHADER = Engine::ShaderManager->request( "./res/shader/mesh/", Shader::LOAD_GEOM );
 }
 
 void MeshObject::destroy()
 {
-    delete SHADER;
+    Engine::ShaderManager->release( SHADER );
 }
 
 IcoSphere::IcoSphere()
@@ -223,7 +233,7 @@ IcoSphere::IcoSphere()
 
     texture = 0;
     buffers = std::vector<BufferObject>( 2 );
-    shader = new Shader( "./res/shader/icosphere/", Shader::LOAD_FULL );
+    shader = Engine::ShaderManager->request( "./res/shader/icosphere/", Shader::LOAD_FULL );
 
     buffers[0].loadData( icoVerts, sizeof icoVerts );
     buffers[1].loadData( icoIndices, sizeof icoIndices );
@@ -242,7 +252,7 @@ void IcoSphere::render()
 
 IcoSphere::~IcoSphere()
 {
-    delete shader;
+    Engine::ShaderManager->release( shader );
 }
 
 void MeshObject::render()
@@ -259,13 +269,13 @@ void MeshObject::render()
     drawCall.execute();
 }
 
-Mesh::Mesh( const Camera * cam, MeshObject * data )
-    :   _cam( cam ),
-        _meshObject( data ),
+Mesh::Mesh( MeshObject * data )
+    :   _meshObject( data ),
         _wireframe( true ),
         _diffuseColor( 1, 0.5, 0.2, 1 ),
         _model( 1.0 )
 {
+    scale.setConstant( glm::vec3( 1, 1, 1) );
 }
 
 Mesh::~Mesh()
@@ -289,17 +299,5 @@ void Mesh::render()
     _meshObject->shader->setUniform( "wireframe", _wireframe );
     _meshObject->shader->setUniform( "DiffuseMaterial", _diffuseColor );
 
-    _cam->setUniforms( _meshObject->shader );
-
     _meshObject->render();
-}
-
-void Mesh::setCam( const Camera * cam )
-{
-    _cam = cam;
-}
-
-const Camera * Mesh::getCam() const
-{
-    return _cam;
 }

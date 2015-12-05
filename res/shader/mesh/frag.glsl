@@ -29,7 +29,6 @@ float amplify(float d, float scale, float offset)
 void main()
 {
     vec4 color = texture(tex, gUV);
-    color = DiffuseMaterial;
 
     if(wireframe)
     {

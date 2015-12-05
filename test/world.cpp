@@ -7,6 +7,7 @@
 #include <iostream>
 #include <framebuffer.h>
 #include <billboard.h>
+#include <engine.h>
 
 World::World ( GLFWwindow * window, int width, int height )
     :   _window ( window ),
@@ -19,13 +20,12 @@ World::World ( GLFWwindow * window, int width, int height )
         _font ( "/usr/share/fonts/TTF/DejaVuSansMono.ttf", 14 ),
         _time ( 0 ),
         _score ( 0 ),
-        _cam ( _window, ( float ) _width / _height ),
-        _cubeData ( MeshObject::genCube() ),
-        _cube ( &_cam, _cubeData ),
-        _player ( &_cam, &_sphereData ),
-        _lighting ( &_cam, _gBuffer ),
+        _player ( &_sphereData ),
+        _cam ( _window, &_player, ( float ) _width / _height ),
+        _testobj( glm::vec3( 1.2, 11, 0 ), 1 ),
+        _lighting ( _gBuffer ),
         _bullets ( &_cam, &_enemies ),
-        _lightwell ( &_cam, glm::vec3 ( 0, 0, 0 ) ),
+        _lightwell ( glm::vec3 ( 0, 0, 0 ) ),
         _heightmap ( HeightMap::genRandom ( 11 ) ),
         _spawnFrequency ( 0.1 ),
         _spawnTimer ( 1.0/_spawnFrequency )
@@ -42,8 +42,29 @@ World::World ( GLFWwindow * window, int width, int height )
     {
         errorExit ( "SOIL loading error: '%s'\n", SOIL_last_result() );
     }
+    
+    GLuint tex2 = SOIL_load_OGL_texture
+                 (
+                     "./res/textures/crate.jpg",
+                     SOIL_LOAD_AUTO,
+                     SOIL_CREATE_NEW_ID,
+                     SOIL_FLAG_INVERT_Y
+                 );
+
+    if ( 0 == tex2 )
+    {
+        errorExit ( "SOIL loading error: '%s'\n", SOIL_last_result() );
+    }
 
     glBindTexture ( GL_TEXTURE_2D, tex );
+    glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+    glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+    glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+    glGenerateMipmap ( GL_TEXTURE_2D );
+    glBindTexture ( GL_TEXTURE_2D, 0 );     
+    
+    glBindTexture ( GL_TEXTURE_2D, tex2 );
     glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
     glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
     glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
@@ -52,8 +73,9 @@ World::World ( GLFWwindow * window, int width, int height )
     glBindTexture ( GL_TEXTURE_2D, 0 );
 
     _groundTex = new Texture ( tex );
+    static Texture crateTex ( tex2 );
 
-    _terrain = new Terrain ( &_cam, &_heightmap, _groundTex );
+    _terrain = new Terrain ( &_heightmap, _groundTex );
     static PointLight p;
     p.position = glm::vec3 ( 0, 0, 0 );
     p.diffuse = glm::vec3 ( 1, 1, 1 );
@@ -61,18 +83,17 @@ World::World ( GLFWwindow * window, int width, int height )
     p.attenuation = glm::vec3 ( 0.1, 0.1, 1 );
     _lighting.addPointLight ( &p );
     _lighting.setAmbient ( glm::vec3 ( 0.3, 0.3, 0.3 ) );
-    _cubeData->texture = _groundTex;
-    _cube.scale.setConstant ( glm::vec3 ( 0.1, 0.1, 0.1 ) );
-    _cube.rotation.setLinear ( glm::vec3 ( 0, 1, 0 ) );
-    _cube.position.setConstant ( glm::vec3 ( 1, -1, 1 ) );
+    Engine::CubeObject->texture = &crateTex;
 
     //_player.toggleWireframe();
-    _player.scale.setConstant ( glm::vec3 ( 0.01, 0.01, 0.01 ) );
     _player.setColor ( glm::vec4 ( 1, 3, 2, 3 ) );
 
     _cam.addCollider ( _terrain );
     _canvas->enableDepthRenderBuffer();
     onResize ( width, height );
+    
+    Engine::Physics->dynamicsWorld->getPairCache()->setInternalGhostPairCallback( new btGhostPairCallback );
+    Engine::Physics->dynamicsWorld->setDebugDrawer( &_debugDrawer );
 }
 
 World::~World()
@@ -96,15 +117,52 @@ void World::step ( double dt )
     _fps = 1.0/dt;
 
     _cam.step ( dt );
-    _player.position.setConstant ( _cam.getPivotPoint() );
-    float v = 0.2*glm::length ( _cam.getPivotPointCurve().getLinear() ) /_player.scale.getConstant().z;
-    float oldv = _player.rotation.getConstant().x;
-    _player.rotation.setConstant ( glm::vec3 ( oldv + v*dt, 0.5*M_PI -_cam.getAngleY(), 0 ) );
-    //_player.rotation.setLinear( _cam.getPivotPointCurve().getLinear() );
     _player.step ( dt );
-    _cube.step ( dt );
     _bullets.step ( dt );
     _lightwell.step ( dt );
+    
+    Engine::Physics->dynamicsWorld->stepSimulation( dt, 10 );
+    
+    btManifoldArray manifoldArray;
+    btBroadphasePairArray& pairArray = _player.ghostObj()->getOverlappingPairCache()->getOverlappingPairArray();
+    
+    for( int i = 0 ; i < pairArray.size() ; ++i )
+    {
+        manifoldArray.clear();
+        
+        const btBroadphasePair& pair = pairArray[i];
+        
+        btBroadphasePair * collisionPair = Engine::Physics->dynamicsWorld->getPairCache()->findPair(
+            pair.m_pProxy0, pair.m_pProxy1);
+        
+        if( !collisionPair ) continue;
+        
+        if (collisionPair->m_algorithm)
+            collisionPair->m_algorithm->getAllContactManifolds(manifoldArray);
+        
+        for (int j=0;j<manifoldArray.size();j++)
+        {
+            btPersistentManifold* manifold = manifoldArray[j];
+            
+            bool isFirstBody = manifold->getBody0() == _player.ghostObj();
+            
+            btScalar direction = isFirstBody ? btScalar(-1.0) : btScalar(1.0);
+            
+            for (int p = 0; p < manifold->getNumContacts(); ++p)
+            {
+                const btManifoldPoint&pt = manifold->getContactPoint(p);
+                
+                if (pt.getDistance() < 0.f)
+                {
+                    const btVector3& ptA = pt.getPositionWorldOnA();
+                    const btVector3& ptB = pt.getPositionWorldOnB();
+                    const btVector3& normalOnB = pt.m_normalWorldOnB;
+                    
+                    std::cerr << "Collision detected" << std::endl;
+                }
+            }
+        }
+    }
 
     for ( size_t i = 0 ; i < _enemies.size() ; ++i )
     {
@@ -146,7 +204,7 @@ void World::step ( double dt )
     {
         _spawnTimer = 1.0/_spawnFrequency;
         static const float speed = 0.3;
-        Enemy * e = new Enemy ( &_cam, &_sphereData, _terrain );
+        Enemy * e = new Enemy ( &_sphereData, _terrain );
         e->position.setConstant ( glm::vec3 ( spawnArea.x + rnd() *spawnArea.z, 0, spawnArea.y + rnd() *spawnArea.w ) );
         glm::vec3 v = e->position.getLinear();
         v = glm::vec3 ( speed* ( rnd() - 0.5 ), 0, sqrt ( speed*speed - v.x*v.x ) );
@@ -174,19 +232,20 @@ void World::render()
     txt.setColor ( glm::vec4 ( 0.3, 1, 0.6, 0.6 ) );
     txt.setPosition ( glm::vec2 ( 5, 2 ) );
     
-    static Shader testshader( "./res/shader/mesh_instanced", Shader::LOAD_GEOM );
-
+    Engine::ActiveCam = &_cam;
     glDisable ( GL_BLEND );
     _gBuffer->clear();
     _terrain->render();
     _player.render();
     
-    Shader * old = _cubeData->shader;
-    _cubeData->shader = &testshader;
-    _cubeData->drawCall.setInstances( 10 );
+    Mesh cube( Engine::CubeObject );
+    cube.scale.setConstant( glm::vec3( 0.1, 0.1, 0.1 ));
+    cube.position.setConstant( glm::vec3( 5, -1, 0 ) );
+    cube.step( 1 );
+    cube.render();
+    
     _cube.render();
-    _cubeData->drawCall.setInstances( 0 );
-    _cubeData->shader = old;
+    _testobj.render();
     
     glEnable ( GL_BLEND );
 
@@ -200,8 +259,12 @@ void World::render()
     }
     _bullets.render();
     _lightwell.render();
+    
+    Engine::Physics->dynamicsWorld->debugDrawWorld();
 
     _bloomed->clear();
+    static Camera nullCam;
+    Engine::ActiveCam = &nullCam;
     bloom.render();
 
     /* post processing and text */
@@ -227,7 +290,7 @@ void World::onKeyAction ( int key, int scancode, int action, int mods )
             _bullets.shoot();
             break;
         case GLFW_KEY_SPACE:
-            _cam.jump();
+            _player.jump();
             break;
         }
     }

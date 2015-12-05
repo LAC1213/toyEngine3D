@@ -22,6 +22,21 @@ public:
         LOAD_FULL = 0x03
     };
 
+    class Manager
+    {
+    private:
+        typedef std::pair<Shader *, unsigned int> ShaderCounter; 
+        typedef std::pair<std::string, LoadFlag> ShaderInfo;
+        std::map<ShaderInfo, ShaderCounter> _shaders;
+    
+    public:
+        Manager();
+        ~Manager();
+        
+        Shader * request( const std::string& shaderDir, LoadFlag flags );
+        void release( Shader * shader );
+    };
+    
     Shader( const std::string& shaderDir, LoadFlag loadFlags );
     ~Shader();
    

@@ -10,6 +10,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <engine.h>
 
 using std::max;
 
@@ -28,6 +29,7 @@ void Shader::use()
 {
     if( this == Active )
         return;
+    Engine::ActiveCam->setUniforms( this );
     glUseProgram( _program );
     Active = this;
 }
@@ -348,3 +350,48 @@ Shader::Shader( const std::string& shaderDir, LoadFlag loadFlags )
     }
 }
 
+Shader::Manager::Manager()
+{
+}
+
+Shader::Manager::~Manager()
+{
+    for(auto iterator = _shaders.begin(); iterator != _shaders.end(); ++iterator) {
+        delete iterator->second.first;
+    }
+}
+
+void Shader::Manager::release ( Shader* shader )
+{
+    for(auto iterator = _shaders.begin(); iterator != _shaders.end(); ++iterator) {
+        if( iterator->second.first == shader )
+        {
+            iterator->second.second--;
+            if( iterator->second.second == 0 )
+            {
+                delete iterator->second.first;
+                _shaders.erase( iterator );
+            }
+        }
+    }
+}
+
+Shader* Shader::Manager::request ( const std::string& shaderDir, Shader::LoadFlag flags )
+{
+    ShaderInfo ci(shaderDir, flags);
+    auto search = _shaders.find( ci );
+    if( search == _shaders.end() )
+    {
+        ShaderCounter c;
+        c.first = new Shader( shaderDir, flags );
+        c.second = 1;
+        _shaders.insert( std::pair<ShaderInfo, ShaderCounter>(ci, c) );
+        return c.first;
+    }
+    else
+    {
+        ShaderCounter c = search->second;
+        search->second.second++;
+        return c.first;
+    }
+}

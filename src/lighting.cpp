@@ -7,9 +7,8 @@
 
 Shader * Lighting::_shader = nullptr;
 
-Lighting::Lighting ( PerspectiveCamera * cam, Framebuffer * gBuffer )
-    :   _cam ( cam ),
-        _gBuffer ( gBuffer ),
+Lighting::Lighting ( Framebuffer * gBuffer )
+    :   _gBuffer ( gBuffer ),
         _ambient ( 0.01, 0.01, 0.01 ),
         _sunDir ( 0.3, -1, 0 ),
         _sunDiffuse ( 0.05, 0.05, 0.05 ),
@@ -62,7 +61,6 @@ void Lighting::render()
 
     _shader->setUniform ( "ambient", glm::vec3 ( 0, 0, 0 ) );
     _shader->setUniform ( "sunDir", glm::vec3 ( 0, 0, 0 ) );
-    _cam->setUniforms ( _shader );
 
     _shader->use();
 
@@ -130,10 +128,10 @@ const glm::vec3& Lighting::getSunSpecular() const
 
 void Lighting::init()
 {
-    _shader = new Shader ( "./res/shader/lighting/", Shader::LOAD_BASIC );
+    _shader = Engine::ShaderManager->request( "./res/shader/lighting/", Shader::LOAD_BASIC );
 }
 
 void Lighting::destroy()
 {
-    delete _shader;
+    Engine::ShaderManager->release( _shader );
 }

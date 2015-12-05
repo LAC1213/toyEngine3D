@@ -5,6 +5,7 @@
 #include <actor.h>
 #include <vector>
 #include <internal/body.h>
+#include <camera.h>
 
 class Particle  
 {
@@ -35,7 +36,7 @@ public:
         SIZE
     };
 
-    ParticleSystem( PerspectiveCamera * cam, const Texture * texture );
+    ParticleSystem( const Texture * texture );
     virtual ~ParticleSystem();
 
     virtual void step( double dt );
@@ -47,7 +48,6 @@ public:
 protected:
     static Shader * _shader;
     std::vector<Particle> _particles;
-    PerspectiveCamera * _cam;
 
 private:
     std::vector<BufferObject> _buffers;
@@ -58,7 +58,7 @@ private:
 class SmoothTail : public ParticleSystem
 {
 public:
-    SmoothTail( PerspectiveCamera * cam );
+    SmoothTail( );
 
     virtual void step( double dt );
 
@@ -69,7 +69,7 @@ protected:
 class LightWell : public ParticleSystem
 {
 public:
-    LightWell( PerspectiveCamera * cam, glm::vec3 pos );
+    LightWell( glm::vec3 pos );
 
     void spawnParticle();
     virtual void step( double dt );

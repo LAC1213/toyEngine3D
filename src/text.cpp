@@ -2,6 +2,8 @@
 #include <internal/util.h>
 #include <vector>
 
+#include <engine.h>
+
 Shader * Text::_shader = 0;
 
 Text::Text( Font * font, std::string str, glm::vec2 screen )
@@ -114,12 +116,12 @@ void Text::init()
     if( FT_Init_FreeType( &Font::ft ) )
         errorExit( "Couldn't initialize freetype" );
 
-    _shader = new Shader( "./res/shader/text/", Shader::LOAD_BASIC );
+    _shader = Engine::ShaderManager->request( "./res/shader/text/", Shader::LOAD_BASIC );
 }
 
 void Text::destroy()
 {
-    delete _shader;
+    Engine::ShaderManager->release( _shader );
 }
 
 void Text::setPosition( glm::vec2 pos )

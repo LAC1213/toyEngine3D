@@ -9,6 +9,7 @@
 #include <collider.h>
 #include <actor.h>
 #include <vector>
+#include <player.h>
 
 class Camera
 {
@@ -99,7 +100,7 @@ class PlayerCamera : public PerspectiveCamera
 {
 public:
     PlayerCamera() {}
-    PlayerCamera( GLFWwindow * window, float aspect );
+    PlayerCamera( GLFWwindow * window, Player * player, float aspect );
 
     void addCollider( Collider * collider );
     void removeCollider( Collider * collider );
@@ -114,10 +115,6 @@ public:
     }
     glm::vec3 getPivotPoint() const
     {
-        return _pivotPoint.getValue();
-    }
-    QuadraticCurve<glm::vec3> getPivotPointCurve() const
-    {
         return _pivotPoint;
     }
 
@@ -130,13 +127,13 @@ protected:
     void pollInput();
     bool    _canJump;
 
+    Player * _player;
+
     glm::vec3 _pivot;
-    QuadraticCurve<glm::vec3> _pivotPoint;
+    glm::vec3 _pivotPoint;
 
     std::vector<Collider*> _colliders;
     GLFWwindow * _window;
-
-    QuadraticCurve<glm::vec2> _rotation;
 };
 
 #endif // CAMERA_H

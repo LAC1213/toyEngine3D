@@ -8,6 +8,10 @@
 #include <posteffect.h>
 #include <text.h>
 #include <particle.h>
+#include <wall.h>
+
+#include <internal/debugdrawer.h>
+#include <dynamiccube.h>
 
 class World
 {
@@ -26,6 +30,8 @@ public:
     GLFWwindow *    _window;
     int             _width;
     int             _height;
+    
+    DebugDrawer      _debugDrawer;
 
 //    MultiSampleFBO  _msaa;
     Framebuffer *   _gBuffer;
@@ -40,9 +46,9 @@ public:
     size_t          _score;
 
     PlayerCamera    _cam;
-    MeshObject *    _cubeData;
-    Mesh            _cube;
-    Mesh            _player;
+    DynamicCube     _testobj;
+    Wall            _cube;
+    Player          _player;
     Lighting        _lighting;
     BulletSpawner   _bullets;
     LightWell       _lightwell;

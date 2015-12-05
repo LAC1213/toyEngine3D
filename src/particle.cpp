@@ -3,11 +3,12 @@
 #include <random>
 #include <algorithm>
 
+#include <engine.h>
+
 Shader * ParticleSystem::_shader = 0;
 
-ParticleSystem::ParticleSystem( PerspectiveCamera * cam, const Texture * texture )
-    :   _cam( cam ),
-        _buffers( 4 ),
+ParticleSystem::ParticleSystem( const Texture * texture )
+    :   _buffers( 4 ),
         _drawCall( GL_POINTS ),
         _texture( texture )
 {
@@ -95,7 +96,6 @@ void ParticleSystem::render()
     glBlendFunc( GL_SRC_ALPHA, GL_ONE );
     glDepthMask( GL_FALSE );
 
-    _cam->setUniforms( _shader );
     _shader->use();
     _drawCall.execute();
 
@@ -105,16 +105,16 @@ void ParticleSystem::render()
 
 void ParticleSystem::init()
 {
-    _shader = new Shader( "./res/shader/particle/", Shader::LOAD_GEOM );
+    _shader =  Engine::ShaderManager->request( "./res/shader/particle/", Shader::LOAD_GEOM );
 }
 
 void ParticleSystem::destroy()
 {
-    delete _shader;
+    Engine::ShaderManager->release( _shader );
 }
 
-SmoothTail::SmoothTail( PerspectiveCamera * cam )
-    :   ParticleSystem( cam, 0 ),
+SmoothTail::SmoothTail()
+    :   ParticleSystem( 0 ),
         _pos( glm::vec3( -10, 0, 0 ), glm::vec3( 2, 0, 0 ) )
 {
 }
@@ -151,8 +151,8 @@ void SmoothTail::step( double dt )
     ParticleSystem::step( dt );
 }
 
-LightWell::LightWell( PerspectiveCamera * cam, glm::vec3 pos )
-    :   ParticleSystem( cam, 0 ),
+LightWell::LightWell( glm::vec3 pos )
+    :   ParticleSystem( 0 ),
         _pos( pos )
 {
 }
@@ -200,7 +200,7 @@ void LightWell::step( double dt )
 }
 
 BulletSpawner::BulletSpawner( PlayerCamera * cam, std::vector<Enemy*>* enemies )
-    :   ParticleSystem( cam, 0 ),
+    :   ParticleSystem( 0 ),
         _enemies( enemies ),
         _playerCam( cam )
 {
@@ -218,7 +218,7 @@ void BulletSpawner::step( double dt )
 void BulletSpawner::shoot()
 {
     glm::vec3 pos = _playerCam->getPosition();
-    glm::vec3 dir = glm::inverse( glm::mat3( _cam->getView() ) ) * glm::vec3( 0, 0, -8 );
+    glm::vec3 dir = glm::inverse( glm::mat3( _playerCam->getView() ) ) * glm::vec3( 0, 0, -8 );
 
     Particle bullet;
     bullet.position = QuadraticCurve<glm::vec3>( pos, dir );

@@ -43,13 +43,12 @@ void PerspectiveCamera::updateView()
 
 //////////////////////////////////////////////////////////////////
 
-PlayerCamera::PlayerCamera( GLFWwindow * window, float aspect )
+PlayerCamera::PlayerCamera( GLFWwindow * window, Player * player, float aspect )
     :   PerspectiveCamera( 45, aspect, 0.01f, 100.f ),
         _pivot( 0, -0.1, 0.3 ),
-        _window( window )
+        _window( window ),
+        _player( player )
 {
-    auto old = _pivotPoint.getQuadratic();
-    _pivotPoint.setQuadratic( glm::vec3( old.x, -2, old.z ) );
 }
 
 void PlayerCamera::addCollider( Collider * collider )
@@ -70,33 +69,10 @@ void PlayerCamera::removeCollider( Collider * collider )
 void PlayerCamera::step( double dt )
 {
     pollInput();
+    _pivotPoint = _player->position.getValue();
 
-    _pivotPoint.step( dt );
-    _rotation.step( dt );
-
-    for( size_t i = 0 ; i < _colliders.size() ; ++i )
-    {
-        glm::vec3 d = _colliders[i]->correct( _pivotPoint.getValue() - glm::vec3( 0, 0.01, 0 ) );
-        _pivotPoint.setConstant( d + _pivotPoint.getValue() );
-        if( glm::dot( d, d ) > 0 )
-        {
-            _canJump = true;
-            glm::vec3 old = _pivotPoint.getLinear();
-            _pivotPoint.setLinear( glm::vec3( old.x, 0, old.z ) );
-        }
-    }
-
-    _eye = _pivotPoint.getValue() - _pivot;
+    _eye = _pivotPoint - _pivot;
     lookAt( _pivotPoint );
-}
-
-void PlayerCamera::jump()
-{
-    if( !_canJump )
-        return;
-    auto old = _pivotPoint.getLinear();
-    _pivotPoint.setLinear( glm::vec3( old.x, 1, old.z ) );
-    _canJump = false;
 }
 
 void PlayerCamera::onMouseMove( double dx, double dy )
@@ -112,8 +88,8 @@ void PlayerCamera::onMouseMove( double dx, double dy )
     _pivot.z = sin( _angleY );
     _pivot *= r/glm::length( _pivot );
 
-    _eye = _pivotPoint.getValue() - _pivot;
-    lookAt( _pivotPoint.getValue() );
+    _eye = _pivotPoint - _pivot;
+    lookAt( _pivotPoint );
 }
 
 void PlayerCamera::pollInput()
@@ -142,6 +118,5 @@ void PlayerCamera::pollInput()
     glm::mat4 m = glm::inverse( getView() );
     glm::vec3 v1 = glm::mat3( m ) * glm::vec3( v.x, 0, v.y );
 
-    float y = _pivotPoint.getLinear().y;
-    _pivotPoint.setLinear( glm::vec3( v1.x, y, v1.z ) );
+    _player->move( v1 );
 }
