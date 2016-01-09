@@ -14,6 +14,8 @@ MeshObject::MeshObject( const MeshData& data, const Texture * tex )
     buffers[3].loadData( data.indices, data.elements*sizeof( unsigned short ) );
     buffers[3].setTarget( GL_ELEMENT_ARRAY_BUFFER );
     drawCall.setIndexBuffer( &buffers[3] );
+    
+    drawCall.setElements( data.elements );
 
     drawCall.addAttribute( VertexAttribute( &buffers[0], GL_FLOAT, 3 ) );
     drawCall.addAttribute( VertexAttribute( &buffers[1], GL_FLOAT, 3 ) );
@@ -275,7 +277,6 @@ Mesh::Mesh( MeshObject * data )
         _diffuseColor( 1, 0.5, 0.2, 1 ),
         _model( 1.0 )
 {
-    scale.setConstant( glm::vec3( 1, 1, 1) );
 }
 
 Mesh::~Mesh()
@@ -287,14 +288,9 @@ void Mesh::toggleWireframe()
     _wireframe ^= true;
 }
 
-void Mesh::step( float dt )
-{
-    Actor::step( dt );
-    _model = getModel();
-}
-
 void Mesh::render()
 {
+    _meshObject->shader->use();
     _meshObject->shader->setUniform( "model", _model );
     _meshObject->shader->setUniform( "wireframe", _wireframe );
     _meshObject->shader->setUniform( "DiffuseMaterial", _diffuseColor );

@@ -1,9 +1,9 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
-#include <engine.h>
+#include <btBulletDynamicsCommon.h>
 
-class Entity : public Renderable
+class Entity
 {
 public:
     Entity() {};

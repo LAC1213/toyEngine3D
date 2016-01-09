@@ -13,7 +13,7 @@ class Font
 public:
     static FT_Library ft;
 
-    Font( std::string name, int fontSize );
+    Font( const char * name, int fontSize );
     ~Font();
 
     struct CharInfo

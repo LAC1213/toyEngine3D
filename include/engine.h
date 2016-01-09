@@ -18,6 +18,7 @@
 #include <string>
 
 #include <btBulletDynamicsCommon.h>
+#include <shapemanager.hpp>
 
 struct PhysicsVars
 {
@@ -37,6 +38,8 @@ namespace Engine
 extern std::string Root;
 
 extern Shader::Manager * ShaderManager;
+extern BoxShapeManagerT * BoxShapeManager;
+extern SphereShapeManagerT * SphereShapeManager;
 
 extern PhysicsVars * Physics;
 extern MeshObject * CubeObject;

@@ -21,6 +21,8 @@ public:
 
     void setParameter( GLenum name, GLint param ) const;
     void setParameter( GLenum name, GLfloat param ) const;
+    
+    void genMipmap() const;
 
     void loadFromFile( const std::string& path );
     void loadData( float * data ) const;

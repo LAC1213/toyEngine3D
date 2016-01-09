@@ -60,6 +60,8 @@ public:
     double          _spawnTimer;
 
     double          _fps;
+    
+    bool            _drawDebug;
 };
 
 #endif //WORLD_H

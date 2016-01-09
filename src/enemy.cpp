@@ -14,7 +14,7 @@ Enemy::Enemy( MeshObject * data, Collider * collider )
 
 void Enemy::step( double dt )
 {
-    Mesh::step( dt );
+    Actor::step( dt );
 
     glm::vec3 p = position.getValue();
     glm::vec3 v = position.getLinear();

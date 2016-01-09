@@ -2,8 +2,9 @@
 #define DYNAMICCUBE_H
 
 #include <entity.h>
+#include <renderable.h>
 
-class DynamicCube : public Entity
+class DynamicCube : public Entity, public Renderable
 {
 public:
     DynamicCube( const glm::vec3& pos, float mass );
@@ -12,7 +13,6 @@ public:
     virtual void render();
     
 protected:
-    
     btDefaultMotionState * _motionState;
 };
 

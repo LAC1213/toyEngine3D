@@ -17,65 +17,31 @@ World::World ( GLFWwindow * window, int width, int height )
         _gBuffer ( Framebuffer::genGeometryBuffer() ),
         _canvas ( Framebuffer::genScreenBuffer() ),
         _bloomed ( Framebuffer::genScreenBuffer() ),
-        _font ( "/usr/share/fonts/TTF/DejaVuSansMono.ttf", 14 ),
+        _font ( "/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf", 14 ),
         _time ( 0 ),
         _score ( 0 ),
-        _player ( &_sphereData ),
         _cam ( _window, &_player, ( float ) _width / _height ),
         _testobj( glm::vec3( 1.2, 11, 0 ), 1 ),
         _lighting ( _gBuffer ),
         _bullets ( &_cam, &_enemies ),
         _lightwell ( glm::vec3 ( 0, 0, 0 ) ),
-        _heightmap ( HeightMap::genRandom ( 11 ) ),
+        _heightmap ( HeightMap::genRandom ( 6 ) ),
         _spawnFrequency ( 0.1 ),
-        _spawnTimer ( 1.0/_spawnFrequency )
+        _spawnTimer ( 1.0/_spawnFrequency ),
+        _drawDebug ( false )
 {
-    GLuint tex = SOIL_load_OGL_texture
-                 (
-                     "./res/textures/ground.jpg",
-                     SOIL_LOAD_AUTO,
-                     SOIL_CREATE_NEW_ID,
-                     SOIL_FLAG_INVERT_Y
-                 );
-
-    if ( 0 == tex )
-    {
-        errorExit ( "SOIL loading error: '%s'\n", SOIL_last_result() );
-    }
+    _groundTex = new Texture ();
+    _groundTex->loadFromFile( "./res/textures/ground.jpg" );
+    _groundTex->setParameter( GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    _groundTex->setParameter( GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+    _groundTex->setParameter( GL_TEXTURE_WRAP_S, GL_REPEAT );
+    _groundTex->setParameter( GL_TEXTURE_WRAP_T, GL_REPEAT );
+    _groundTex->genMipmap();
     
-    GLuint tex2 = SOIL_load_OGL_texture
-                 (
-                     "./res/textures/crate.jpg",
-                     SOIL_LOAD_AUTO,
-                     SOIL_CREATE_NEW_ID,
-                     SOIL_FLAG_INVERT_Y
-                 );
-
-    if ( 0 == tex2 )
-    {
-        errorExit ( "SOIL loading error: '%s'\n", SOIL_last_result() );
-    }
-
-    glBindTexture ( GL_TEXTURE_2D, tex );
-    glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-    glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-    glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-    glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-    glGenerateMipmap ( GL_TEXTURE_2D );
-    glBindTexture ( GL_TEXTURE_2D, 0 );     
+    _cube.setModel( glm::vec3(0), glm::vec3(0), glm::vec3( 0.1, 0.1, 0.1 ) );
     
-    glBindTexture ( GL_TEXTURE_2D, tex2 );
-    glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-    glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-    glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-    glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-    glGenerateMipmap ( GL_TEXTURE_2D );
-    glBindTexture ( GL_TEXTURE_2D, 0 );
-
-    _groundTex = new Texture ( tex );
-    static Texture crateTex ( tex2 );
-
-    _terrain = new Terrain ( &_heightmap, _groundTex );
+   // _terrain = new Terrain ( &_heightmap, _groundTex );
+   // _terrain->toggleWireframe();
     static PointLight p;
     p.position = glm::vec3 ( 0, 0, 0 );
     p.diffuse = glm::vec3 ( 1, 1, 1 );
@@ -83,16 +49,14 @@ World::World ( GLFWwindow * window, int width, int height )
     p.attenuation = glm::vec3 ( 0.1, 0.1, 1 );
     _lighting.addPointLight ( &p );
     _lighting.setAmbient ( glm::vec3 ( 0.3, 0.3, 0.3 ) );
-    Engine::CubeObject->texture = &crateTex;
-
-    //_player.toggleWireframe();
-    _player.setColor ( glm::vec4 ( 1, 3, 2, 3 ) );
-
-    _cam.addCollider ( _terrain );
+    
+    _lighting.addPointLight ( _player.light() );
+    
     _canvas->enableDepthRenderBuffer();
     onResize ( width, height );
     
     Engine::Physics->dynamicsWorld->getPairCache()->setInternalGhostPairCallback( new btGhostPairCallback );
+    _debugDrawer.setDebugMode( btIDebugDraw::DBG_DrawWireframe );
     Engine::Physics->dynamicsWorld->setDebugDrawer( &_debugDrawer );
 }
 
@@ -116,18 +80,22 @@ void World::step ( double dt )
 
     _fps = 1.0/dt;
 
-    _cam.step ( dt );
-    _player.step ( dt );
+    _player.step( dt );
+    _cam.step( dt );
     _bullets.step ( dt );
     _lightwell.step ( dt );
     
-    Engine::Physics->dynamicsWorld->stepSimulation( dt, 10 );
+    _cube.setModel( glm::vec3(0), glm::vec3(1, 1, 0), glm::vec3( 1, 1, 1 ) );
     
+    Engine::Physics->dynamicsWorld->stepSimulation( dt, 10 );
+
+    /*
     btManifoldArray manifoldArray;
     btBroadphasePairArray& pairArray = _player.ghostObj()->getOverlappingPairCache()->getOverlappingPairArray();
     
     for( int i = 0 ; i < pairArray.size() ; ++i )
     {
+        std::cout << "bla" << std::endl;
         manifoldArray.clear();
         
         const btBroadphasePair& pair = pairArray[i];
@@ -158,11 +126,11 @@ void World::step ( double dt )
                     const btVector3& ptB = pt.getPositionWorldOnB();
                     const btVector3& normalOnB = pt.m_normalWorldOnB;
                     
-                    std::cerr << "Collision detected" << std::endl;
+                    std::cout << "Collision detected" << std::endl;
                 }
             }
         }
-    }
+    }*/
 
     for ( size_t i = 0 ; i < _enemies.size() ; ++i )
     {
@@ -194,7 +162,7 @@ void World::step ( double dt )
             ++_score;
         }
     }
-
+    /*
     auto rnd = [] ()
     {
         return ( float ) rand() / RAND_MAX;
@@ -216,7 +184,7 @@ void World::step ( double dt )
         _enemies.push_back ( e );
         _cam.addCollider ( e );
         _lighting.addPointLight ( &e->pointLight() );
-    }
+    } */
 }
 
 void World::render()
@@ -227,7 +195,8 @@ void World::render()
     glViewport ( 0, 0, _width, _height );
     std::stringstream ss;
     ss.precision ( 5 );
-    ss << "Score: " << _score << " Spheres: " << _enemies.size() << "  Time: " << _time << " FPS: " << _fps;
+    glm::vec3 p = _player.getPos();
+    ss << "Score: " << _score << " Pos: " << p << " Vel: " << _player.getVelocity() << "  Time: " << _time << " FPS: " << _fps;
     Text txt ( &_font, ss.str(), glm::vec2 ( _width, _height ) );
     txt.setColor ( glm::vec4 ( 0.3, 1, 0.6, 0.6 ) );
     txt.setPosition ( glm::vec2 ( 5, 2 ) );
@@ -235,22 +204,18 @@ void World::render()
     Engine::ActiveCam = &_cam;
     glDisable ( GL_BLEND );
     _gBuffer->clear();
-    _terrain->render();
-    _player.render();
-    
-    Mesh cube( Engine::CubeObject );
-    cube.scale.setConstant( glm::vec3( 0.1, 0.1, 0.1 ));
-    cube.position.setConstant( glm::vec3( 5, -1, 0 ) );
-    cube.step( 1 );
-    cube.render();
+  //  _terrain->render();
     
     _cube.render();
     _testobj.render();
     
     glEnable ( GL_BLEND );
 
+    static Camera nullCam;
+  
     _canvas->clear();
     _canvas->copyDepth ( *_gBuffer );
+    
     _lighting.render();
 
     for ( size_t i = 0 ; i < _enemies.size() ; ++i )
@@ -258,22 +223,39 @@ void World::render()
         _enemies[i]->render();
     }
     _bullets.render();
-    _lightwell.render();
+    _player.render();
+   // _lightwell.render();
     
+    if( _drawDebug )
+        _debugDrawer.setDebugMode( btIDebugDraw::DBG_DrawWireframe );
+    else
+        _debugDrawer.setDebugMode( btIDebugDraw::DBG_NoDebug );
+    
+    glDisable( GL_DEPTH_TEST );
     Engine::Physics->dynamicsWorld->debugDrawWorld();
-
-    _bloomed->clear();
-    static Camera nullCam;
+    /* x: green, y: blue, z: red */
+    if( _drawDebug )
+    {
+        _debugDrawer.drawLine( btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(0, 1, 0));
+        _debugDrawer.drawLine( btVector3(0, 0, 0), btVector3(0, 1, 0), btVector3(0, 0, 1));
+        _debugDrawer.drawLine( btVector3(0, 0, 0), btVector3(0, 0, 1), btVector3(1, 0, 0));
+    }
+    glEnable( GL_DEPTH_TEST );
+    
     Engine::ActiveCam = &nullCam;
+   
+    _bloomed->clear();
     bloom.render();
 
     /* post processing and text */
-
+    
     Framebuffer::Screen.clear();
     effect.render();
     txt.render();
-
+    
+    Engine::ActiveCam = &_cam;
 }
+
 void World::onKeyAction ( int key, int scancode, int action, int mods )
 {
     if ( action == GLFW_PRESS )
@@ -284,13 +266,16 @@ void World::onKeyAction ( int key, int scancode, int action, int mods )
             exit ( EXIT_SUCCESS );
             break;
         case GLFW_KEY_Z:
-            _terrain->toggleWireframe();
+            _drawDebug ^= true;
             break;
         case GLFW_KEY_X:
             _bullets.shoot();
             break;
         case GLFW_KEY_SPACE:
             _player.jump();
+            break;
+        case GLFW_KEY_F:
+            _testobj.body()->applyImpulse( btVector3( 0, 3, 0 ), btVector3( 0, 0, 0 ) );
             break;
         }
     }

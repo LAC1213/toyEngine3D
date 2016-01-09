@@ -1,6 +1,10 @@
 #include <texture.h>
 #include <iostream>
 
+#include <SOIL/SOIL.h>
+
+#include <internal/util.h>
+
 Texture Texture::Null( 0 );
 const Texture* Texture::Active = &Texture::Null;
 
@@ -90,6 +94,14 @@ void Texture::setParameter( GLenum name, GLfloat param ) const
     glTexParameterf( _target, name, param );
 }
 
+/** glGenerateMipmap() wrapper
+ */
+void Texture::genMipmap() const
+{
+    bind();
+    glGenerateMipmap( _target );
+}
+
 /** glTexImage2D() wrapper
  */
 void Texture::loadData( float * data ) const
@@ -112,6 +124,15 @@ void Texture::loadData( unsigned char * data ) const
 {
     bind();
     glTexImage2D( _target, 0, _internalFormat, _width, _height, 0, _format, GL_UNSIGNED_BYTE, data );
+}
+
+/** load texture data from file using SOIL
+ */
+void Texture::loadFromFile ( const std::string& path )
+{
+    std::cerr << log_info << "Loading Texture " << path << log_endl;
+    if(!SOIL_load_OGL_texture( path.c_str(), SOIL_LOAD_AUTO, _id, 0 ))
+        std::cerr << log_alert << "SOIL error: " << SOIL_last_result() << log_endl;
 }
 
 /** Set the size of the texture

@@ -36,7 +36,8 @@ namespace Engine
 std::string Root = ".";
 PhysicsVars * Physics = nullptr;
 
-Camera * ActiveCam = nullptr;
+static Camera nullCam;
+Camera * ActiveCam = &nullCam;
 
 BufferObject * QuadBuffer = nullptr;
 DrawCall * DrawScreenQuad = nullptr;
@@ -44,6 +45,8 @@ MeshObject * CubeObject = nullptr;
 btCollisionShape * CubeShape = nullptr;
 
 Shader::Manager * ShaderManager = nullptr;
+BoxShapeManagerT * BoxShapeManager = nullptr;
+SphereShapeManagerT * SphereShapeManager = nullptr;
 
 static bool initialized = false;
 
@@ -74,14 +77,14 @@ void init()
     if( resPath )
     {
         chdir( resPath );
-        info( "engine root at " + std::string( resPath ) );
+        std::cerr << log_info << "engine root at " << std::string( resPath ) << log_endl;
         Root = std::string(resPath);
     }
     else
     {
         char wd[4096];
         getcwd( wd, sizeof wd );
-        info( "engine root at " + std::string( wd ) );
+        std::cerr << log_info << "engine root at " << std::string( wd ) << log_endl;
         Root = std::string(wd);
     }
 
@@ -90,26 +93,19 @@ void init()
     conf.setGroup( "Modules" );
     
     ShaderManager = new Shader::Manager;
+    BoxShapeManager = new BoxShapeManagerT;
+    SphereShapeManager = new SphereShapeManagerT;
 
-    if( conf.getBool("Lighting") )
-        Lighting::init();
-    if( conf.getBool("PostEffect") )
-        PostEffect::init();
-    if( conf.getBool("Billboard") )
-        Billboard::init();
-    if( conf.getBool("Particles") )
-        ParticleSystem::init();
-    if( conf.getBool("Text") )
-        Text::init();
-    if( conf.getBool("Terrain") )
-        Terrain::init();
+    Lighting::init();
+    PostEffect::init();
+    Billboard::init();
+    ParticleSystem::init();
+    Text::init();
+    Terrain::init();
 
     MeshObject::init();
     CubeObject = MeshObject::genCube();
     CubeShape = new btBoxShape( btVector3(1, 1, 1) );
-
-    static Camera nullCam;
-    ActiveCam = &nullCam;
 
     initialized = true;
 }
@@ -119,6 +115,8 @@ void destroy()
     if( !initialized ) return;
 
     delete ShaderManager;
+    delete BoxShapeManager;
+    delete SphereShapeManager;
     
     delete Physics;
 
@@ -137,4 +135,4 @@ void destroy()
     initialized = false;
 }
 
-}
+} //namespace Engine

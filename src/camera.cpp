@@ -1,4 +1,4 @@
-#include <camera.h>
+    #include <camera.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -69,7 +69,7 @@ void PlayerCamera::removeCollider( Collider * collider )
 void PlayerCamera::step( double dt )
 {
     pollInput();
-    _pivotPoint = _player->position.getValue();
+    _pivotPoint = _player->getPos();
 
     _eye = _pivotPoint - _pivot;
     lookAt( _pivotPoint );
@@ -95,7 +95,7 @@ void PlayerCamera::onMouseMove( double dx, double dy )
 void PlayerCamera::pollInput()
 {
     glm::vec2 v;
-    constexpr float ds = 0.8;
+    constexpr float ds = 4;
     if( glfwGetKey( _window, GLFW_KEY_D ) == GLFW_PRESS )
     {
         v.x = 1;

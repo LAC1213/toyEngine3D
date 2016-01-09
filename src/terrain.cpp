@@ -6,6 +6,8 @@
 
 Shader * Terrain::SHADER = 0;
 
+constexpr float bullet2glfactor = 1000;
+
 Terrain::Terrain( HeightMap * heightmap, const Texture * texture )
     :   _heightmap( heightmap )
 {
@@ -13,6 +15,21 @@ Terrain::Terrain( HeightMap * heightmap, const Texture * texture )
     _depth = 25;
     _maxHeight = 15;
     _quadCount = 25;
+    
+    _shape = new btHeightfieldTerrainShape( 
+        heightmap->width, heightmap->height, 
+        _heightmap->data, 1.0,
+        -0.5, 0.5, 1, PHY_FLOAT, false
+    );
+    
+    _shape->setLocalScaling( btVector3( (float)_width/heightmap->width, _maxHeight/bullet2glfactor, (float)_width/heightmap->height ) );
+    
+    _motionState = new btDefaultMotionState;
+    
+    btRigidBody::btRigidBodyConstructionInfo ci(0, _motionState, _shape, btVector3( 0, 0, 0 ) );
+    _body = new btRigidBody( ci );
+    
+    Engine::Physics->dynamicsWorld->addRigidBody( _body );
 
     _meshObject = new MeshObject();
 
@@ -20,7 +37,7 @@ Terrain::Terrain( HeightMap * heightmap, const Texture * texture )
     _wireframe = false;
     _diffuseColor = glm::vec4( 0.6, 0.6, 0.6, 1 );
     glm::mat4 s = glm::scale( glm::mat4( 1 ), glm::vec3( _width, _maxHeight, _depth ) );
-    _model = glm::translate( glm::mat4( 1.0f ), glm::vec3( -12.5, -5, -12.5 ) ) * s;
+    _model = glm::translate( glm::mat4( 1.0f ), glm::vec3( -12.5, -0.5*_maxHeight, -12.5 ) ) * s;
 
     _meshObject->shader = SHADER;
     _meshObject->drawCall.setMode( GL_PATCHES );
@@ -64,6 +81,10 @@ Terrain::Terrain( HeightMap * heightmap, const Texture * texture )
 Terrain::~Terrain()
 {
     delete _meshObject;
+    
+    delete _body;
+    delete _motionState;
+    delete _shape;
 }
 
 void Terrain::render()
@@ -96,17 +117,17 @@ static double getRnd()
 }
 
 /* stack overflow copy paste :P */
-static void diamondSquare( double ** data, unsigned int size )
+static void diamondSquare( float ** data, unsigned int size )
 {
 //value 2^n+1
     unsigned int DATA_SIZE = size;
 //an initial seed value for the corners of the data
-    constexpr double SEED = 0.5;
+    constexpr float SEED = 0;
 //seed the data
     data[0][0] = data[0][DATA_SIZE-1] = data[DATA_SIZE-1][0] =
                                             data[DATA_SIZE-1][DATA_SIZE-1] = SEED;
 
-    double h = 0.25;//the range (-h -> +h) for the average offset
+    float h = 0.25;//the range (-h -> +h) for the average offset
     //for the new value in range of h
 //side length is distance of a single square side
 //or distance of diagonal in diamond
@@ -131,7 +152,7 @@ static void diamondSquare( double ** data, unsigned int size )
             {
                 //x, y is upper left corner of square
                 //calculate average of existing corners
-                double avg = data[x][y] + //top left
+                float avg = data[x][y] + //top left
                              data[x+sideLength][y] +//top right
                              data[x][y+sideLength] + //lower left
                              data[x+sideLength][y+sideLength];//lower right
@@ -162,7 +183,7 @@ static void diamondSquare( double ** data, unsigned int size )
                 //x, y is center of diamond
                 //note we must use mod  and add DATA_SIZE for subtraction
                 //so that we can wrap around the array to find the corners
-                double avg =
+                float avg =
                     data[( x-halfSide+DATA_SIZE )%DATA_SIZE][y] + //left of center
                     data[( x+halfSide )%DATA_SIZE][y] + //right of center
                     data[x][( y+halfSide )%DATA_SIZE] + //below center
@@ -192,10 +213,10 @@ HeightMap HeightMap::genRandom( unsigned int pow )
 {
     unsigned int width = exp2( pow ) + 1;
     unsigned short * heights = new unsigned short[ width*width ];
-    double ** data = new double*[ width ];
+    float ** data = new float*[ width ];
     for( size_t i = 0 ; i < width ; ++i )
     {
-        data[ i ] = new double[ width ];
+        data[ i ] = new float[ width ];
     }
 
     diamondSquare( data, width );
@@ -203,7 +224,7 @@ HeightMap HeightMap::genRandom( unsigned int pow )
     for( size_t i = 0 ; i < width ; ++i )
         for( size_t j = 0 ; j < width ; ++j )
         {
-            heights[ i*width +j ] = 0xffff * data[i][j];
+            heights[ i*width +j ] = 0xffff * (data[i][j] + 0.5);
         }
 
     GLuint tex;
@@ -219,7 +240,17 @@ HeightMap HeightMap::genRandom( unsigned int pow )
     delete[] heights;
 
     HeightMap heightmap( width, width );
-    heightmap.data = data;
+    
+    float * flatdata = new float[width*width];
+    for(int i = 0 ; i < width ; ++i)
+        for(int j = 0 ; j < width ; ++j)
+            flatdata[i*width + j] = bullet2glfactor*data[i][j];
+        
+    for( size_t i = 0 ; i < width ; ++i )
+        delete[] data[i];
+    delete[] data;
+    
+    heightmap.data = flatdata;
     heightmap.texture = new Texture( tex );
     return heightmap;
 }
@@ -228,9 +259,7 @@ HeightMap::HeightMap( const HeightMap& copy )
     :   width( copy.width ),
         height( copy.height )
 {
-    memcpy( data, copy.data, width*sizeof( *data ) );
-    for( size_t i = 0 ; i < width ; ++i )
-        memcpy( data[i], copy.data[i], height*sizeof( **data ) );
+    memcpy( data, copy.data, width*height );
 }
 
 HeightMap::HeightMap( size_t w, size_t h )
@@ -241,8 +270,6 @@ HeightMap::HeightMap( size_t w, size_t h )
 
 HeightMap::~HeightMap()
 {
-    for( size_t i = 0 ; i < width ; ++i )
-        delete[] data[i];
     delete[] data;
     delete texture;
 }

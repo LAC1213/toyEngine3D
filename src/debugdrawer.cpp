@@ -5,21 +5,20 @@
 
 DebugDrawer::DebugDrawer() : _drawCall( GL_LINES )
 {
-    _drawCall.addAttribute( VertexAttribute( &_points, GL_FLOAT, 3 ) );
     _drawCall.addAttribute( VertexAttribute( &_points, GL_FLOAT, 3) );
-    _drawCall.setElements( 1 );
-    _shader = new Shader( "./res/shader/line/", Shader::LOAD_BASIC );
+    _drawCall.addAttribute( VertexAttribute( &_colors, GL_FLOAT, 3) );
+    _drawCall.setElements( 2 );
+    _shader = Engine::ShaderManager->request("./res/shader/line/", Shader::LOAD_BASIC );
 }
 
 DebugDrawer::~DebugDrawer()
 {
-    delete _shader;
+    Engine::ShaderManager->release( _shader );
 }
 
 void DebugDrawer::drawLine ( const btVector3& from, const btVector3& to, const btVector3& color )
 {
     drawLine( from, to, color, color );
-    std::cout << "drawLine" << std::endl;
 }
 
 void DebugDrawer::draw3dText ( const btVector3& location, const char* textString )
@@ -41,15 +40,35 @@ void DebugDrawer::drawLine ( const btVector3& from, const btVector3& to, const b
     
     GLfloat colorData[] = {
         fromColor.getX(), fromColor.getY(), fromColor.getZ(),
-        fromColor.getX(), toColor.getY(), toColor.getZ()
+        toColor.getX(), toColor.getY(), toColor.getZ()
     };
+    
     _points.loadData( pointData, sizeof pointData );
     _colors.loadData( colorData, sizeof colorData );
     
     _shader->use();
     
     _drawCall();
-    std::cout << "drawLine" << std::endl;
+    
+//    _pointData.insert( std::end(_pointData), std::begin(pointData), std::end(pointData));
+//    _colorData.insert( std::end(_colorData), std::begin(colorData), std::end(colorData));
+}
+
+void DebugDrawer::render()
+{
+    glDisable( GL_DEPTH_TEST );
+    
+    _points.loadData( _pointData.data(), _pointData.size() * sizeof(GLfloat) );
+    _colors.loadData( _colorData.data(), _colorData.size() * sizeof(GLfloat) );
+    
+    _shader->use();
+    
+    _drawCall.execute();
+    
+    glEnable( GL_DEPTH_TEST );
+    
+    _pointData.clear();
+    _colorData.clear();
 }
 
 void DebugDrawer::drawSphere ( const btVector3& p, btScalar radius, const btVector3& color )

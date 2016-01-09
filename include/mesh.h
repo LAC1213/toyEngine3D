@@ -58,7 +58,7 @@ public:
     virtual void render();
 };
 
-class Mesh : public Renderable, public Actor
+class Mesh : public Renderable
 {
 public:
     Mesh() {}
@@ -66,14 +66,15 @@ public:
     virtual ~Mesh();
     
     virtual void render();
-    virtual void step( float dt );
 
     void toggleWireframe();
 
-    void setColor( glm::vec4 color ) { _diffuseColor = color; }
+    void setColor( const glm::vec4& color ) { _diffuseColor = color; }
+    void setModel( const glm::mat4& model ) { _model = model; }
     
 protected:
     MeshObject * _meshObject;
+    
     /* uniforms */
     bool        _wireframe;
     glm::vec4   _diffuseColor;

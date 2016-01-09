@@ -1,9 +1,11 @@
 #include <wall.h>
+#include <engine.h>
 
 Wall::Wall() : _model(1)
 {
     _motionState = new btDefaultMotionState;
-    btRigidBody::btRigidBodyConstructionInfo bodyCI(0, _motionState, Engine::CubeShape, btVector3(0, 0, 0));
+    _shape = Engine::BoxShapeManager->request( glm::vec3(1) );
+    btRigidBody::btRigidBodyConstructionInfo bodyCI(0, _motionState, _shape, btVector3(0, 0, 0));
     _body = new btRigidBody( bodyCI );
     Engine::Physics->dynamicsWorld->addRigidBody( _body );
 }
@@ -12,6 +14,7 @@ Wall::~Wall()
 {
     delete _motionState;
     delete _body;
+    Engine::BoxShapeManager->release( _shape );
 }
 
 void Wall::render()
@@ -23,12 +26,18 @@ void Wall::render()
     Engine::CubeObject->render();
 }
 
-void Wall::setModel( const glm::mat4& model )
+void Wall::setModel( const glm::vec3& trans, const glm::vec3& rot, const glm::vec3& scale )
 {
-    _model = model;
+    _model = makeModel( trans, rot, scale);
+    
     btTransform t;
-    t.setFromOpenGLMatrix( glm::value_ptr( model ) );
-    _motionState->setWorldTransform(t);
+    t.setIdentity();
+    t.setOrigin( glm2bt( trans ) );
+    t.setRotation( btQuaternion( rot.x, rot.y, rot.z ) );
+    _body->setCenterOfMassTransform( t );
+    
+    Engine::BoxShapeManager->release( _shape );
+    _shape = Engine::BoxShapeManager->request( scale );
 }
 
 const glm::mat4& Wall::getModel() const

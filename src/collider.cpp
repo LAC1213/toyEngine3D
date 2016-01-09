@@ -78,7 +78,7 @@ bool Terrain::contains( const glm::vec3& p ) const
     if( x < 0 || z < 0 || x > _heightmap->height || z > _heightmap->width )
         return false;
 
-    double th = _maxHeight * _heightmap->data[ ( int )x ][ ( int )z ];
+    double th = _maxHeight * _heightmap->data[ ( int )x*_heightmap->width + ( int )z ];
     // std::cout << "terrain height at " << x << " , " << z << " = " << th << std::endl;
     return point.y < th;
 }
@@ -92,7 +92,7 @@ glm::vec3 Terrain::correct( const glm::vec3& p ) const
     if( x < 0 || z < 0 || x > _heightmap->height || z > _heightmap->width )
         return glm::vec3( 0, 0, 0 );
 
-    double th = _maxHeight * _heightmap->data[ ( int )x ][ ( int )z ];
+    double th = _maxHeight * _heightmap->data[ ( int )x*_heightmap->width + ( int )z ];
     // std::cout << "terrain height at " << x << " , " << z << " = " << th << std::endl;
 
     if( point.y >= th )

@@ -14,7 +14,8 @@ public:
         GAUSS_V,
         GAUSS_H,
         BLOOM_FILTER,
-        BLEND
+        BLEND,
+        DITHER
     };
 
     PostEffect( Type type, Framebuffer * canvas );

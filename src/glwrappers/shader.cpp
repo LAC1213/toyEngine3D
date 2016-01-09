@@ -1,5 +1,4 @@
 #include <shader.h>
-#include <stdio.h>
 #include <iostream>
 
 #include <GL/glew.h>
@@ -23,13 +22,13 @@ Shader::~Shader()
     glDeleteProgram( _program );
 }
 
-/** glUseProgram() wrapper
+/** glUseProgram() wrapper, also sets uniforms of the Engine::ActiveCam
  */
 void Shader::use()
 {
+    Engine::ActiveCam->setUniforms( this );
     if( this == Active )
         return;
-    Engine::ActiveCam->setUniforms( this );
     glUseProgram( _program );
     Active = this;
 }
@@ -46,7 +45,7 @@ GLint Shader::getUniformLocation( const std::string& name )
     {
         id = glGetUniformLocation( _program, name.c_str() );
         if( id == -1 )
-            std::cerr << "Can't find Uniform " << name << "[" << _program << ": " << gluErrorString( glGetError() ) << "]" << std::endl;
+            std::cerr << log_warn << "Can't find Uniform " << name << "[" << _program << ": " << gluErrorString( glGetError() ) << "]" << log_endl;
         else
             _uniforms.insert( std::pair<std::string, GLint>( name, id ) );
     }
@@ -163,7 +162,7 @@ Shader::Shader( const std::string& shaderDir, LoadFlag loadFlags )
 
     char wd[4096];
     getcwd( wd, sizeof wd );
-    std::cerr << "Loading shader dir " << shaderDir << std::endl;
+    std::cerr << log_info << "Loading shader dir " << shaderDir << log_endl;
     chdir( shaderDir.c_str() );
 
     // Read the Vertex Shader code from the file
@@ -241,7 +240,7 @@ Shader::Shader( const std::string& shaderDir, LoadFlag loadFlags )
     int InfoLogLength;
 
     // Compile Vertex Shader
-    printf( "Compiling shader : %s\n", VERT_PATH );
+    std::cerr << log_info << "Compiling shader: " << VERT_PATH << log_endl;
     glShaderSource( VertexShaderID, 1, ( const char * const * )&vertSrc , NULL );
     glCompileShader( VertexShaderID );
 
@@ -250,12 +249,13 @@ Shader::Shader( const std::string& shaderDir, LoadFlag loadFlags )
     glGetShaderiv( VertexShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength );
     char VertexShaderErrorMessage[InfoLogLength];
     glGetShaderInfoLog( VertexShaderID, InfoLogLength, NULL, VertexShaderErrorMessage );
-    fprintf( stderr, "%s\n", &VertexShaderErrorMessage[0] );
+    if( InfoLogLength )
+        std::cerr << log_warn << VertexShaderErrorMessage << log_endl;
 
     if( loadFlags & LOAD_TESS )
     {
         // Compile TessControl Shader
-        printf( "Compiling shader : %s\n", CONT_PATH );
+        std::cerr << log_info << "Compiling shader: " << CONT_PATH << log_endl;
         glShaderSource( TessControlShaderID, 1, ( const char * const * )&tesscontrolSrc , NULL );
         glCompileShader( TessControlShaderID );
 
@@ -264,10 +264,11 @@ Shader::Shader( const std::string& shaderDir, LoadFlag loadFlags )
         glGetShaderiv( TessControlShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength );
         char TCShaderErrorMessage[InfoLogLength];
         glGetShaderInfoLog( TessControlShaderID, InfoLogLength, NULL, TCShaderErrorMessage );
-        fprintf( stderr, "%s\n", &TCShaderErrorMessage[0] );
+        if( InfoLogLength )
+            std::cerr << log_warn << TCShaderErrorMessage << log_endl;
 
         // Compile TessEval Shader
-        printf( "Compiling shader : %s\n", EVAL_PATH );
+        std::cerr << log_info << "Compiling shader: " << EVAL_PATH << log_endl;
         glShaderSource( TessEvalShaderID, 1, ( const char * const * )&tessevalSrc , NULL );
         glCompileShader( TessEvalShaderID );
 
@@ -276,12 +277,13 @@ Shader::Shader( const std::string& shaderDir, LoadFlag loadFlags )
         glGetShaderiv( TessEvalShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength );
         char TEShaderErrorMessage[InfoLogLength];
         glGetShaderInfoLog( TessEvalShaderID, InfoLogLength, NULL, TEShaderErrorMessage );
-        fprintf( stderr, "%s\n", &TEShaderErrorMessage[0] );
+        if( InfoLogLength )
+            std::cerr << log_warn << TEShaderErrorMessage << log_endl;
     }
     if( loadFlags & LOAD_GEOM )
     {
         // Compile Geometry Shader
-        printf( "Compiling shader : %s\n", GEOM_PATH );
+        std::cerr << log_info << "Compiling shader: " << GEOM_PATH << log_endl;
         glShaderSource( GeometryShaderID, 1, ( const char * const * )&geomSrc , NULL );
         glCompileShader( GeometryShaderID );
 
@@ -290,11 +292,12 @@ Shader::Shader( const std::string& shaderDir, LoadFlag loadFlags )
         glGetShaderiv( GeometryShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength );
         char GeometryShaderErrorMessage[InfoLogLength];
         glGetShaderInfoLog( GeometryShaderID, InfoLogLength, NULL, GeometryShaderErrorMessage );
-        fprintf( stderr, "%s\n", &GeometryShaderErrorMessage[0] );
+        if( InfoLogLength )
+            std::cerr << log_warn << GeometryShaderErrorMessage << log_endl;
     }
 
     // Compile Fragment Shader
-    printf( "Compiling shader : %s\n", FRAG_PATH );
+    std::cerr << log_info << "Compiling shader: " << FRAG_PATH << log_endl;
     glShaderSource( FragmentShaderID, 1, ( const char * const * )&fragSrc , NULL );
     glCompileShader( FragmentShaderID );
 
@@ -303,11 +306,12 @@ Shader::Shader( const std::string& shaderDir, LoadFlag loadFlags )
     glGetShaderiv( FragmentShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength );
     char FragmentShaderErrorMessage[InfoLogLength];
     glGetShaderInfoLog( FragmentShaderID, InfoLogLength, NULL, FragmentShaderErrorMessage );
-    fprintf( stderr, "%s\n", &FragmentShaderErrorMessage[0] );
+    if( InfoLogLength )
+        std::cerr << log_warn << FragmentShaderErrorMessage << log_endl;
 
     // Link the program
-    fprintf( stdout, "Linking program\n" );
     _program = glCreateProgram();
+    std::cerr << log_info << "Linking Program, ID: " << _program << log_endl;
     GLuint ProgramID = _program;
     glAttachShader( ProgramID, VertexShaderID );
     if( loadFlags & LOAD_TESS )
@@ -325,7 +329,8 @@ Shader::Shader( const std::string& shaderDir, LoadFlag loadFlags )
     glGetProgramiv( ProgramID, GL_INFO_LOG_LENGTH, &InfoLogLength );
     char ProgramErrorMessage[ max( InfoLogLength, 1 )];
     glGetProgramInfoLog( ProgramID, InfoLogLength, NULL, ProgramErrorMessage );
-    fprintf( stderr, "%s\n", ProgramErrorMessage );
+    if( InfoLogLength )
+        std::cerr << log_warn << ProgramErrorMessage << log_endl;
 
     chdir( wd );
 
@@ -350,48 +355,23 @@ Shader::Shader( const std::string& shaderDir, LoadFlag loadFlags )
     }
 }
 
-Shader::Manager::Manager()
+
+Shader* Shader::Manager::loadResource ( const std::pair< std::__cxx11::string, Shader::LoadFlag >& ci )
 {
+    return new Shader( ci.first, ci.second );
 }
 
-Shader::Manager::~Manager()
-{
-    for(auto iterator = _shaders.begin(); iterator != _shaders.end(); ++iterator) {
-        delete iterator->second.first;
-    }
-}
-
-void Shader::Manager::release ( Shader* shader )
-{
-    for(auto iterator = _shaders.begin(); iterator != _shaders.end(); ++iterator) {
-        if( iterator->second.first == shader )
-        {
-            iterator->second.second--;
-            if( iterator->second.second == 0 )
-            {
-                delete iterator->second.first;
-                _shaders.erase( iterator );
-            }
-        }
-    }
+Shader* Shader::Manager::request ( const std::pair< std::__cxx11::string, Shader::LoadFlag >& ci )
+{    
+    std::string dir;
+    if( ci.first[ci.first.size() - 1] == '/' )
+        dir = ci.first;
+    else
+        dir = ci.first + '/';
+    return ResourceManager::request( std::pair<std::string, LoadFlag>(dir, ci.second) );
 }
 
 Shader* Shader::Manager::request ( const std::string& shaderDir, Shader::LoadFlag flags )
 {
-    ShaderInfo ci(shaderDir, flags);
-    auto search = _shaders.find( ci );
-    if( search == _shaders.end() )
-    {
-        ShaderCounter c;
-        c.first = new Shader( shaderDir, flags );
-        c.second = 1;
-        _shaders.insert( std::pair<ShaderInfo, ShaderCounter>(ci, c) );
-        return c.first;
-    }
-    else
-    {
-        ShaderCounter c = search->second;
-        search->second.second++;
-        return c.first;
-    }
+    return request( std::pair<std::string, LoadFlag>(shaderDir, flags) );
 }

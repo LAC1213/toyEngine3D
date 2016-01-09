@@ -59,7 +59,7 @@ GLFWwindow * initContext()
     glfwSetErrorCallback(glfwErrorCallback);
 
     /* Create a windowed mode window and its OpenGL context */
-    GLFWwindow * window = glfwCreateWindow(1000, 800, "Window Title", NULL, NULL);
+    GLFWwindow * window = glfwCreateWindow(1000, 800, "Engine Demo", NULL, NULL);
     if (!window)
         errorExit("Couldn't create glfw window.");
     glfwSetWindowPos(window, 2800, 200);

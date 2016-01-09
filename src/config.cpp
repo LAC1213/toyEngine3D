@@ -17,7 +17,7 @@ bool Config::loadFile ( const std::string& path )
 {
     if ( !g_key_file_load_from_file ( _keyFile, path.c_str(), G_KEY_FILE_NONE, &_error ) )
     {
-        g_error ( _error->message );
+        std::cerr << "Couldn't load configfile" << std::endl;
         return false;
     }
     return true;
@@ -50,7 +50,7 @@ bool Config::getBool( const std::string& name )
     }
 
     std::cerr << _error->message << std::endl;
-    return false;;
+    return false;
 }
 
 double Config::getDouble( const std::string& name )

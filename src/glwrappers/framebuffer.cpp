@@ -184,7 +184,8 @@ void Framebuffer::copyColor( const Framebuffer& fb ) const
 {
     fb.bindRead();
     bindDraw();
-    glBlitFramebuffer( 0, 0, _width, _height, 0, 0, _width, _height, GL_COLOR_BUFFER_BIT, GL_NEAREST );
+    glBlitFramebuffer( 0, 0, fb.getWidth(), fb.getHeight(), 
+                       0, 0, _width, _height, GL_COLOR_BUFFER_BIT, GL_NEAREST );
 }
 
 /** glBlitFramebuffer() wrapper which copies depth
@@ -194,7 +195,8 @@ void Framebuffer::copyDepth( const Framebuffer& fb ) const
 {
     fb.bindRead();
     bindDraw();
-    glBlitFramebuffer( 0, 0, _width, _height, 0, 0, _width, _height, GL_DEPTH_BUFFER_BIT, GL_NEAREST );
+    glBlitFramebuffer( 0, 0, fb.getWidth(), fb.getHeight(), 
+                       0, 0, _width, _height, GL_DEPTH_BUFFER_BIT, GL_NEAREST );
 }
 
 /** glClear() wrapper which clears color

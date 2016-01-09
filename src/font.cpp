@@ -5,12 +5,12 @@ FT_Library Font::ft = 0;
 
 using std::max;
 
-Font::Font( std::string name, int fontSize ) : _size( fontSize )
+Font::Font( const char * name, int fontSize ) : _size( fontSize )
 {
     FT_Face face;
 
-    if( FT_New_Face( ft, name.c_str(), 0, &face ) )
-        errorExit( "Couldn't open font %s", name.c_str() );
+    if( FT_New_Face( ft, name, 0, &face ) )
+        errorExit( "Couldn't open font '%s'", name );
 
     FT_Set_Pixel_Sizes( face, 0, fontSize );
     FT_GlyphSlot g = face->glyph;

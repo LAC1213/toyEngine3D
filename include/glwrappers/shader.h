@@ -5,6 +5,7 @@
 #include <string>
 #include <GL/glew.h>
 #include <glm/glm.hpp>
+#include <resourcemanager.hpp>
 
 #define VERT_PATH "vert.glsl"
 #define CONT_PATH "cont.glsl"
@@ -22,19 +23,13 @@ public:
         LOAD_FULL = 0x03
     };
 
-    class Manager
+    class Manager : public ResourceManager<std::pair<std::string, LoadFlag>, Shader>
     {
-    private:
-        typedef std::pair<Shader *, unsigned int> ShaderCounter; 
-        typedef std::pair<std::string, LoadFlag> ShaderInfo;
-        std::map<ShaderInfo, ShaderCounter> _shaders;
-    
+    protected:
+        virtual Shader * loadResource( const std::pair<std::string, LoadFlag>& ci );
     public:
-        Manager();
-        ~Manager();
-        
+        virtual Shader * request( const std::pair<std::string, LoadFlag>& ci );
         Shader * request( const std::string& shaderDir, LoadFlag flags );
-        void release( Shader * shader );
     };
     
     Shader( const std::string& shaderDir, LoadFlag loadFlags );
