@@ -42,7 +42,6 @@ Camera * ActiveCam = &nullCam;
 BufferObject * QuadBuffer = nullptr;
 DrawCall * DrawScreenQuad = nullptr;
 MeshObject * CubeObject = nullptr;
-btCollisionShape * CubeShape = nullptr;
 
 Shader::Manager * ShaderManager = nullptr;
 BoxShapeManagerT * BoxShapeManager = nullptr;
@@ -53,8 +52,6 @@ static bool initialized = false;
 void init()
 {
     if( initialized ) return;
-    /* init physics */
-    Physics = new PhysicsVars;
 
     /* init graphics */
     QuadBuffer = new BufferObject();
@@ -88,10 +85,6 @@ void init()
         Root = std::string(wd);
     }
 
-    Config conf;
-    conf.loadFile( "engine.cfg" );
-    conf.setGroup( "Modules" );
-    
     ShaderManager = new Shader::Manager;
     BoxShapeManager = new BoxShapeManagerT;
     SphereShapeManager = new SphereShapeManagerT;
@@ -105,7 +98,6 @@ void init()
 
     MeshObject::init();
     CubeObject = MeshObject::genCube();
-    CubeShape = new btBoxShape( btVector3(1, 1, 1) );
 
     initialized = true;
 }
@@ -118,8 +110,6 @@ void destroy()
     delete BoxShapeManager;
     delete SphereShapeManager;
     
-    delete Physics;
-
     Lighting::destroy();
     PostEffect::destroy();
     Billboard::destroy();
@@ -131,7 +121,6 @@ void destroy()
     delete QuadBuffer;
     delete DrawScreenQuad;
     delete CubeObject;
-    delete CubeShape;
     initialized = false;
 }
 

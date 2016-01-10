@@ -1,6 +1,7 @@
-    #include <camera.h>
+#include <camera.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <player.h>
 
 const std::string PerspectiveCamera::PROJ_UNIFORM_STR = "proj";
 const std::string PerspectiveCamera::VIEW_UNIFORM_STR = "view";
@@ -95,7 +96,7 @@ void PlayerCamera::onMouseMove( double dx, double dy )
 void PlayerCamera::pollInput()
 {
     glm::vec2 v;
-    constexpr float ds = 4;
+    constexpr float ds = 1;
     if( glfwGetKey( _window, GLFW_KEY_D ) == GLFW_PRESS )
     {
         v.x = 1;

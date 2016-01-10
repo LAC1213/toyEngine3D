@@ -43,7 +43,7 @@ void Player::step ( float dt )
     constexpr float stickyness = 0.1;
     
     btVector3 p = glm2bt( _p );
-    btVector3 start = p + btVector3(0, 1, 0);
+    btVector3 start = p + btVector3(0, stickyness, 0);
     btVector3 end = p - btVector3(0, maxWorldHeight, 0);
     btCollisionWorld::ClosestRayResultCallback cb( start, end );
     Engine::Physics->dynamicsWorld->rayTest( start, end, cb );
@@ -65,6 +65,10 @@ void Player::step ( float dt )
             _canJump = false;
         }
     }
+    else
+    {
+        _canJump = false;
+    }
     
     if( _canJump )
         _color = glm::vec4( 0, 10, 0, 10 );
@@ -74,6 +78,11 @@ void Player::step ( float dt )
     _billboard.setPosition( _p );
     _light.position = _p;
     _light.diffuse = glm::vec3(_color);
+    
+    _tail.newColor.setConstant( _color );
+    
+    _tail.setPosition( _p );
+    _tail.step( dt );
 }
 
 PointLight* Player::light()
@@ -89,12 +98,22 @@ void Player::move ( const glm::vec3& d )
         return;
     }
     
-    _v.x = d.x * glm::dot( _surfaceNormal, glm::vec3( 0, 1, 0 ) );
-    _v.z = d.z * glm::dot( _surfaceNormal, glm::vec3( 0, 1, 0 ) );
+    if( _canJump )
+    {
+        _v.x = d.x * glm::dot( _surfaceNormal, glm::vec3( 0, 1, 0 ) );
+        _v.z = d.z * glm::dot( _surfaceNormal, glm::vec3( 0, 1, 0 ) );
+    }
+    else
+    {
+        _v.x = d.x;
+        _v.z = d.z;
+    }
 }
 
 void Player::render()
 {
     Engine::ShaderManager->request( "./res/shader/billboard/", Shader::LOAD_GEOM )->setUniform( "color", _color );
     _billboard.render();
+    
+    _tail.render();
 }

@@ -1,6 +1,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include <particle.h>
 #include <billboard.h>
 #include <btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
@@ -28,6 +29,8 @@ protected:
     Texture   _tex;
     Billboard _billboard;
     PointLight _light;
+    
+    SmoothTail _tail;
     
     float _size;
     

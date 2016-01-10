@@ -9,7 +9,6 @@
 #include <collider.h>
 #include <actor.h>
 #include <vector>
-#include <player.h>
 
 class Camera
 {
@@ -95,6 +94,8 @@ private:
     float       _near;
     float       _far;
 };
+
+class Player; // see src/player.h
 
 class PlayerCamera : public PerspectiveCamera
 {

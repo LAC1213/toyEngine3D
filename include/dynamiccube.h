@@ -14,6 +14,7 @@ public:
     
 protected:
     btDefaultMotionState * _motionState;
+    btBoxShape * _shape;
 };
 
 #endif // DYNAMICCUBE_H

@@ -9,6 +9,7 @@
 #include <text.h>
 #include <particle.h>
 #include <wall.h>
+#include <player.h>
 
 #include <internal/debugdrawer.h>
 #include <dynamiccube.h>

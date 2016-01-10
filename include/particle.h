@@ -1,5 +1,4 @@
-#ifndef PARTICLE_H
-#define PARTICLE_H
+#pragma once
 
 #include <mesh.h>
 #include <actor.h>
@@ -60,9 +59,15 @@ class SmoothTail : public ParticleSystem
 public:
     SmoothTail( );
 
+    QuadraticCurve<glm::vec4> newColor;
+    QuadraticCurve<GLfloat> newSize;
+    
     virtual void step( double dt );
+    
+    void setPosition( const glm::vec3& p ) { _pos.setConstant(p); }
 
 protected:
+    void spawnParticle();
     QuadraticCurve<glm::vec3> _pos;
 };
 
@@ -90,5 +95,3 @@ private:
     std::vector<Enemy*>* _enemies;
     PlayerCamera * _playerCam;
 };
-
-#endif //PARTICLE_H

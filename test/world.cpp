@@ -85,7 +85,7 @@ void World::step ( double dt )
     _bullets.step ( dt );
     _lightwell.step ( dt );
     
-    _cube.setModel( glm::vec3(0), glm::vec3(1, 1, 0), glm::vec3( 1, 1, 1 ) );
+    _cube.setModel( glm::vec3(0.2, 0, 0), glm::vec3(1, 1, 0), glm::vec3( 1, 2, 1 ) );
     
     Engine::Physics->dynamicsWorld->stepSimulation( dt, 10 );
 

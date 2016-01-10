@@ -11,8 +11,8 @@ Lighting::Lighting ( Framebuffer * gBuffer )
     :   _gBuffer ( gBuffer ),
         _ambient ( 0.01, 0.01, 0.01 ),
         _sunDir ( 0.3, -1, 0 ),
-        _sunDiffuse ( 0.05, 0.05, 0.05 ),
-        _sunSpecular ( 0.05, 0.05, 0.05 )
+        _sunDiffuse ( 0.5, 0.5, 0.5 ),
+        _sunSpecular ( 0.5, 0.5, 0.5 )
 {
 }
 

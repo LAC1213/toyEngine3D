@@ -42,8 +42,7 @@ extern BoxShapeManagerT * BoxShapeManager;
 extern SphereShapeManagerT * SphereShapeManager;
 
 extern PhysicsVars * Physics;
-extern MeshObject * CubeObject;
-extern btCollisionShape * CubeShape;
+extern MeshObject * CubeObject; // deprecated
 
 extern Camera * ActiveCam;
 

@@ -5,12 +5,12 @@
 DynamicCube::DynamicCube( const glm::vec3& pos, float mass )
 {
     _motionState = new btDefaultMotionState( btTransform( btQuaternion( 1, 0, 0, 1 ), btVector3(pos.x, pos.y, pos.z)));
+    _shape = Engine::BoxShapeManager->request( glm::vec3( 1, 1, 1) );
     btScalar m = mass;
     btVector3 inertia(0, 0, 0);
-    Engine::CubeShape->calculateLocalInertia( m, inertia );
-    btRigidBody::btRigidBodyConstructionInfo ci( m, _motionState, Engine::CubeShape, inertia );
+    _shape->calculateLocalInertia( m, inertia );
+    btRigidBody::btRigidBodyConstructionInfo ci( m, _motionState, _shape, inertia );
     _body = new btRigidBody( ci );
-    Engine::Physics->dynamicsWorld->addRigidBody( _body );
 }
 
 DynamicCube::~DynamicCube()

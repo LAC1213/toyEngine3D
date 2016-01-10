@@ -117,37 +117,41 @@ SmoothTail::SmoothTail()
     :   ParticleSystem( 0 ),
         _pos( glm::vec3( -10, 0, 0 ), glm::vec3( 2, 0, 0 ) )
 {
+    newColor =  QuadraticCurve<glm::vec4>( glm::vec4( 0.8, 0.8, 1, 1 ), glm::vec4( 0.05f, 0.05f, 0, -0.2 ) );
+    newSize = QuadraticCurve<GLfloat>( 0.01 , 0, -0.01 );
 }
 
-void SmoothTail::step( double dt )
+void SmoothTail::spawnParticle()
 {
-    // static std::random_device rd;
-    // static std::mt19937 mt( rd() );
-    // static std::uniform_real_distribution<float> dist( -0.05, 0.05 );
-
     auto rnd = [] ()
     {
-        return 0.1*( float ) rand() / RAND_MAX - 0.05;
+        return 0.01*( float ) rand() / RAND_MAX - 0.005;
     };
-
-    _pos.step( dt );
-
+ 
     Particle part;
     part.position = QuadraticCurve<glm::vec3>( _pos.getValue() + glm::vec3( rnd(), rnd(), rnd() ) );
-    part.color = QuadraticCurve<glm::vec4>( glm::vec4( 0.8, 0.8, 1, 1 ), glm::vec4( 0.05f, 0.05f, 0, -0.2 ) );
+    part.color = newColor;
     part.uv = QuadraticCurve<glm::vec2>( glm::vec2( 0, 0 ) );
-    part.size = QuadraticCurve<GLfloat> ( 0.1f, 0, -0.2 );
+    part.size = newSize;
     part.life = 4;
 
     for( size_t i = 0 ; i < _particles.size() ; ++i )
         if( _particles[i].life <= 0 )
         {
             _particles[i] = part;
-            ParticleSystem::step( dt );
             return;
         }
 
     _particles.push_back( part );
+}
+
+void SmoothTail::step( double dt )
+{
+    constexpr float pps = 120;
+    
+    for( int i = 0 ; i < pps*dt ; ++i )
+        spawnParticle();
+    
     ParticleSystem::step( dt );
 }
 

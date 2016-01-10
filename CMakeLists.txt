@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.3)
 
 set(CMAKE_BUILD_TYPE DEBUG)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 
 file( GLOB SRC src/*.cpp src/glwrappers/*.cpp )
 
@@ -20,6 +20,11 @@ set_property( TARGET engine PROPERTY CXX_STANDARD 14 )
 
 include_directories( "test" )
 file( GLOB TESTSRC test/main.cpp test/world.cpp )
+add_executable( app.old ${TESTSRC} )
+target_link_libraries( app.old engine glfw )
+set_property( TARGET app.old PROPERTY CXX_STANDARD 14 )
+
+file( GLOB TESTSRC test/playlevel.cpp )
 add_executable( app ${TESTSRC} )
 target_link_libraries( app engine glfw )
 set_property( TARGET app PROPERTY CXX_STANDARD 14 )

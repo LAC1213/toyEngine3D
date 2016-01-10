@@ -9,7 +9,7 @@ class CompVec3
 public:
     bool operator()( glm::vec3 a, glm::vec3 b )
     {
-        return a.x < b.x;
+        return a.x + a.y + a.z < b.x + b.y + b.z;
     }
 };
 
