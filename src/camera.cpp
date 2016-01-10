@@ -84,9 +84,9 @@ void PlayerCamera::onMouseMove( double dx, double dy )
     _angleX -= dphi*dy;
 
     double r = glm::length( _pivot );
-    _pivot.y = sin( _angleX );
-    _pivot.x = cos( _angleY );
-    _pivot.z = sin( _angleY );
+    _pivot.y = cos( _angleX );
+    _pivot.x = cos( _angleY ) * sin( _angleX );
+    _pivot.z = sin( _angleY ) * sin( _angleX );
     _pivot *= r/glm::length( _pivot );
 
     _eye = _pivotPoint - _pivot;
