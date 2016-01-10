@@ -13,7 +13,7 @@
 class Camera
 {
 public:
-    virtual void setUniforms( Shader * shader ) const {}
+    virtual void setUniforms( __attribute__((unused)) Shader * shader ) const {}
 };
 
 class PerspectiveCamera : public Camera

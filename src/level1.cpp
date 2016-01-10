@@ -28,7 +28,7 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
 Level1::~Level1()
 {
     delete _bloomed;
-    for( int i = 0 ; i < _spinnies.size() ; ++i )
+    vec_for_each( i, _spinnies )
         delete _spinnies[i];
 }
 
@@ -43,7 +43,7 @@ void Level1::init()
     _walls[3].setModel( glm::vec3(0, 1, 1 + sqrt(2)), glm::vec3(M_PI/4,0,0), glm::vec3( 1, 1, 1 ) );
     _walls[4].setModel( glm::vec3(0, 0, 4), glm::vec3(M_PI/6,0,0), glm::vec3( 1, 1, 1 ) );
     
-    for( int i = 0 ; i < _walls.size() ; ++i )
+    vec_for_each( i, _walls )
         _physics->dynamicsWorld->addRigidBody( _walls[i].body() );
     
     _spinnies[0]->setColor( glm::vec4( 10, 10, 10, 10 ) );
@@ -89,8 +89,14 @@ void Level1::update ( double dt )
     _player.step( dt );
     _cam.step( dt );
     
-    for( int i = 0 ; i < _spinnies.size() ; ++i )
+    vec_for_each( i, _spinnies )
+    {
+        if( glfwGetKey( _window, GLFW_KEY_Q ) == GLFW_PRESS )
+            _spinnies[i]->target( _player.getPos() );
+        else
+            _spinnies[i]->wait();
         _spinnies[i]->step( dt );
+    }
     
  //   std::cout << _spinnies[0]._up << std::endl;
     
@@ -109,10 +115,10 @@ void Level1::render()
     glDisable( GL_BLEND );
     _gBuffer->clear();
     
-    for( int i = 0 ; i < _spinnies.size() ; ++i )
+    vec_for_each( i, _spinnies )
         _spinnies[i]->renderGeom();
     
-    for( int i = 0 ; i < _walls.size() ; ++i )
+    vec_for_each( i, _walls )
         _walls[i].render();
     
     glEnable( GL_BLEND );
@@ -122,7 +128,7 @@ void Level1::render()
     
     _lighting.render();
     _player.render();
-    for( int i = 0 ; i < _spinnies.size() ; ++i )
+    vec_for_each( i, _spinnies )
         _spinnies[i]->renderFX();
     Level::render();
     

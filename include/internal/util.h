@@ -13,6 +13,8 @@
 
 void __errorExit( const char * file, const char * func, unsigned int line, const char * format, ... );
 
+#define vec_for_each( index, vec ) for( size_t index = 0 ; index < vec.size() ; ++index )
+
 enum Log
 {
     log_warn,

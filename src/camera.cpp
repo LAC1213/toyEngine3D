@@ -45,10 +45,10 @@ void PerspectiveCamera::updateView()
 //////////////////////////////////////////////////////////////////
 
 PlayerCamera::PlayerCamera( GLFWwindow * window, Player * player, float aspect )
-    :   PerspectiveCamera( 45, aspect, 0.01f, 100.f ),
-        _pivot( 0, -0.1, 0.3 ),
-        _window( window ),
-        _player( player )
+    : PerspectiveCamera( 45, aspect, 0.01f, 100.f )
+    , _player( player )
+    , _pivot( 0, -0.1, 0.3 )
+    , _window( window )
 {
 }
 
@@ -67,7 +67,7 @@ void PlayerCamera::removeCollider( Collider * collider )
         }
 }
 
-void PlayerCamera::step( double dt )
+void PlayerCamera::step( __attribute__((unused)) double dt )
 {
     pollInput();
     _pivotPoint = _player->getPos();

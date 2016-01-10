@@ -21,8 +21,8 @@ Player::Player ()
     _light.specular = glm::vec3 ( 1, 1, 1 );
     _light.attenuation = glm::vec3 ( 1, 1, 1 );
     
-    _tail.setSpawnFrequency( 30 );
-    _tail.setRandomness( 0.01 );
+    _tail.setSpawnFrequency( 120 );
+    _tail.setRandomness( 0.005 );
     _tail.initialParticle().color = QuadraticCurve<glm::vec4>( glm::vec4(0.8, 0.8, 1, 1), glm::vec4( 0.05f, 0.05f, 0, -0.2 ) );
     _tail.initialParticle().size = QuadraticCurve<GLfloat>( 0.01, 0, -0.01 );
     _tail.initialParticle().life = 10;
@@ -41,16 +41,14 @@ void Player::jump ()
 
 void Player::step ( float dt )
 {
-    std::cerr << log_info << "Surface: " << _surfaceNormal << log_endl;
-    
     _p += dt * _v;
     _v += dt * _a;
     
     constexpr float maxWorldHeight = 100;
-    constexpr float stickyness = 0.025;
+    constexpr float stickyness = 0.1;
     
     btVector3 p = glm2bt( _p );
-    btVector3 start = p + btVector3(0, stickyness, 0);
+    btVector3 start = p + btVector3(0, 0.3, 0);
     btVector3 end = p - btVector3(0, maxWorldHeight, 0);
     btCollisionWorld::ClosestRayResultCallback cb( start, end );
     Engine::Physics->dynamicsWorld->rayTest( start, end, cb );

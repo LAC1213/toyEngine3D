@@ -7,7 +7,7 @@
 Shader * Text::_shader = 0;
 
 Text::Text( Font * font, std::string str, glm::vec2 screen )
-    : _color( 1, 1, 1, 1 ), _font( font ), _screen( screen )
+    : _font( font ), _screen( screen ), _color( 1, 1, 1, 1 )
 {
     size_t n = str.length();
     GLuint _elements = 6*n;

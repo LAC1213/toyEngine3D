@@ -34,6 +34,7 @@ std::ostream& operator<<( std::ostream& os, Log l )
         case log_endl:
             return os << "\x1b[0m" << std::endl;
     }
+    return os;
 }
 
 std::ostream& operator<< ( std::ostream& os, glm::vec2 v2 )
