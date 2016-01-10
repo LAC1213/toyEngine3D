@@ -9,6 +9,8 @@
 class Particle  
 {
 public:
+    Particle();
+    
     QuadraticCurve<glm::vec3> position;
     QuadraticCurve<glm::vec2> uv; //!< for texture animation
     QuadraticCurve<glm::vec4> color;
@@ -35,40 +37,35 @@ public:
         SIZE
     };
 
-    ParticleSystem( const Texture * texture );
+    ParticleSystem( const Texture * texture = nullptr );
     virtual ~ParticleSystem();
 
     virtual void step( double dt );
     virtual void render();
+    
+    void setSpawnFrequency( double f );
+    void setRandomness( double r );
+    
+    Particle& initialParticle();
 
     static void init();
     static void destroy();
 
+    void addParticle( const Particle& p );
+
 protected:
     static Shader * _shader;
+    
+    double _spawnFrequency;
+    double _rnJesus;
+    Particle _newParticle;
+    
     std::vector<Particle> _particles;
-
+    
 private:
     std::vector<BufferObject> _buffers;
     DrawCall _drawCall;
     const Texture * _texture;
-};
-
-class SmoothTail : public ParticleSystem
-{
-public:
-    SmoothTail( );
-
-    QuadraticCurve<glm::vec4> newColor;
-    QuadraticCurve<GLfloat> newSize;
-    
-    virtual void step( double dt );
-    
-    void setPosition( const glm::vec3& p ) { _pos.setConstant(p); }
-
-protected:
-    void spawnParticle();
-    QuadraticCurve<glm::vec3> _pos;
 };
 
 class LightWell : public ParticleSystem

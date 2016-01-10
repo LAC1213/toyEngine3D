@@ -1,5 +1,5 @@
 #!/bin/bash
 
-astyle --style=ansi src/*
-astyle --style=ansi include/*
-astyle --style=ansi include/internal/*
+astyle -i --style=ansi src/*
+astyle -i --style=ansi include/*
+astyle -i --style=ansi include/internal/*

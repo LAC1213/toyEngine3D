@@ -2,6 +2,7 @@
 #include <engine.h>
 
 #include <internal/util.h>
+#include <collisionlistener.h>
 
 Player::Player () 
     : _billboard( &_tex )
@@ -19,6 +20,12 @@ Player::Player ()
     _light.diffuse = glm::vec3 ( 1, 1, 1 );
     _light.specular = glm::vec3 ( 1, 1, 1 );
     _light.attenuation = glm::vec3 ( 1, 1, 1 );
+    
+    _tail.setSpawnFrequency( 30 );
+    _tail.setRandomness( 0.01 );
+    _tail.initialParticle().color = QuadraticCurve<glm::vec4>( glm::vec4(0.8, 0.8, 1, 1), glm::vec4( 0.05f, 0.05f, 0, -0.2 ) );
+    _tail.initialParticle().size = QuadraticCurve<GLfloat>( 0.01, 0, -0.01 );
+    _tail.initialParticle().life = 10;
 }
 
 Player::~Player()
@@ -40,7 +47,7 @@ void Player::step ( float dt )
     _v += dt * _a;
     
     constexpr float maxWorldHeight = 100;
-    constexpr float stickyness = 0.1;
+    constexpr float stickyness = 0.025;
     
     btVector3 p = glm2bt( _p );
     btVector3 start = p + btVector3(0, stickyness, 0);
@@ -59,6 +66,9 @@ void Player::step ( float dt )
                 _v.y = 0;
                 _p = bt2glm(cb.m_hitPointWorld) + glm::vec3( 0, _size, 0 );
             }
+            
+            if( cb.m_collisionObject->getUserPointer() )
+                ((CollisionListener*)cb.m_collisionObject->getUserPointer())->playerOnTop();
         }
         else
         {
@@ -78,10 +88,10 @@ void Player::step ( float dt )
     _billboard.setPosition( _p );
     _light.position = _p;
     _light.diffuse = glm::vec3(_color);
+    _light.specular = glm::vec3(_color);
     
-    _tail.newColor.setConstant( _color );
-    
-    _tail.setPosition( _p );
+    _tail.initialParticle().color.setConstant( _color );
+    _tail.initialParticle().position.setConstant( _p );
     _tail.step( dt );
 }
 

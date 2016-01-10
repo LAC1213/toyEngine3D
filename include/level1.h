@@ -1,8 +1,9 @@
+#pragma once
 #include <level.h>
 #include <wall.h>
 #include <player.h>
-
-#pragma once
+#include <collisionlistener.h>
+#include <spinny.h>
 
 class Level1 : public Level
 {
@@ -11,6 +12,7 @@ public:
     virtual ~Level1();
     
     virtual void init();
+    virtual void reset();
     virtual void update( double dt );
     
     virtual void render();
@@ -27,5 +29,7 @@ protected:
     Framebuffer * _bloomed;
     Lighting _lighting;
     
+    GoalListener _goal;
     std::vector<Wall> _walls;
+    std::vector<Spinny*> _spinnies;
 };

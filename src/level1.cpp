@@ -1,11 +1,13 @@
 #include <level1.h>
+#include <spinny.h>
 
 Level1::Level1 ( GLFWwindow* window, int width, int height ) 
     : Level ( window, width, height )
     , _cam( _window, &_player, (float) _width/ _height )
     , _bloomed( Framebuffer::genScreenBuffer() )
     , _lighting( _gBuffer )
-    , _walls( 3 )
+    , _walls( 5 )
+    , _spinnies( 1 )
 {    
     static PointLight p;
     p.position = glm::vec3 ( 0, 0, 0 );
@@ -16,12 +18,18 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     _lighting.setAmbient ( glm::vec3 ( 0.3, 0.3, 0.3 ) );
     _lighting.addPointLight( _player.light() );
     
+    static MeshObject * tetra = MeshObject::genTetrahedron();
+    Spinny::obj = tetra;
+    _spinnies[0] = new Spinny;
+    
     onResize( width, height );
 }
 
 Level1::~Level1()
 {
     delete _bloomed;
+    for( int i = 0 ; i < _spinnies.size() ; ++i )
+        delete _spinnies[i];
 }
 
 void Level1::init()
@@ -29,10 +37,22 @@ void Level1::init()
     Level::init();
     _walls[0].setModel( glm::vec3(10, 4, 3), glm::vec3(2*M_PI, 0, 0), glm::vec3(0.5, 0.5, 0.5));
     _walls[0].setColor( glm::vec4( 0, 1.2, 1.6, 1) );
+    _walls[0].body()->setUserPointer( &_goal );
     _walls[1].setModel( glm::vec3(0), glm::vec3(2*M_PI,0,0), glm::vec3( 1, 1, 1 ) );
     _walls[2].setModel( glm::vec3(5, 0, 0), glm::vec3(1), glm::vec3( 2, 1, 3) );
+    _walls[3].setModel( glm::vec3(0, 1, 1 + sqrt(2)), glm::vec3(M_PI/4,0,0), glm::vec3( 1, 1, 1 ) );
+    _walls[4].setModel( glm::vec3(0, 0, 4), glm::vec3(M_PI/6,0,0), glm::vec3( 1, 1, 1 ) );
+    
     for( int i = 0 ; i < _walls.size() ; ++i )
         _physics->dynamicsWorld->addRigidBody( _walls[i].body() );
+    
+    _spinnies[0]->setColor( glm::vec4( 10, 10, 10, 10 ) );
+}
+
+void Level1::reset()
+{
+    Level::reset();
+    init();
 }
 
 void Level1::onMouseMove ( double x, double y )
@@ -69,6 +89,11 @@ void Level1::update ( double dt )
     _player.step( dt );
     _cam.step( dt );
     
+    for( int i = 0 ; i < _spinnies.size() ; ++i )
+        _spinnies[i]->step( dt );
+    
+ //   std::cout << _spinnies[0]._up << std::endl;
+    
     Level::update ( dt );
 }
 
@@ -84,6 +109,9 @@ void Level1::render()
     glDisable( GL_BLEND );
     _gBuffer->clear();
     
+    for( int i = 0 ; i < _spinnies.size() ; ++i )
+        _spinnies[i]->renderGeom();
+    
     for( int i = 0 ; i < _walls.size() ; ++i )
         _walls[i].render();
     
@@ -93,7 +121,9 @@ void Level1::render()
     _canvas->copyDepth( *_gBuffer );
     
     _lighting.render();
-    _player.render();    
+    _player.render();
+    for( int i = 0 ; i < _spinnies.size() ; ++i )
+        _spinnies[i]->renderFX();
     Level::render();
     
     Engine::ActiveCam = &nullCam;
@@ -107,18 +137,7 @@ void Level1::render()
 
 Level::Status Level1::getStatus()
 {
-    btVector3 start = glm2bt(_player.getPos());
-    btVector3 end = glm2bt(_player.getPos() - glm::vec3(0, 10, 0));
-    btTransform startt, endt;
-    startt.setOrigin( start );
-    endt.setOrigin( end );
-    btCollisionWorld::ClosestRayResultCallback cb(start, end);
-    _physics->dynamicsWorld->rayTestSingle(
-        startt, endt,
-        _walls[0].body(), _walls[0].body()->getCollisionShape(), 
-        _walls[0].body()->getCenterOfMassTransform(), cb );
-    
-    if( cb.hasHit() )
+    if( _goal.win )
         return Won;
     
     return Running;

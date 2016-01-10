@@ -36,7 +36,9 @@ public:
 
     virtual void render();
 
+    /* optimally call these only once */
     static MeshObject * genCube();
+    static MeshObject * genTetrahedron();
 
     static void init();
     static void destroy();
@@ -70,6 +72,8 @@ public:
     void toggleWireframe();
 
     void setColor( const glm::vec4& color ) { _diffuseColor = color; }
+    const glm::vec4& getColor() const { return _diffuseColor; }
+    
     void setModel( const glm::mat4& model ) { _model = model; }
     
 protected:

@@ -23,11 +23,11 @@ PhysicsVars::PhysicsVars()
 
 PhysicsVars::~PhysicsVars()
 {
-    delete dynamicsWorld;
     delete broadphase;
     delete collisionConfig;
     delete dispatcher;
     delete solver;
+    delete dynamicsWorld;
 }
 
 namespace Engine
@@ -109,7 +109,7 @@ void destroy()
     delete ShaderManager;
     delete BoxShapeManager;
     delete SphereShapeManager;
-
+    
     Lighting::destroy();
     PostEffect::destroy();
     Billboard::destroy();

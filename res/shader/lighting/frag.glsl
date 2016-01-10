@@ -13,6 +13,7 @@ uniform vec3 sunDir;
 uniform vec3 sunDiffuse;
 uniform vec3 sunSpecular;
 
+/* all in camera space ( view * model ) */
 uniform sampler2D colorTex;
 uniform sampler2D positionTex;
 uniform sampler2D normalTex;

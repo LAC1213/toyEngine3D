@@ -33,25 +33,23 @@ void DebugDrawer::drawContactPoint ( const btVector3& PointOnB, const btVector3&
 
 void DebugDrawer::drawLine ( const btVector3& from, const btVector3& to, const btVector3& fromColor, const btVector3& toColor )
 {
-    GLfloat pointData[] =
-    {
+    GLfloat pointData[] = {
         from.getX(), from.getY(), from.getZ(),
         to.getX(), to.getY(), to.getZ()
     };
-
-    GLfloat colorData[] =
-    {
+    
+    GLfloat colorData[] = {
         fromColor.getX(), fromColor.getY(), fromColor.getZ(),
         toColor.getX(), toColor.getY(), toColor.getZ()
     };
-
+    
     _points.loadData( pointData, sizeof pointData );
     _colors.loadData( colorData, sizeof colorData );
-
+    
     _shader->use();
-
+    
     _drawCall();
-
+    
 //    _pointData.insert( std::end(_pointData), std::begin(pointData), std::end(pointData));
 //    _colorData.insert( std::end(_colorData), std::begin(colorData), std::end(colorData));
 }
@@ -59,16 +57,16 @@ void DebugDrawer::drawLine ( const btVector3& from, const btVector3& to, const b
 void DebugDrawer::render()
 {
     glDisable( GL_DEPTH_TEST );
-
+    
     _points.loadData( _pointData.data(), _pointData.size() * sizeof(GLfloat) );
     _colors.loadData( _colorData.data(), _colorData.size() * sizeof(GLfloat) );
-
+    
     _shader->use();
-
+    
     _drawCall.execute();
-
+    
     glEnable( GL_DEPTH_TEST );
-
+    
     _pointData.clear();
     _colorData.clear();
 }

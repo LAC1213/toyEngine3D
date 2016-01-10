@@ -174,6 +174,82 @@ MeshObject * MeshObject::genCube()
     return cube;
 }
 
+MeshObject * MeshObject::genTetrahedron()
+{
+    /* -1, -h/2, -a/2
+     * 1, -h/2, -a/2
+     * 0, -h/2, a/2
+     */
+    
+    constexpr float h = sqrt(2)/sqrt(3);
+    constexpr float a = sqrt(3);
+    constexpr float b = sqrt(3)/3;
+    
+    GLfloat verts[] = {
+        0, h, 0,
+        1, -h, -b,
+        -1, -h, -b,
+        0, h, 0,
+        0, -h, a - b,
+        1, -h, -b,
+        0, h, 0,
+        -1, -h, -b,
+        0, -h, a - b,
+        -1, -h, -b,
+        1, -h, -b,
+        0, -h, a - b
+    };
+    
+    GLfloat normals[] = {
+        -1, -h, a - 2*b,
+        -1, -h, a - 2*b,
+        -1, -h, a - 2*b,
+        0, -h, -2*b,
+        0, -h, -2*b,
+        0, -h, -2*b,
+        1, -h, a - 2*b,
+        1, -h, a - 2*b,
+        1, -h, a - 2*b,
+        0, 1, 0,
+        0, 1, 0,
+        0, 1, 0
+    };
+    
+    for( int i = 0 ; i < sizeof(normals)/sizeof(normals[0]) ; ++i )
+        normals[i] *= -1;
+    
+    GLfloat uvs[] = {
+        0, 0,
+        0, 0,
+        0, 0,
+        0, 0,
+        0, 0,
+        0, 0,
+        0, 0,
+        0, 0,
+        0, 0,
+        0, 0,
+        0, 0,
+        0, 0
+    };
+    
+    MeshObject * tetra = new MeshObject();
+    tetra->buffers = std::vector<BufferObject>( 2 );
+    tetra->buffers[0].loadData( verts, sizeof verts );
+    tetra->buffers[1].loadData( normals, sizeof normals );
+    tetra->buffers[2].loadData( uvs, sizeof uvs );
+    tetra->drawCall.addAttribute( VertexAttribute( &tetra->buffers[0], GL_FLOAT, 3 ) );
+    VertexAttribute attr( &tetra->buffers[1], GL_FLOAT, 3 );
+    attr.normalize_ = true;
+    tetra->drawCall.addAttribute( attr );
+    tetra->drawCall.addAttribute( VertexAttribute( &tetra->buffers[2], GL_FLOAT, 2 ) );
+    tetra->drawCall.setElements( 36 );
+    tetra->shader = SHADER;
+    tetra->texture = 0;
+
+    return tetra;
+}
+
 void MeshObject::init()
 {
     SHADER = Engine::ShaderManager->request( "./res/shader/mesh/", Shader::LOAD_GEOM );

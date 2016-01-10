@@ -5,10 +5,20 @@
 
 #include <engine.h>
 
+Particle::Particle()
+    : uv( glm::vec2(0, 0))
+    , color( glm::vec4(1, 1, 1, 1))
+    , size( 0.1 )
+    , life( 4 )
+{
+}
+
 Shader * ParticleSystem::_shader = 0;
 
 ParticleSystem::ParticleSystem( const Texture * texture )
-    :   _buffers( 4 ),
+    :   _spawnFrequency( 60 ),
+        _rnJesus( 0 ),
+        _buffers( 4 ),
         _drawCall( GL_POINTS ),
         _texture( texture )
 {
@@ -16,21 +26,77 @@ ParticleSystem::ParticleSystem( const Texture * texture )
     _drawCall.addAttribute( VertexAttribute( &_buffers[COLOR], GL_FLOAT, 4 ) ); // color
     _drawCall.addAttribute( VertexAttribute( &_buffers[UV], GL_FLOAT, 2 ) ); // uv
     _drawCall.addAttribute( VertexAttribute( &_buffers[SIZE], GL_FLOAT, 1 ) ); // size
-
-    /*Particle test;
-    test.position = Curve<glm::vec3>( glm::vec3( 0, 0, 10 ), glm::vec3( 0, 1, 0 ), glm::vec3( 0, -1, 0 ) );
-    test.color = Curve<glm::vec4>( glm::vec4( 1, 1, 1, 1 ) );
-    test.uv = Curve<glm::vec2>( glm::vec2( 0, 0 ) );
-    test.life = 100;
-    _particles.push_back( test );*/
 }
 
 ParticleSystem::~ParticleSystem()
 {
 }
 
+void ParticleSystem::addParticle ( const Particle& p )
+{
+    for( int i = 0 ; i < _particles.size() ; ++i )
+    {
+        if( _particles[i].life <= 0 )
+        {
+            _particles[i] = p;
+            return;
+        }
+    }
+    _particles.push_back( p );
+}
+
+Particle& ParticleSystem::initialParticle()
+{
+    return _newParticle;
+}
+
+void ParticleSystem::setRandomness ( double r )
+{
+    _rnJesus = r;
+}
+
+void ParticleSystem::setSpawnFrequency ( double f )
+{
+    _spawnFrequency = f;
+}
+
 void ParticleSystem::step( double dt )
 {
+    auto rnd = [this] ()
+    {
+        return _rnJesus*( float ) rand() / RAND_MAX - 0.5*_rnJesus;
+    };
+    
+    static double timer = 0;
+    timer += dt;
+    if( timer * _spawnFrequency > 1)
+    {
+        for( int i = 0 ; i < timer*_spawnFrequency ; ++i )
+        {
+            Particle p = _newParticle;
+            
+            glm::vec3 r0(rnd(), rnd(), rnd());
+            glm::vec3 r1(rnd(), rnd(), rnd());
+            glm::vec3 r2(rnd(), rnd(), rnd());
+            p.position = QuadraticCurve<glm::vec3>( p.position.getConstant() + r0, 
+                                                    p.position.getLinear() + r1,
+                                                    p.position.getQuadratic() + r2
+                                                  );
+            
+            glm::vec4 c0(rnd(), rnd(), rnd(), rnd());
+            glm::vec4 c1(rnd(), rnd(), rnd(), rnd());
+            glm::vec4 c2(rnd(), rnd(), rnd(), rnd());
+            
+            p.color = QuadraticCurve<glm::vec4>( p.color.getConstant() + c0, 
+                                                    p.color.getLinear() + c1,
+                                                    p.color.getQuadratic() + c2
+                                                  );
+            //TODO make this more efficient [ reduce looping through particles ]
+            addParticle( p );
+        }
+        timer = 0;
+    }
+    
     for( size_t i = 0 ; i < _particles.size() ; ++i )
     {
         _particles[i].step( dt );
@@ -111,48 +177,6 @@ void ParticleSystem::init()
 void ParticleSystem::destroy()
 {
     Engine::ShaderManager->release( _shader );
-}
-
-SmoothTail::SmoothTail()
-    :   ParticleSystem( 0 ),
-        _pos( glm::vec3( -10, 0, 0 ), glm::vec3( 2, 0, 0 ) )
-{
-    newColor =  QuadraticCurve<glm::vec4>( glm::vec4( 0.8, 0.8, 1, 1 ), glm::vec4( 0.05f, 0.05f, 0, -0.2 ) );
-    newSize = QuadraticCurve<GLfloat>( 0.01 , 0, -0.01 );
-}
-
-void SmoothTail::spawnParticle()
-{
-    auto rnd = [] ()
-    {
-        return 0.01*( float ) rand() / RAND_MAX - 0.005;
-    };
- 
-    Particle part;
-    part.position = QuadraticCurve<glm::vec3>( _pos.getValue() + glm::vec3( rnd(), rnd(), rnd() ) );
-    part.color = newColor;
-    part.uv = QuadraticCurve<glm::vec2>( glm::vec2( 0, 0 ) );
-    part.size = newSize;
-    part.life = 4;
-
-    for( size_t i = 0 ; i < _particles.size() ; ++i )
-        if( _particles[i].life <= 0 )
-        {
-            _particles[i] = part;
-            return;
-        }
-
-    _particles.push_back( part );
-}
-
-void SmoothTail::step( double dt )
-{
-    constexpr float pps = 120;
-    
-    for( int i = 0 ; i < pps*dt ; ++i )
-        spawnParticle();
-    
-    ParticleSystem::step( dt );
 }
 
 LightWell::LightWell( glm::vec3 pos )

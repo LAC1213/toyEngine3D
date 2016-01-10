@@ -32,8 +32,8 @@ btVector3 glm2bt( const glm::vec3& vec );
 static glm::vec3 __nullvec = glm::vec3(0);
 static glm::vec3 __rotvec = glm::vec3(2*M_PI, 0, 0);
 static glm::vec3 __scalevec = glm::vec3(1);
-glm::mat4 makeModel( const glm::vec3& origin = __nullvec,
-                     const glm::vec3& rotation = __rotvec,
+glm::mat4 makeModel( const glm::vec3& origin = __nullvec, 
+                     const glm::vec3& rotation = __rotvec, 
                      const glm::vec3& scale = __scalevec );
 
 #endif //INTERNAL_UTIL_H
