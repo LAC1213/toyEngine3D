@@ -8,6 +8,7 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     , _cam( _window, &_player, (float) _width/ _height )
     , _bloomed( Framebuffer::genScreenBuffer() )
     , _lighting( _gBuffer )
+    , _shock( _gBuffer )
     , _walls( 6 )
     , _spinnies( 1 )
 {    
@@ -19,6 +20,9 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     _lighting.addPointLight ( &p );
     _lighting.setAmbient ( glm::vec3 ( 0.3, 0.3, 0.3 ) );
     _lighting.addPointLight( _player.light() );
+    
+    _shock.setCenter( glm::vec3(0, 1, 0) );
+    _shock.setColor( glm::vec3( 7, 5, 0 ) );
     
     static IcoSphere sphere;
     Bomb::obj = &sphere;
@@ -91,12 +95,17 @@ void Level1::onKeyAction ( int key, int scancode, int action, int mods )
                 _player.jump();
                 break;
             case GLFW_KEY_E:
+            {
                 Bomb * nb = new Bomb;
                 nb->setModel( _player.getPos() + glm::vec3(0, 0.3, 0), glm::vec3(2*M_PI, 0, 0), glm::vec3(0.06) );
                 _physics->dynamicsWorld->addRigidBody( nb->body() );
                 _lighting.addPointLight( &nb->light() );
                 nb->body()->applyCentralImpulse( btVector3( 0, 4, 0 ) );
                 _bombs.push_back( nb );
+                break;
+            }
+            case GLFW_KEY_Q:
+                _shock.fire();
                 break;
         }
     }
@@ -107,6 +116,8 @@ void Level1::update ( double dt )
     Engine::Physics = _physics;
     _player.step( dt );
     _cam.step( dt );
+    _shock.setCenter( _player.getPos() );
+    _shock.step( dt );
     
     vec_for_each( i, _bombs )
         _bombs[i]->step( dt );
@@ -152,6 +163,7 @@ void Level1::render()
     _canvas->copyDepth( *_gBuffer );
     
     _lighting.render();
+    _shock.render();
     _player.render();
     vec_for_each( i, _spinnies )
         _spinnies[i]->renderFX();
@@ -180,5 +192,5 @@ Level::Status Level1::getStatus()
     if( _goal.win )
         return Won;
     
-    return Running;
+    return Level::getStatus();
 }

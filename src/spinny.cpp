@@ -11,13 +11,21 @@ Spinny::Spinny()
     , _p( 0, 3, 0 )
     , _waiting( true )
 {
+    static Texture animationAtlas;
+    animationAtlas.loadFromFile( "./res/textures/particle4.png" );
+    animationAtlas.setParameter( GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    animationAtlas.setParameter( GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+    animationAtlas.genMipmap();
+    
     for( int i = 0 ; i < 3 ; ++i )
     {
-        _tail[i] = new ParticleSystem;
+        _tail[i] = new ParticleSystem( &animationAtlas );
+        _tail[i]->setAnimSize( glm::vec2( 4, 4) );
         _tail[i]->setSpawnFrequency( 60 );
-        _tail[i]->setRandomness( 0.06 );
+        _tail[i]->setRandomness( 0.03 );
         _tail[i]->initialParticle().color = QuadraticCurve<glm::vec4>( glm::vec4( 0.1, 0.9, 0.3, 1 ), glm::vec4(0.1, 0.1, 0.1, 0.1) );
-        _tail[i]->initialParticle().size = QuadraticCurve<GLfloat>(0.05, -0.008, -0.01);
+        _tail[i]->initialParticle().size = QuadraticCurve<GLfloat>(0.05, -0.00, -0.0);
+        _tail[i]->initialParticle().uv.setConstant( glm::vec2(0, 0) );
         _tail[i]->initialParticle().life = 4;
         _tail[i]->initialParticle().uv.setConstant( glm::vec2(0) );
     }
@@ -35,9 +43,9 @@ void Spinny::step ( double dt )
     timer += dt;
     
     if( _waiting )
-        setColor( glm::vec4( 7, 7, 7, 1 ) );
+        setColor( glm::vec4( 0.5, 1, 0.5, 1 ) );
     else
-        setColor( glm::vec4( 7, 0, 0, 1 ) );
+        setColor( glm::vec4( 1, 1, 1, 1 ) );
     
     for( int i = 0 ; i < 3 ; ++i )
         _tail[i]->initialParticle().color.setConstant( _diffuseColor );

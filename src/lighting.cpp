@@ -16,7 +16,6 @@ Lighting::Lighting ( Framebuffer * gBuffer )
 {
 }
 
-
 Lighting::~Lighting()
 {
 }
@@ -38,12 +37,6 @@ void Lighting::removePointLight ( PointLight * light )
 
 void Lighting::render()
 {
-    const Framebuffer * target = Framebuffer::getActiveDraw();
-
-    /* render lighting */
-    glViewport ( 0, 0, target->getWidth(), target->getHeight() );
-    target->bindDraw();
-
     glBlendFunc ( GL_ONE, GL_ONE );
     glDisable ( GL_DEPTH_TEST );
 

@@ -17,14 +17,7 @@ public:
     QuadraticCurve<GLfloat> size;
     float life;
 
-    virtual void step( double dt )
-    {
-        life -= dt;
-        position.step( dt );
-        uv.step( dt );
-        color.step( dt );
-        size.step( dt );
-    }
+    virtual void step( double dt );
 };
 
 class ParticleSystem : public Renderable
@@ -45,6 +38,9 @@ public:
     
     void setSpawnFrequency( double f );
     void setRandomness( double r );
+    void setAnimSize( const glm::vec2& s );
+    void setAnimDuration( double t );
+    void setTexture( const Texture * tex );
     
     Particle& initialParticle();
 
@@ -55,6 +51,8 @@ public:
 
 protected:
     static Shader * _shader;
+    glm::vec2 _animSize;
+    double _animDuration;
     
     double _spawnFrequency;
     double _rnJesus;

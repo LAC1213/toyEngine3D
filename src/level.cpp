@@ -9,6 +9,7 @@ Level::Level( GLFWwindow * win, int w, int h )
     , _gBuffer( Framebuffer::genGeometryBuffer() )
     , _canvas( Framebuffer::genScreenBuffer() )
     , _drawCollisionShapes( false )
+    , _status( Running )
 {
     onResize( w, h );
     _physics = new PhysicsVars;
@@ -58,7 +59,7 @@ void Level::render()
 
 Level::Status Level::getStatus()
 {
-    return Running;
+    return _status;
 }
 
 void Level::onResize ( int w, int h )
@@ -86,7 +87,7 @@ void Level::onKeyAction ( int key, int scancode, int action, int mods )
             reset();
             break;
         case GLFW_KEY_ESCAPE:
-            exit( EXIT_SUCCESS );
+            _status = Shutdown;
             break;
         case GLFW_KEY_Z:
             _drawCollisionShapes ^= true;

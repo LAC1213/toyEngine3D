@@ -13,10 +13,20 @@ Particle::Particle()
 {
 }
 
+void Particle::step( double dt )
+{
+    life -= dt;
+    position.step( dt );
+    color.step( dt );
+    size.step( dt );
+}
+
 Shader * ParticleSystem::_shader = 0;
 
 ParticleSystem::ParticleSystem( const Texture * texture )
-    :   _spawnFrequency( 60 ),
+    :   _animSize( 1, 1 ),
+        _animDuration( 4 ),
+        _spawnFrequency( 60 ),
         _rnJesus( 0 ),
         _buffers( 4 ),
         _drawCall( GL_POINTS ),
@@ -60,6 +70,16 @@ void ParticleSystem::setSpawnFrequency ( double f )
     _spawnFrequency = f;
 }
 
+void ParticleSystem::setAnimSize ( const glm::vec2& s )
+{
+    _animSize = s;
+}
+
+void ParticleSystem::setTexture ( const Texture* tex )
+{
+    _texture = tex;
+}
+
 void ParticleSystem::step( double dt )
 {
     auto rnd = [this] ()
@@ -100,6 +120,17 @@ void ParticleSystem::step( double dt )
     for( size_t i = 0 ; i < _particles.size() ; ++i )
     {
         _particles[i].step( dt );
+        if( glm::dot( _animSize, _animSize ) > 3 )
+        {
+            int pos = _particles[i].life/_animDuration*_animSize.x*_animSize.y;
+            int x = pos % (int)_animSize.x;
+            int y = pos / (int)_animSize.y;
+            _particles[i].uv.setConstant( glm::vec2((float)x/_animSize.x, (float)y/_animSize.y) );
+        }
+        else
+        {
+            _particles[i].uv.setConstant( glm::vec2(0, 0) );
+        }
     }
 
     /* auto cmp = [this] ( Particle a, Particle b )
@@ -158,6 +189,7 @@ void ParticleSystem::render()
 
     glm::mat4 model( 1 );
     _shader->setUniform( "model", model );
+    _shader->setUniform( "animSize", _animSize );
 
     glBlendFunc( GL_SRC_ALPHA, GL_ONE );
     glDepthMask( GL_FALSE );

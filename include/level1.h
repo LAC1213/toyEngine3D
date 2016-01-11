@@ -5,6 +5,7 @@
 #include <collisionlistener.h>
 #include <spinny.h>
 #include <bomb.h>
+#include <shockwave.h>
 
 class Level1 : public Level
 {
@@ -29,6 +30,7 @@ protected:
     
     Framebuffer * _bloomed;
     Lighting _lighting;
+    Shockwave _shock;
     
     GoalListener _goal;
     std::vector<Wall> _walls;

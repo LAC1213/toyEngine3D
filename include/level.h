@@ -21,7 +21,8 @@ public:
     {
         Won,
         Lost,
-        Running
+        Running,
+        Shutdown
     };
     
     virtual Status getStatus();
@@ -44,4 +45,7 @@ protected:
     bool _drawCollisionShapes;
     
     PhysicsVars * _physics;
+    
+private:
+    Status _status;
 };

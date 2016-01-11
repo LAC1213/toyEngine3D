@@ -15,6 +15,8 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 proj;
 
+uniform vec2 animSize;
+
 void main()
 {
     vec4 p = gl_in[0].gl_Position;
@@ -35,7 +37,7 @@ void main()
     vec2 vd = p.xy + vec2(0.5, -0.5) * particle_size;
     gPosition = p.xyz;
     gl_Position = proj * vec4(vd, p.zw);
-    gUV = animPos + vec2(1, 0.0);
+    gUV = animPos + vec2(1/animSize.x, 0.0);
     gColor = vColor[0];
     EmitVertex();
 
@@ -43,7 +45,7 @@ void main()
     vec2 vb = p.xy + vec2(-0.5, 0.5) * particle_size;
     gPosition = p.xyz;
     gl_Position = proj * vec4(vb, p.zw);
-    gUV = animPos + vec2(0.0, 1);
+    gUV = animPos + vec2(0.0, 1/animSize.y);
     gColor = vColor[0];
     EmitVertex();
     
@@ -51,7 +53,7 @@ void main()
     vec2 vc = p.xy + vec2(0.5, 0.5) * particle_size;
     gPosition = p.xyz;
     gl_Position = proj * vec4(vc, p.zw);
-    gUV = animPos + vec2(1, 1);
+    gUV = animPos + 1/animSize;
     gColor = vColor[0];
     EmitVertex();
 

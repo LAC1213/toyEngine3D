@@ -21,6 +21,7 @@ Player::Player ()
     _light.specular = glm::vec3 ( 1, 1, 1 );
     _light.attenuation = glm::vec3 ( 1, 1, 1 );
     
+    _tail.setTexture( &_tex );
     _tail.setSpawnFrequency( 120 );
     _tail.setRandomness( 0.03 );
     _tail.initialParticle().color = QuadraticCurve<glm::vec4>( glm::vec4(0.8, 0.8, 1, 1), glm::vec4( 0.05f, 0.05f, 0, -0.2 ) );
