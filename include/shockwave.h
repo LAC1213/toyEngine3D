@@ -5,13 +5,14 @@
 class Shockwave : public Renderable
 {
 public:
-    Shockwave( Framebuffer * gBuffer );
+    Shockwave( Framebuffer * gBuffer, Framebuffer * canvas );
     ~Shockwave();
     
     void fire();
     
     virtual void step( double dt );
     virtual void render();
+    void renderFX();
     
     void setCenter( const glm::vec3& p );
     void setAcceleration( float a );
@@ -34,4 +35,6 @@ protected:
 private:
     Shader * _shader;
     Framebuffer * _gBuffer;
+    Framebuffer * _canvas;
+    Explosion * _particles;
 };

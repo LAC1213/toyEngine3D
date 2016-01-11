@@ -21,9 +21,9 @@ void Particle::step( double dt )
     size.step( dt );
 }
 
-Shader * ParticleSystem::_shader = 0;
+Shader * ParticleEmitter::_shader = 0;
 
-ParticleSystem::ParticleSystem( const Texture * texture )
+ParticleEmitter::ParticleEmitter( const Texture * texture )
     :   _animSize( 1, 1 ),
         _animDuration( 4 ),
         _spawnFrequency( 60 ),
@@ -38,11 +38,79 @@ ParticleSystem::ParticleSystem( const Texture * texture )
     _drawCall.addAttribute( VertexAttribute( &_buffers[SIZE], GL_FLOAT, 1 ) ); // size
 }
 
-ParticleSystem::~ParticleSystem()
+ParticleEmitter::~ParticleEmitter()
 {
 }
 
-void ParticleSystem::addParticle ( const Particle& p )
+Particle ParticleEmitter::genParticle()
+{
+    auto rnd = [this] ()
+    {
+        return _rnJesus*( float ) rand() / RAND_MAX - 0.5*_rnJesus;
+    };
+    
+    Particle p = _newParticle;
+    
+    glm::vec3 r0(rnd(), rnd(), rnd());
+    glm::vec3 r1(rnd(), rnd(), rnd());
+    glm::vec3 r2(rnd(), rnd(), rnd());
+    p.position = QuadraticCurve<glm::vec3>( p.position.getConstant() + r0, 
+                                    p.position.getLinear() + r1,
+                                    p.position.getQuadratic() + r2
+                                  );
+    
+    glm::vec4 c0(rnd(), rnd(), rnd(), rnd());
+    glm::vec4 c1(rnd(), rnd(), rnd(), rnd());
+    glm::vec4 c2(rnd(), rnd(), rnd(), rnd());
+    
+    p.color = QuadraticCurve<glm::vec4>( p.color.getConstant() + c0, 
+                                    p.color.getLinear() + c1,
+                                    p.color.getQuadratic() + c2
+                                  );
+    
+    p.step( rnd() * p.life );
+
+    return p;
+}
+
+void ParticleEmitter::addParticles ( size_t n )
+{
+    _particles.reserve( n );
+    
+    vec_for_each( i, _particles )
+    {
+        if( n <= 0 )
+            break;
+        if( _particles[i].life <= 0 )
+        {
+            _particles[i] = genParticle();
+            
+            --n;
+        }
+    }
+    
+    for( size_t i = 0 ; i < n ; ++i )
+    {
+        _particles.push_back( genParticle() );
+    }
+    
+}
+
+void ParticleEmitter::addParticles ( const std::vector<Particle>& ps )
+{
+    size_t n = 0;
+    vec_for_each( i, _particles )
+    {
+        if( _particles[i].life <= 0 )
+        {
+            _particles[i] = ps[n];
+            ++n;
+        }
+    }
+    std::copy( ps.begin() + n, ps.end(), _particles.end() );
+}
+
+void ParticleEmitter::addParticle ( const Particle& p )
 {
     vec_for_each( i, _particles )
     {
@@ -55,70 +123,43 @@ void ParticleSystem::addParticle ( const Particle& p )
     _particles.push_back( p );
 }
 
-Particle& ParticleSystem::initialParticle()
+Particle& ParticleEmitter::initialParticle()
 {
     return _newParticle;
 }
 
-void ParticleSystem::setRandomness ( double r )
+void ParticleEmitter::setRandomness ( double r )
 {
     _rnJesus = r;
 }
 
-void ParticleSystem::setSpawnFrequency ( double f )
+void ParticleEmitter::setSpawnFrequency ( double f )
 {
     _spawnFrequency = f;
 }
 
-void ParticleSystem::setAnimSize ( const glm::vec2& s )
+void ParticleEmitter::setAnimSize ( const glm::vec2& s )
 {
     _animSize = s;
 }
 
-void ParticleSystem::setAnimDuration ( double t )
+void ParticleEmitter::setAnimDuration ( double t )
 {
     _animDuration = t;
 }
 
-void ParticleSystem::setTexture ( const Texture* tex )
+void ParticleEmitter::setTexture ( const Texture* tex )
 {
     _texture = tex;
 }
 
-void ParticleSystem::step( double dt )
+void ParticleEmitter::step( double dt )
 {
-    auto rnd = [this] ()
-    {
-        return _rnJesus*( float ) rand() / RAND_MAX - 0.5*_rnJesus;
-    };
-    
     static double timer = 0;
     timer += dt;
     if( timer * _spawnFrequency > 1)
     {
-        for( int i = 0 ; i < timer*_spawnFrequency ; ++i )
-        {
-            Particle p = _newParticle;
-            
-            glm::vec3 r0(rnd(), rnd(), rnd());
-            glm::vec3 r1(rnd(), rnd(), rnd());
-            glm::vec3 r2(rnd(), rnd(), rnd());
-            p.position = QuadraticCurve<glm::vec3>( p.position.getConstant() + r0, 
-                                                    p.position.getLinear() + r1,
-                                                    p.position.getQuadratic() + r2
-                                                  );
-            
-            glm::vec4 c0(rnd(), rnd(), rnd(), rnd());
-            glm::vec4 c1(rnd(), rnd(), rnd(), rnd());
-            glm::vec4 c2(rnd(), rnd(), rnd(), rnd());
-            
-            p.color = QuadraticCurve<glm::vec4>( p.color.getConstant() + c0, 
-                                                    p.color.getLinear() + c1,
-                                                    p.color.getQuadratic() + c2
-                                                  );
-            //TODO make this more efficient [ reduce looping through particles ]
-            addParticle( p );
-        }
+        addParticles( (size_t) (timer * _spawnFrequency) );
         timer = 0;
     }
     
@@ -183,7 +224,7 @@ void ParticleSystem::step( double dt )
     _buffers[ SIZE ].loadData( sizes.data(), sizes.size()*sizeof( GLfloat ) );
 }
 
-void ParticleSystem::render()
+void ParticleEmitter::render()
 {
     if( _texture )
     {
@@ -206,18 +247,18 @@ void ParticleSystem::render()
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 }
 
-void ParticleSystem::init()
+void ParticleEmitter::init()
 {
     _shader =  Engine::ShaderManager->request( "./res/shader/particle/", Shader::LOAD_GEOM );
 }
 
-void ParticleSystem::destroy()
+void ParticleEmitter::destroy()
 {
     Engine::ShaderManager->release( _shader );
 }
 
 LightWell::LightWell( glm::vec3 pos )
-    :   ParticleSystem( 0 ),
+    :   ParticleEmitter( 0 ),
         _pos( pos )
 {
 }
@@ -261,11 +302,11 @@ void LightWell::step( double dt )
     for( int i = 0 ; i < spawnrate*dt ; ++i )
         spawnParticle();
 
-    ParticleSystem::step( dt );
+    ParticleEmitter::step( dt );
 }
 
 BulletSpawner::BulletSpawner( PlayerCamera * cam, std::vector<Enemy*>* enemies )
-    :   ParticleSystem( 0 ),
+    :   ParticleEmitter( 0 ),
         _enemies( enemies ),
         _playerCam( cam )
 {
@@ -277,7 +318,7 @@ void BulletSpawner::step( double dt )
         for( size_t j = 0 ; j < _enemies->size() ; ++j )
             if( ( *_enemies )[j]->contains( _particles[i].position ) )
                 ( *_enemies )[j]->onHit();
-    ParticleSystem::step( dt );
+    ParticleEmitter::step( dt );
 }
 
 void BulletSpawner::shoot()
@@ -297,4 +338,45 @@ void BulletSpawner::shoot()
             _particles.erase( _particles.begin() + i );
 
     _particles.push_back( bullet );
+}
+
+Particle Explosion::genParticle()
+{
+    auto rnd = [this] ()
+    {
+        return _rnJesus*( float ) rand() / RAND_MAX - 0.5*_rnJesus;
+    };
+    
+    Particle p = _newParticle;
+    
+    glm::vec3 r0(rnd(), rnd(), rnd());
+    glm::vec3 r1(rnd(), rnd(), rnd());
+    glm::vec3 r2(rnd(), rnd(), rnd());
+    glm::vec3 v = p.position.getLinear() + glm::normalize(r1)*_expandSpeed;
+    p.position = QuadraticCurve<glm::vec3>( p.position.getConstant() + r0, r0 + v,
+                                r2 + glm::normalize(v) * (2*(_expandSpeed*p.life - _maxRadius)/p.life/p.life)
+                                  );
+    
+    glm::vec4 c0(rnd(), rnd(), rnd(), rnd());
+    glm::vec4 c1(rnd(), rnd(), rnd(), rnd());
+    glm::vec4 c2(rnd(), rnd(), rnd(), rnd());
+    
+    p.color = QuadraticCurve<glm::vec4>( p.color.getConstant() + c0, 
+                                    p.color.getLinear() + c1,
+                                    p.color.getQuadratic() + c2
+                                  );
+    
+    p.step( rnd() * p.life );
+
+    return p;
+}
+
+void Explosion::setExpandSpeed ( float v )
+{
+    _expandSpeed = v;
+}
+
+void Explosion::setMaxRadius ( float r )
+{
+    _maxRadius = r;
 }

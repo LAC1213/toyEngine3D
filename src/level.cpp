@@ -35,8 +35,6 @@ void Level::init()
 void Level::reset()
 {
     _time = 0;
-    delete _physics;
-    _physics = new PhysicsVars;
 }
 
 void Level::update ( double dt )

@@ -21,13 +21,13 @@ Player::Player ()
     _light.position = glm::vec3 ( 0, 0, 0 );
     _light.diffuse = glm::vec3 ( 1, 1, 1 );
     _light.specular = glm::vec3 ( 1, 1, 1 );
-    _light.attenuation = glm::vec3 ( 1, 1, 1 );
+    _light.attenuation = glm::vec3 ( 0.4, 0.4, 0.4 );
     
     _tail.setTexture( Engine::TextureManager->request( "res/textures/particle4.png" ) );
     _tail.setAnimSize( glm::vec2(4, 4));
     _tail.setAnimDuration( 4 );
     _tail.setSpawnFrequency( 60 );
-    _tail.setRandomness( 0.01 );
+    _tail.setRandomness( 0.03 );
     _tail.initialParticle().color = QuadraticCurve<glm::vec4>( _color );
     _tail.initialParticle().size = QuadraticCurve<GLfloat>( 0.1, 0 );
     _tail.initialParticle().life = 4;
@@ -40,8 +40,8 @@ Player::~Player()
 
 void Player::jump ()
 {
-//    if( !_canJump )
-//        return;
+    if( !_canJump )
+        return;
     _v.y = 3;
 }
 

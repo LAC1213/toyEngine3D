@@ -56,7 +56,6 @@ Hello Cube example:
 ## To Do
 
 1. `Engine::ActiveCam` -> `Camera::Active`
-2. eliminate `static Camera nullCam;` with Camera::Null
 3. drop rolling bomb, level1
 4. bad guys, level1
-5. load particles, walls, etc. from disk (protobuf ?)
+5. load particles, walls, etc. from disk (yaml)

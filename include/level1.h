@@ -29,6 +29,7 @@ protected:
     Player _player;
     
     Framebuffer * _bloomed;
+    Framebuffer * _swapBuffer;
     Lighting _lighting;
     Shockwave _shock;
     

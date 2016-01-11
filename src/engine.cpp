@@ -9,7 +9,7 @@
 
 #include <unistd.h>
 #include <internal/util.h>
-#include <internal/config.h>
+#include <yaml-cpp/yaml.h>
 
 PhysicsVars::PhysicsVars()
 {
@@ -86,6 +86,8 @@ void init()
         Root = std::string(wd);
     }
 
+    YAML::Node config = YAML::LoadFile( "config.yaml" );
+    
     ShaderManager = new Shader::Manager;
     TextureManager = new Texture::Manager;
     BoxShapeManager = new BoxShapeManagerT;
@@ -94,9 +96,12 @@ void init()
     Lighting::init();
     PostEffect::init();
     Billboard::init();
-    ParticleSystem::init();
+    ParticleEmitter::init();
     Text::init();
-    Terrain::init();
+    
+    if( config["enableTerrain"] )
+    if( config["enableTerrain"].as<bool>() )
+        Terrain::init();
 
     MeshObject::init();
     CubeObject = MeshObject::genCube();
@@ -116,7 +121,7 @@ void destroy()
     Lighting::destroy();
     PostEffect::destroy();
     Billboard::destroy();
-    ParticleSystem::destroy();
+    ParticleEmitter::destroy();
     Text::destroy();
     Terrain::destroy();
     MeshObject::destroy();

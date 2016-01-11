@@ -7,8 +7,9 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     : Level ( window, width, height )
     , _cam( _window, &_player, (float) _width/ _height )
     , _bloomed( Framebuffer::genScreenBuffer() )
+    , _swapBuffer( Framebuffer::genScreenBuffer() )
     , _lighting( _gBuffer )
-    , _shock( _gBuffer )
+    , _shock( _gBuffer, _canvas )
     , _walls( 6 )
     , _spinnies( 1 )
 {    
@@ -22,8 +23,8 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     _lighting.addPointLight( _player.light() );
     
     _shock.setCenter( glm::vec3(0, 1, 0) );
-    _shock.setColor( glm::vec3( 0.7, 0.1, 0 ) );
-    _shock.setAcceleration( 10 );
+    _shock.setColor( glm::vec3( 1, 1, 1 ) );
+    _shock.setAcceleration( 20 );
     _shock.setDuration( 1 );
     
     static IcoSphere sphere;
@@ -69,7 +70,6 @@ void Level1::init()
 void Level1::reset()
 {
     Level::reset();
-    init();
 }
 
 void Level1::onMouseMove ( double x, double y )
@@ -137,7 +137,7 @@ void Level1::update ( double dt )
             glm::vec3 d = bt2glm(_bombs[i]->body()->getCenterOfMassPosition()) - _shock.getCenter();
             if( glm::dot(d, d) < _shock.getRadius()*_shock.getRadius() )
             {
-                _bombs[i]->body()->applyCentralImpulse( 30*glm2bt(glm::normalize(d))/(1 + _shock.getRadius()) );
+                _bombs[i]->body()->applyCentralImpulse( 10*glm2bt(glm::normalize(d))/(1 + _shock.getRadius()) );
                 hit[i] = true;
             }
         }
@@ -164,8 +164,8 @@ void Level1::update ( double dt )
 
 void Level1::render()
 {
-    static Blend effect ( _bloomed, _canvas );
-    static Bloom bloom ( _canvas );
+    static Blend effect ( _bloomed, _swapBuffer );
+    static Bloom bloom ( _swapBuffer );
     static Camera nullCam;
     
     glViewport( 0, 0, _width, _height );
@@ -189,11 +189,23 @@ void Level1::render()
     _canvas->copyDepth( *_gBuffer );
     
     _lighting.render();
-    _shock.render();
     _player.render();
     vec_for_each( i, _spinnies )
         _spinnies[i]->renderFX();
+    _shock.renderFX();
+        
     Level::render();
+    
+    _swapBuffer->clear();
+    
+    glBlendFunc( GL_ONE, GL_ONE );
+    static PostEffect passthrogh( PostEffect::NONE, _canvas );
+    Engine::ActiveCam = &Camera::Null;
+    passthrogh.render();
+    
+    Engine::ActiveCam = &_cam;
+    _shock.render();
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
     
     Engine::ActiveCam = &nullCam;
     

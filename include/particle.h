@@ -20,7 +20,7 @@ public:
     virtual void step( double dt );
 };
 
-class ParticleSystem : public Renderable
+class ParticleEmitter : public Renderable
 {
 public:
     enum BufferIndex {
@@ -30,8 +30,8 @@ public:
         SIZE
     };
 
-    ParticleSystem( const Texture * texture = nullptr );
-    virtual ~ParticleSystem();
+    ParticleEmitter( const Texture * texture = nullptr );
+    virtual ~ParticleEmitter();
 
     virtual void step( double dt );
     virtual void render();
@@ -48,8 +48,12 @@ public:
     static void destroy();
 
     void addParticle( const Particle& p );
+    void addParticles( const std::vector<Particle>& ps );
+    void addParticles( size_t n );
 
 protected:
+    virtual Particle genParticle();
+    
     static Shader * _shader;
     glm::vec2 _animSize;
     double _animDuration;
@@ -66,7 +70,19 @@ private:
     const Texture * _texture;
 };
 
-class LightWell : public ParticleSystem
+class Explosion : public ParticleEmitter
+{
+public:
+    void setMaxRadius( float r );
+    void setExpandSpeed( float v );
+    
+    virtual Particle genParticle();
+protected:
+    float _expandSpeed;
+    float _maxRadius;
+};
+
+class LightWell : public ParticleEmitter
 {
 public:
     LightWell( glm::vec3 pos );
@@ -78,7 +94,7 @@ protected:
     glm::vec3   _pos;
 };
 
-class BulletSpawner : public ParticleSystem
+class BulletSpawner : public ParticleEmitter
 {
 public:
     BulletSpawner( PlayerCamera * cam, std::vector<Enemy*>* enemies );

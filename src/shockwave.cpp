@@ -1,18 +1,34 @@
 #include <shockwave.h>
 
-Shockwave::Shockwave ( Framebuffer* gBuffer )
+Shockwave::Shockwave ( Framebuffer* gBuffer, Framebuffer * canvas )
     : _duration( 2 )
     , _timer( _duration + 1 )
     , _a( 6 )
     , _color( 1, 1, 1 )
     , _gBuffer( gBuffer )
+    , _canvas( canvas )
 {
     _shader = Engine::ShaderManager->request( "res/shader/shockwave", Shader::LOAD_BASIC );
+    
+    _particles = new Explosion;
+    _particles->setExpandSpeed( 1 );
+    _particles->setMaxRadius( 0.4 );
+    _particles->setTexture( Engine::TextureManager->request( "res/textures/explosion.png" ) );
+    _particles->setAnimSize( glm::vec2(4, 4) );
+    _particles->setAnimDuration( 3 );
+    _particles->setRandomness( 0.07 );
+    _particles->setSpawnFrequency( 0 );
+    _particles->initialParticle().color.setConstant( glm::vec4(_color, 1) );
+    _particles->initialParticle().position.setConstant( _center );
+    _particles->initialParticle().size.setConstant( 0.1 );
+    _particles->initialParticle().life = 0.5;
 }
 
 Shockwave::~Shockwave()
 {
     Engine::ShaderManager->release( _shader );
+    Engine::TextureManager->release( "res/textures/explosion.png" );
+    delete _particles;
 }
 
 void Shockwave::fire()
@@ -22,11 +38,14 @@ void Shockwave::fire()
         _timer = 0;
         _radius = 0;
         _v = _duration*_a;
+        
+        _particles->addParticles( 400 );
     }
 }
 
 void Shockwave::step ( double dt )
 {
+    _particles->step( dt );
     _timer += dt;
     if( !isActive() )
         return;
@@ -40,12 +59,15 @@ void Shockwave::render()
     if( !isActive() )
         return;
     
-    glBlendFunc ( GL_ONE, GL_ONE );
     glDisable ( GL_DEPTH_TEST );
 
-    glActiveTexture ( GL_TEXTURE0 );
+    glActiveTexture ( GL_TEXTURE1 );
     _gBuffer->getAttachments() [1]->bind();
     _shader->setUniform ( "positionTex", 1 );
+    
+    glActiveTexture ( GL_TEXTURE0 );
+    _canvas->getAttachments().front()->bind();
+    _shader->setUniform ( "colorTex", 0 );
 
     _shader->setUniform ( "color", _color );
     _shader->setUniform ( "center", _center );
@@ -62,8 +84,12 @@ void Shockwave::render()
     Engine::DrawScreenQuad->execute();
 
     glEnable ( GL_DEPTH_TEST );
-    glBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
+}
+
+void Shockwave::renderFX()
+{
+    _particles->render();
 }
 
 void Shockwave::setAcceleration ( float a )
@@ -74,11 +100,13 @@ void Shockwave::setAcceleration ( float a )
 void Shockwave::setCenter ( const glm::vec3& p )
 {
     _center = p;
+    _particles->initialParticle().position.setConstant( p );
 }
 
 void Shockwave::setColor ( const glm::vec3& color )
 {
     _color = color;
+    _particles->initialParticle().color.setConstant( glm::vec4(_color, 1) );
 }
 
 void Shockwave::setDuration ( double t )

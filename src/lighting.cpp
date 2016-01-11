@@ -126,7 +126,7 @@ const glm::vec3& Lighting::getSunSpecular() const
 
 void Lighting::init()
 {
-    _shader = Engine::ShaderManager->request( "./res/shader/lighting/", Shader::LOAD_BASIC );
+    _shader = Engine::ShaderManager->request( "res/shader/lighting/", Shader::LOAD_BASIC );
 }
 
 void Lighting::destroy()

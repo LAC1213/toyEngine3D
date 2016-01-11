@@ -15,7 +15,7 @@ Spinny::Spinny()
     
     for( int i = 0 ; i < 3 ; ++i )
     {
-        _tail[i] = new ParticleSystem( animationAtlas );
+        _tail[i] = new ParticleEmitter( animationAtlas );
         _tail[i]->setAnimSize( glm::vec2( 4, 4) );
         _tail[i]->setAnimDuration( 2 );
         _tail[i]->setSpawnFrequency( 120 );

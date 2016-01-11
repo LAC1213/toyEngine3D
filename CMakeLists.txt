@@ -15,7 +15,7 @@ include_directories( "src" "include" "src/glwrappers" "include/glwrappers"
     ${BULLET_INCLUDE_DIR})
 
 add_library( engine SHARED ${SRC} )
-target_link_libraries( engine m glib-2.0 freetype GL GLU GLEW SOIL ${BULLET_LIBRARIES} )
+target_link_libraries( engine m yaml-cpp freetype GL GLU GLEW SOIL ${BULLET_LIBRARIES} )
 set_property( TARGET engine PROPERTY CXX_STANDARD 14 )
 
 include_directories( "test" )

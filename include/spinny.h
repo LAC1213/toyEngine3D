@@ -30,5 +30,5 @@ protected:
     bool _waiting;
     glm::vec3 _target;
     
-    ParticleSystem * _tail[3];
+    ParticleEmitter * _tail[3];
 };

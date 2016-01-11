@@ -3,6 +3,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <player.h>
 
+Camera Camera::Null;
+
 const std::string PerspectiveCamera::PROJ_UNIFORM_STR = "proj";
 const std::string PerspectiveCamera::VIEW_UNIFORM_STR = "view";
 

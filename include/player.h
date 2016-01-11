@@ -30,7 +30,7 @@ protected:
     Billboard _billboard;
     PointLight _light;
     
-    ParticleSystem _tail;
+    ParticleEmitter _tail;
     
     float _size;
     
