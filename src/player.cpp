@@ -6,7 +6,7 @@
 
 Player::Player () 
     : _billboard( &_tex )
-    , _size( 0.02 )
+    , _size( 0.07 )
     , _color( 10, 0, 0, 10 )
     , _p( 0, 2, 0 )
     , _a( 0, -1, 0 )
@@ -22,9 +22,9 @@ Player::Player ()
     _light.attenuation = glm::vec3 ( 1, 1, 1 );
     
     _tail.setSpawnFrequency( 120 );
-    _tail.setRandomness( 0.005 );
+    _tail.setRandomness( 0.03 );
     _tail.initialParticle().color = QuadraticCurve<glm::vec4>( glm::vec4(0.8, 0.8, 1, 1), glm::vec4( 0.05f, 0.05f, 0, -0.2 ) );
-    _tail.initialParticle().size = QuadraticCurve<GLfloat>( 0.01, 0, -0.01 );
+    _tail.initialParticle().size = QuadraticCurve<GLfloat>( 0.05, 0, -0.04 );
     _tail.initialParticle().life = 10;
 }
 

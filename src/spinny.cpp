@@ -31,17 +31,37 @@ Spinny::~Spinny()
 
 void Spinny::step ( double dt )
 {
-    constexpr double rotationspeed = 3;
-    constexpr float speed = 0.005;
-    _angle += rotationspeed * dt;
+    static double timer = 0;
+    timer += dt;
     
     if( _waiting )
+        setColor( glm::vec4( 7, 7, 7, 1 ) );
+    else
+        setColor( glm::vec4( 7, 0, 0, 1 ) );
+    
+    for( int i = 0 ; i < 3 ; ++i )
+        _tail[i]->initialParticle().color.setConstant( _diffuseColor );
+    
+    constexpr double timerLen = 6;
+    if( timer > timerLen )
     {
+        timer = 0;
+        _waiting = true;
+    }
+    
+    static double rotationspeed = 3;
+    constexpr float speed = 0.04;
+    _angle += rotationspeed * dt;
+    
+    if( _waiting || timer > timerLen * 0.6)
+    {
+        rotationspeed = 2;
         _up = glm::vec3(0, 1, 0);
     }
     else
     {
-        _up = glm::normalize(_target - _p);
+        rotationspeed = 6;
+        _up = _target;
         _p += speed * _up;
     }
     
@@ -58,12 +78,12 @@ void Spinny::step ( double dt )
     {
         glm::vec3 n = bt2glm( cb.m_hitNormalWorld );
         _up = glm::length(_up) * glm::normalize(glm::cross( n, glm::cross(_up, n)));
-        _p = bt2glm( cb.m_hitPointWorld) + glm::vec3( 0, _scale.y, 0 );
+        _p = bt2glm( cb.m_hitPointWorld) + glm::vec3( 0, 2*_scale.y, 0 );
     }
     
     glm::vec3 axis = glm::cross( -_up, glm::vec3(0, 1, 0));
     float phi;
-    if(!_waiting)
+    if(!_waiting && timer < timerLen * 0.6)
         phi = acos( glm::dot( _up, glm::vec3( 0, 1, 0 )));
     else    
         phi = acos( glm::dot( _up, glm::vec3( 0, 1, 0 ))) - M_PI/2;
@@ -103,8 +123,10 @@ void Spinny::renderFX()
 
 void Spinny::target ( const glm::vec3& pos )
 {
+    if(!_waiting)
+        return;
     _waiting = false;
-    _target = pos;
+    _target = glm::normalize(pos - _p);
 }
 
 void Spinny::wait()

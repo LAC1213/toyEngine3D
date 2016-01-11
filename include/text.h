@@ -29,8 +29,8 @@ protected:
     BufferObject _buffers[3];
     DrawCall _drawCall;
 
-    glm::vec4 _color;
     glm::vec2 _screen;
+    glm::vec4 _color;
     glm::vec2 _pos;
 };
 

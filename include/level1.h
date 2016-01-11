@@ -4,6 +4,7 @@
 #include <player.h>
 #include <collisionlistener.h>
 #include <spinny.h>
+#include <bomb.h>
 
 class Level1 : public Level
 {
@@ -32,4 +33,5 @@ protected:
     GoalListener _goal;
     std::vector<Wall> _walls;
     std::vector<Spinny*> _spinnies;
+    std::vector<Bomb*> _bombs;
 };

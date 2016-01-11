@@ -160,7 +160,7 @@ MeshObject * MeshObject::genCube()
     };
 
     MeshObject * cube = new MeshObject();
-    cube->buffers = std::vector<BufferObject>( 2 );
+    cube->buffers = std::vector<BufferObject>( 3 );
     cube->buffers[0].loadData( verts, sizeof verts );
     cube->buffers[1].loadData( normals, sizeof normals );
     cube->buffers[2].loadData( uvs, sizeof uvs );
@@ -234,7 +234,7 @@ MeshObject * MeshObject::genTetrahedron()
     };
     
     MeshObject * tetra = new MeshObject();
-    tetra->buffers = std::vector<BufferObject>( 2 );
+    tetra->buffers = std::vector<BufferObject>( 3 );
     tetra->buffers[0].loadData( verts, sizeof verts );
     tetra->buffers[1].loadData( normals, sizeof normals );
     tetra->buffers[2].loadData( uvs, sizeof uvs );

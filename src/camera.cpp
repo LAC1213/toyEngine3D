@@ -47,7 +47,7 @@ void PerspectiveCamera::updateView()
 PlayerCamera::PlayerCamera( GLFWwindow * window, Player * player, float aspect )
     : PerspectiveCamera( 45, aspect, 0.01f, 100.f )
     , _player( player )
-    , _pivot( 0, -0.1, 0.3 )
+    , _pivot( 0, -1, 3 )
     , _window( window )
 {
 }
@@ -96,7 +96,7 @@ void PlayerCamera::onMouseMove( double dx, double dy )
 void PlayerCamera::pollInput()
 {
     glm::vec2 v;
-    constexpr float ds = 1;
+    constexpr float ds = 1.5;
     if( glfwGetKey( _window, GLFW_KEY_D ) == GLFW_PRESS )
     {
         v.x = 1;

@@ -36,17 +36,17 @@ void glfwErrorCallback(int error, const char* description)
     errorExit("GLFW [%i]: %s\n", error, description);
 }
 
-void onKey( GLFWwindow * window, int key, int scancode, int action, int mods )
+void onKey( __attribute__((unused)) GLFWwindow * window, int key, int scancode, int action, int mods )
 {
     currentLevel->onKeyAction( key, scancode, action, mods );
 }
 
-void onMouseMove( GLFWwindow * window, double x, double y )
+void onMouseMove( __attribute__((unused)) GLFWwindow * window, double x, double y )
 {
     currentLevel->onMouseMove( x, y );
 }
 
-void onResize( GLFWwindow * window, int width, int height )
+void onResize( __attribute__((unused)) GLFWwindow * window, int width, int height )
 {
     currentLevel->onResize( width, height );
 }
@@ -90,7 +90,7 @@ GLFWwindow * initContext()
     return window;
 }
 
-int main(int argc, char ** argv)
+int main()
 {
     int errFd = -1;
     errFd = open("stderr_log.txt", O_TRUNC | O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
@@ -99,7 +99,7 @@ int main(int argc, char ** argv)
         perror("Couldn't set error logfile");
     else
     {
-        close(STDERR_FILENO);
+        //close(STDERR_FILENO);
         dup(errFd);
         close(errFd);
         write(STDERR_FILENO, " ", 1);
@@ -122,6 +122,8 @@ int main(int argc, char ** argv)
     glfwSetKeyCallback( window, onKey );
     glfwSetCursorPosCallback( window, onMouseMove );
     glfwSetFramebufferSizeCallback( window, onResize );
+    
+    glfwSetCursorPos( window, 0, 0 );
 
     double t0 = 0, dt;
 

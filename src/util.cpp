@@ -69,5 +69,8 @@ glm::mat4 makeModel( const glm::vec3& origin, const glm::vec3& rotation, const g
     glm::mat4 s = glm::scale( glm::mat4( 1 ), scale );
     glm::mat4 r = glm::rotate( glm::mat4(1), glm::length( rotation ), glm::normalize( rotation ) );
     glm::mat4 t = glm::translate( glm::mat4( 1 ), origin );
-    return t * r * s;
+    if( glm::dot( rotation, rotation ) <= 0.01 )
+        return t * s;
+    else
+        return t * r * s;
 }

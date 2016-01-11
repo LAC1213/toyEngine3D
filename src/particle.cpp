@@ -34,7 +34,7 @@ ParticleSystem::~ParticleSystem()
 
 void ParticleSystem::addParticle ( const Particle& p )
 {
-    for( int i = 0 ; i < _particles.size() ; ++i )
+    vec_for_each( i, _particles )
     {
         if( _particles[i].life <= 0 )
         {

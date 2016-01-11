@@ -1,12 +1,14 @@
 #include <level1.h>
 #include <spinny.h>
+#include <bomb.h>
+#include <sstream>
 
 Level1::Level1 ( GLFWwindow* window, int width, int height ) 
     : Level ( window, width, height )
     , _cam( _window, &_player, (float) _width/ _height )
     , _bloomed( Framebuffer::genScreenBuffer() )
     , _lighting( _gBuffer )
-    , _walls( 5 )
+    , _walls( 6 )
     , _spinnies( 1 )
 {    
     static PointLight p;
@@ -17,6 +19,9 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     _lighting.addPointLight ( &p );
     _lighting.setAmbient ( glm::vec3 ( 0.3, 0.3, 0.3 ) );
     _lighting.addPointLight( _player.light() );
+    
+    static IcoSphere sphere;
+    Bomb::obj = &sphere;
     
     static MeshObject * tetra = MeshObject::genTetrahedron();
     Spinny::obj = tetra;
@@ -30,6 +35,8 @@ Level1::~Level1()
     delete _bloomed;
     vec_for_each( i, _spinnies )
         delete _spinnies[i];
+    vec_for_each( i, _bombs )
+        delete _bombs[i];
 }
 
 void Level1::init()
@@ -42,9 +49,13 @@ void Level1::init()
     _walls[2].setModel( glm::vec3(5, 0, 0), glm::vec3(1), glm::vec3( 2, 1, 3) );
     _walls[3].setModel( glm::vec3(0, 1, 1 + sqrt(2)), glm::vec3(M_PI/4,0,0), glm::vec3( 1, 1, 1 ) );
     _walls[4].setModel( glm::vec3(0, 0, 4), glm::vec3(M_PI/6,0,0), glm::vec3( 1, 1, 1 ) );
+    _walls[5].setModel( glm::vec3(0, -2, 0), glm::vec3(0.1, 0.1, 0.1), glm::vec3( 3, 0.2, 3 ));
     
     vec_for_each( i, _walls )
         _physics->dynamicsWorld->addRigidBody( _walls[i].body() );
+    
+    vec_for_each( i, _bombs )
+        _physics->dynamicsWorld->addRigidBody( _bombs[i]->body() );
     
     _spinnies[0]->setColor( glm::vec4( 10, 10, 10, 10 ) );
 }
@@ -79,6 +90,14 @@ void Level1::onKeyAction ( int key, int scancode, int action, int mods )
             case GLFW_KEY_SPACE:
                 _player.jump();
                 break;
+            case GLFW_KEY_E:
+                Bomb * nb = new Bomb;
+                nb->setModel( _player.getPos() + glm::vec3(0, 0.3, 0), glm::vec3(2*M_PI, 0, 0), glm::vec3(0.06) );
+                _physics->dynamicsWorld->addRigidBody( nb->body() );
+                _lighting.addPointLight( &nb->light() );
+                nb->body()->applyCentralImpulse( btVector3( 0, 4, 0 ) );
+                _bombs.push_back( nb );
+                break;
         }
     }
 }
@@ -89,9 +108,12 @@ void Level1::update ( double dt )
     _player.step( dt );
     _cam.step( dt );
     
+    vec_for_each( i, _bombs )
+        _bombs[i]->step( dt );
+    
     vec_for_each( i, _spinnies )
     {
-        if( glfwGetKey( _window, GLFW_KEY_Q ) == GLFW_PRESS )
+        if( glm::length(_player.getPos() - _spinnies[i]->getPos()) < 2 )
             _spinnies[i]->target( _player.getPos() );
         else
             _spinnies[i]->wait();
@@ -117,6 +139,9 @@ void Level1::render()
     
     vec_for_each( i, _spinnies )
         _spinnies[i]->renderGeom();
+        
+    vec_for_each( i, _bombs )
+        _bombs[i]->render();
     
     vec_for_each( i, _walls )
         _walls[i].render();
@@ -137,8 +162,17 @@ void Level1::render()
     _bloomed->clear();
     bloom.render();
     
+    static Font font( "/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf", 14 );
+    std::stringstream ss;
+    ss.precision( 5 );
+    ss << "Time: " << _time;
+    Text txt( &font, ss.str(), glm::vec2(_width, _height) );
+    txt.setColor( glm::vec4( 1, 1, 0.3, 0.7 ) );
+    txt.setPosition( glm::vec2( 5, 2 ) );
+    
     Framebuffer::Screen.clear();
     effect.render();
+    txt.render();
 }
 
 Level::Status Level1::getStatus()

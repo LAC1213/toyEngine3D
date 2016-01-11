@@ -140,7 +140,6 @@ bool Shader::setUniform( const std::string& name, const glm::mat4& val )
  */
 Shader::Shader( const std::string& shaderDir, LoadFlag loadFlags )
 {
-    const char * shader_dir = shaderDir.c_str();
     // Create the shaders
     GLuint VertexShaderID = glCreateShader( GL_VERTEX_SHADER );
     GLuint FragmentShaderID = glCreateShader( GL_FRAGMENT_SHADER );

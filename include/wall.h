@@ -17,10 +17,6 @@ public:
 protected:
     btDefaultMotionState * _motionState;
     btBoxShape * _shape;
-    
-private:
-    Wall( const Wall& copy ) = delete;
-    Wall& operator=( const Wall& copy ) = delete;
 };
 
 #endif //WALL_H

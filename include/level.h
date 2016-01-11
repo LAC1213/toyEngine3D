@@ -35,10 +35,10 @@ protected:
     int _width;
     int _height;
     
+    double _time;
+    
     Framebuffer * _gBuffer;
     Framebuffer * _canvas;
-    
-    double _time;
     
     DebugDrawer _debugDrawer;
     bool _drawCollisionShapes;
