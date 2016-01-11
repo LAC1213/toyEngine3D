@@ -32,6 +32,7 @@ Spinny::~Spinny()
 {
     for( int i = 0 ; i < 3 ; ++i )
         delete _tail[i];
+    Engine::TextureManager->release( "res/textures/particle4.png" );
 }
 
 void Spinny::step ( double dt )
