@@ -162,3 +162,12 @@ GLuint Texture::getID() const
     return _id;
 }
 
+Texture* Texture::Manager::loadResource ( const std::string& path )
+{
+    Texture * tex = new Texture;
+    tex->loadFromFile( path );
+    tex->setParameter( GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    tex->setParameter( GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+    tex->genMipmap();
+    return tex;
+}

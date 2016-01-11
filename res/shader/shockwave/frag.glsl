@@ -10,12 +10,12 @@ uniform mat4 view;
 uniform vec3 center;
 uniform float radius;
 uniform vec3 color;
-uniform float lambda = 50;
+uniform float lambda = 1;
 
 void main()
 {
     vec3 position = texture( positionTex, gl_FragCoord.xy/textureSize(positionTex, 0) ).rgb;
 
-    fragColor.rgb = exp(-lambda*pow(length( vec3(view * vec4(center,1)) - position ) - radius, 2))*color;
+    fragColor.rgb = exp(-lambda*pow(length( center - vec3(inverse(view) * vec4(position,1)) ) - radius, 2))*color;
     fragColor.a = 1;
 }

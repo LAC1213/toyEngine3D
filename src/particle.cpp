@@ -75,6 +75,11 @@ void ParticleSystem::setAnimSize ( const glm::vec2& s )
     _animSize = s;
 }
 
+void ParticleSystem::setAnimDuration ( double t )
+{
+    _animDuration = t;
+}
+
 void ParticleSystem::setTexture ( const Texture* tex )
 {
     _texture = tex;

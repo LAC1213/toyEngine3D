@@ -16,6 +16,7 @@ Level::Level( GLFWwindow * win, int w, int h )
     
     _debugDrawer.setDebugMode( btIDebugDraw::DBG_DrawWireframe );
     _physics->dynamicsWorld->setDebugDrawer( &_debugDrawer );
+    _physics->dynamicsWorld->setGravity( btVector3(0, -9.81, 0 ) );
     
     _canvas->enableDepthRenderBuffer();
 }

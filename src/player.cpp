@@ -6,38 +6,43 @@
 
 Player::Player () 
     : _billboard( &_tex )
-    , _size( 0.07 )
+    , _size( 0.04 )
     , _color( 10, 0, 0, 10 )
     , _p( 0, 2, 0 )
-    , _a( 0, -1, 0 )
+    , _a( 0, -9.81, 0 )
     , _surfaceNormal( 0, 1, 0 )
     , _canJump( false )
 {
-    _tex.loadFromFile( "./res/textures/orange_blob.png" );
+    _tex.loadFromFile( "res/textures/orange_blob.png" );
     _billboard.setSize( glm::vec2( _size, _size ) );
+    
+    _color = glm::vec4( 1, 1, 1, 1 );
     
     _light.position = glm::vec3 ( 0, 0, 0 );
     _light.diffuse = glm::vec3 ( 1, 1, 1 );
     _light.specular = glm::vec3 ( 1, 1, 1 );
     _light.attenuation = glm::vec3 ( 1, 1, 1 );
     
-    _tail.setTexture( &_tex );
-    _tail.setSpawnFrequency( 120 );
-    _tail.setRandomness( 0.03 );
-    _tail.initialParticle().color = QuadraticCurve<glm::vec4>( glm::vec4(0.8, 0.8, 1, 1), glm::vec4( 0.05f, 0.05f, 0, -0.2 ) );
-    _tail.initialParticle().size = QuadraticCurve<GLfloat>( 0.05, 0, -0.04 );
-    _tail.initialParticle().life = 10;
+    _tail.setTexture( Engine::TextureManager->request( "res/textures/particle4.png" ) );
+    _tail.setAnimSize( glm::vec2(4, 4));
+    _tail.setAnimDuration( 4 );
+    _tail.setSpawnFrequency( 60 );
+    _tail.setRandomness( 0.01 );
+    _tail.initialParticle().color = QuadraticCurve<glm::vec4>( _color );
+    _tail.initialParticle().size = QuadraticCurve<GLfloat>( 0.1, 0 );
+    _tail.initialParticle().life = 4;
 }
 
 Player::~Player()
 {
+    Engine::TextureManager->release( "res/textures/particle4.png" );
 }
 
 void Player::jump ()
 {
 //    if( !_canJump )
 //        return;
-    _v.y = 1;
+    _v.y = 3;
 }
 
 void Player::step ( float dt )
@@ -79,17 +84,9 @@ void Player::step ( float dt )
         _canJump = false;
     }
     
-    if( _canJump )
-        _color = glm::vec4( 0, 10, 0, 10 );
-    else
-        _color = glm::vec4( 10, 0, 0, 10 );
-    
     _billboard.setPosition( _p );
     _light.position = _p;
-    _light.diffuse = glm::vec3(_color);
-    _light.specular = glm::vec3(_color);
     
-    _tail.initialParticle().color.setConstant( _color );
     _tail.initialParticle().position.setConstant( _p );
     _tail.step( dt );
 }
@@ -122,7 +119,6 @@ void Player::move ( const glm::vec3& d )
 void Player::render()
 {
     Engine::ShaderManager->request( "./res/shader/billboard/", Shader::LOAD_GEOM )->setUniform( "color", _color );
-    _billboard.render();
-    
     _tail.render();
+    _billboard.render();
 }

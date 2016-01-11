@@ -51,4 +51,20 @@ public:
             }
         }
     }
+    
+    virtual void release( const K& key )
+    {    
+        for(auto iterator = _resources.begin(); iterator != _resources.end(); ++iterator) {
+            if( iterator->first == key )
+            {
+                iterator->second.second--;
+                if( iterator->second.second == 0 )
+                {
+                    delete iterator->second.first;
+                    _resources.erase( iterator );
+                }
+                break;
+            }
+        }
+    }
 };

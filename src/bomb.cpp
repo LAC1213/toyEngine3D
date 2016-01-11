@@ -10,8 +10,8 @@ Bomb::Bomb() : Mesh( obj ), _mass(5), _scale(1)
     btVector3 inertia(0, 0, 0);
     _shape->calculateLocalInertia( _mass, inertia );
     btRigidBody::btRigidBodyConstructionInfo bodyCI(_mass, _motionState, _shape, inertia);
-    bodyCI.m_restitution = 0.98f;
-    bodyCI.m_friction = 0.05f;
+    bodyCI.m_restitution = 0.9f;
+    bodyCI.m_friction = 0.1f;
     _body = new btRigidBody( bodyCI );
     _body->setActivationState( DISABLE_DEACTIVATION );
     

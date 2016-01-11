@@ -22,7 +22,9 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     _lighting.addPointLight( _player.light() );
     
     _shock.setCenter( glm::vec3(0, 1, 0) );
-    _shock.setColor( glm::vec3( 7, 5, 0 ) );
+    _shock.setColor( glm::vec3( 0.7, 0.1, 0 ) );
+    _shock.setAcceleration( 10 );
+    _shock.setDuration( 1 );
     
     static IcoSphere sphere;
     Bomb::obj = &sphere;
@@ -100,12 +102,18 @@ void Level1::onKeyAction ( int key, int scancode, int action, int mods )
                 nb->setModel( _player.getPos() + glm::vec3(0, 0.3, 0), glm::vec3(2*M_PI, 0, 0), glm::vec3(0.06) );
                 _physics->dynamicsWorld->addRigidBody( nb->body() );
                 _lighting.addPointLight( &nb->light() );
-                nb->body()->applyCentralImpulse( btVector3( 0, 4, 0 ) );
+                nb->body()->applyCentralImpulse( btVector3( 0, 6, 0 ) );
                 _bombs.push_back( nb );
                 break;
             }
             case GLFW_KEY_Q:
                 _shock.fire();
+                break;
+            case GLFW_KEY_UP:
+                _cam.setPivot( _cam.getPivot() * 0.9f );
+                break;
+            case GLFW_KEY_DOWN:
+                _cam.setPivot( _cam.getPivot() * 1.1f );
                 break;
         }
     }
@@ -119,8 +127,26 @@ void Level1::update ( double dt )
     _shock.setCenter( _player.getPos() );
     _shock.step( dt );
     
+    static std::vector<bool> hit;
+    hit.resize(_bombs.size());
+    
     vec_for_each( i, _bombs )
+    {
+        if( _shock.isActive() && !hit[i] )
+        {
+            glm::vec3 d = bt2glm(_bombs[i]->body()->getCenterOfMassPosition()) - _shock.getCenter();
+            if( glm::dot(d, d) < _shock.getRadius()*_shock.getRadius() )
+            {
+                _bombs[i]->body()->applyCentralImpulse( 30*glm2bt(glm::normalize(d))/(1 + _shock.getRadius()) );
+                hit[i] = true;
+            }
+        }
+        else if( !_shock.isActive() )
+        {
+            hit[i] = false;
+        }
         _bombs[i]->step( dt );
+    }
     
     vec_for_each( i, _spinnies )
     {

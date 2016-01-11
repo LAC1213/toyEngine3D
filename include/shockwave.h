@@ -18,6 +18,10 @@ public:
     void setColor( const glm::vec3& color );
     void setDuration( double t );
     
+    float getRadius() const;
+    const glm::vec3& getCenter() const;
+    bool isActive() const;
+    
 protected:
     double _duration;
     double _timer;

@@ -3,10 +3,17 @@
 
 #include <GL/glew.h>
 #include <string>
+#include <resourcemanager.hpp>
 
 class Texture
 {
 public:
+    class Manager : public ResourceManager<std::string, Texture>
+    {
+    protected:
+        virtual Texture * loadResource( const std::string& path );
+    };
+    
     static Texture Null; //!< bind() to this texture to unbind any previous texture
 
     Texture();

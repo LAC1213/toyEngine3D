@@ -38,6 +38,7 @@ namespace Engine
 extern std::string Root;
 
 extern Shader::Manager * ShaderManager;
+extern Texture::Manager * TextureManager;
 extern BoxShapeManagerT * BoxShapeManager;
 extern SphereShapeManagerT * SphereShapeManager;
 

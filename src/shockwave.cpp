@@ -1,11 +1,11 @@
 #include <shockwave.h>
 
 Shockwave::Shockwave ( Framebuffer* gBuffer )
-    : _gBuffer( gBuffer )
-    , _duration( 2 )
+    : _duration( 2 )
     , _timer( _duration + 1 )
     , _a( 6 )
     , _color( 1, 1, 1 )
+    , _gBuffer( gBuffer )
 {
     _shader = Engine::ShaderManager->request( "res/shader/shockwave", Shader::LOAD_BASIC );
 }
@@ -17,7 +17,7 @@ Shockwave::~Shockwave()
 
 void Shockwave::fire()
 {
-    if( _timer > _duration )
+    if( !isActive() )
     {
         _timer = 0;
         _radius = 0;
@@ -28,7 +28,7 @@ void Shockwave::fire()
 void Shockwave::step ( double dt )
 {
     _timer += dt;
-    if( _timer > _duration )
+    if( !isActive() )
         return;
     
     _v -= dt * _a;
@@ -37,7 +37,7 @@ void Shockwave::step ( double dt )
 
 void Shockwave::render()
 {
-    if( _timer > _duration )
+    if( !isActive() )
         return;
     
     glBlendFunc ( GL_ONE, GL_ONE );
@@ -84,4 +84,19 @@ void Shockwave::setColor ( const glm::vec3& color )
 void Shockwave::setDuration ( double t )
 {
     _duration = t;
+}
+
+float Shockwave::getRadius() const
+{
+    return _radius;
+}
+
+const glm::vec3& Shockwave::getCenter() const
+{
+    return _center;
+}
+
+bool Shockwave::isActive() const
+{
+    return _timer < _duration;
 }
