@@ -9,7 +9,7 @@
 #include <lighting.h>
 #include <entity.h>
 
-class Player : public Renderable, public Entity
+class Player : public Mesh, public Entity
 {
 public:
     Player();
@@ -29,15 +29,9 @@ public:
     void setModel( const glm::vec3& trans, const glm::vec3& rot, const glm::vec3& scale );
     
 protected:
-    Texture   _tex;
-    Billboard _billboard;
     PointLight _light;
     
     ParticleEmitter _tail;
-    
-    float _size;
-    
-    glm::vec4 _color;
     
     btSphereShape * _shape;
     btDefaultMotionState * _motionState;
@@ -47,12 +41,10 @@ protected:
     
     glm::vec3 _p; //!< position
     glm::vec3 _v; //!< velocity
-    glm::vec3 _a; //!< acceleration 
     
     glm::vec3 _surfaceNormal; //!< normal of surface the player is standing on
     
     bool _canJump;
-    double _respondTimer;
 };
 
 #endif //PLAYER_H

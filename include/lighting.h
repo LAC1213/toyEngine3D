@@ -5,6 +5,7 @@
 #include <framebuffer.h>
 #include <drawcall.h>
 #include <mesh.h>
+#include <list>
 
 class PointLight
 {
@@ -44,7 +45,7 @@ protected:
 
     Framebuffer * _gBuffer;
 
-    std::vector<PointLight*> _lights;
+    std::list<PointLight*> _lights;
 
     glm::vec3 _ambient;
     glm::vec3 _sunDir;

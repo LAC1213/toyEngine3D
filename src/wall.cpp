@@ -27,7 +27,8 @@ void Wall::setModel( const glm::vec3& trans, const glm::vec3& rot, const glm::ve
     btTransform t;
     t.setIdentity();
     t.setOrigin( glm2bt( trans ) );
-    t.setRotation( btQuaternion( glm2bt( glm::normalize( rot )), glm::length( rot ) ) );
+    if( glm::dot( rot, rot ) > 0.01 )
+        t.setRotation( btQuaternion( glm2bt( glm::normalize( rot )), glm::length( rot ) ) );
     _body->setCenterOfMassTransform( t );
     
     _shape->setLocalScaling( glm2bt(scale) );

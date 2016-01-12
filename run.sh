@@ -2,6 +2,6 @@
 
 export ENGINE_ROOT=~/programs/c-c++/engine
 cd build
-make
+make -j8
 ./app
 cd ..

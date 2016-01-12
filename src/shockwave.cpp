@@ -4,24 +4,24 @@ Shockwave::Shockwave ( Framebuffer* gBuffer, Framebuffer * canvas )
     : _duration( 2 )
     , _timer( _duration + 1 )
     , _a( 6 )
-    , _color( 1, 1, 1 )
+    , _color( 0.8, 0.8, 0.7 )
     , _gBuffer( gBuffer )
     , _canvas( canvas )
 {
     _shader = Engine::ShaderManager->request( "res/shader/shockwave", Shader::LOAD_BASIC );
     
     _particles = new Explosion;
-    _particles->setExpandSpeed( 1 );
-    _particles->setMaxRadius( 0.4 );
+    _particles->setExpandSpeed( 0.012 );
+    _particles->setMaxRadius( 0.1 );
     _particles->setTexture( Engine::TextureManager->request( "res/textures/explosion.png" ) );
     _particles->setAnimSize( glm::vec2(4, 4) );
     _particles->setAnimDuration( 3 );
-    _particles->setRandomness( 0.07 );
+    _particles->setRandomness( 0.035 );
     _particles->setSpawnFrequency( 0 );
-    _particles->initialParticle().color.setConstant( glm::vec4(_color, 1) );
+    _particles->initialParticle().color.setConstant( glm::vec4(1, 1, 1, 1) );
     _particles->initialParticle().position.setConstant( _center );
     _particles->initialParticle().size.setConstant( 0.1 );
-    _particles->initialParticle().life = 0.5;
+    _particles->initialParticle().life = 3;
 }
 
 Shockwave::~Shockwave()
@@ -39,7 +39,7 @@ void Shockwave::fire()
         _radius = 0;
         _v = _duration*_a;
         
-        _particles->addParticles( 400 );
+        _particles->addParticles( 100 );
     }
 }
 
@@ -128,3 +128,9 @@ bool Shockwave::isActive() const
 {
     return _timer < _duration;
 }
+
+bool Shockwave::isVisible() const
+{
+    return isActive() || _timer < _particles->initialParticle().life;
+}
+

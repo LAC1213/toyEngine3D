@@ -2,6 +2,7 @@
 #include <spinny.h>
 #include <bomb.h>
 #include <sstream>
+#include <internal/util.h>
 
 Level1::Level1 ( GLFWwindow* window, int width, int height ) 
     : Level ( window, width, height )
@@ -10,7 +11,6 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     , _swapBuffer( Framebuffer::genScreenBuffer() )
     , _lighting( _gBuffer )
     , _shock( _gBuffer, _canvas )
-    , _walls( 6 )
     , _spinnies( 1 )
 {    
     static PointLight p;
@@ -23,9 +23,9 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     _lighting.addPointLight( _player.light() );
     
     _shock.setCenter( glm::vec3(0, 1, 0) );
-    _shock.setColor( glm::vec3( 1, 1, 1 ) );
+    _shock.setColor( glm::vec3( 8, 8, 5 ) );
     _shock.setAcceleration( 20 );
-    _shock.setDuration( 1 );
+    _shock.setDuration( 2 );
     
     static MeshObject * tetra = MeshObject::genTetrahedron();
     Spinny::obj = tetra;
@@ -37,31 +37,60 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
 Level1::~Level1()
 {
     delete _bloomed;
+    delete _swapBuffer;
     vec_for_each( i, _spinnies )
         delete _spinnies[i];
-    vec_for_each( i, _bombs )
-        delete _bombs[i];
+    list_for_each( it, _bombs )
+        delete *it;
+    list_for_each( it, _shocks )
+        delete *it;
+    vec_for_each( i, _walls )
+        delete _walls[i];
+}
+
+void Level1::loadWallsFromYAML( YAML::Node node )
+{
+    assert( node.Type() == YAML::NodeType::Sequence );
+    vec_for_each( i, node )
+    {
+        glm::vec3 origin(0);
+        glm::vec3 rot(0);
+        glm::vec3 scale(1);
+        glm::vec4 color(0.1);
+        
+        YAML::Node n = node[i]["center"];
+        if( n )
+            origin = n.as<glm::vec3>();
+        n = node[i]["rotation"];
+        if( n )
+            rot = n.as<glm::vec3>();
+        n = node[i]["scale"];
+        if( n )
+            scale = n.as<glm::vec3>();
+        n = node[i]["color"];
+        if( n )
+            color = n.as<glm::vec4>();
+        
+        _walls.push_back( new Wall );
+        _walls.back()->setModel( origin, rot, scale );
+        _walls.back()->setColor( color );
+        
+        if(node[i]["goal"] && node[i]["goal"].as<bool>() )
+            _walls.back()->body()->setUserPointer( &_goal );
+    }
 }
 
 void Level1::init()
 {
     Level::init();
-    _walls[0].setModel( glm::vec3(10, 4, 3), glm::vec3(2*M_PI, 0, 0), glm::vec3(0.5, 0.5, 0.5));
-    _walls[0].setColor( glm::vec4( 0, 1.2, 1.6, 1) );
-    _walls[0].body()->setUserPointer( &_goal );
-    _walls[1].setModel( glm::vec3(0), glm::vec3(2*M_PI,0,0), glm::vec3( 1, 1, 1 ) );
-    _walls[2].setModel( glm::vec3(5, 0, 0), glm::vec3(1), glm::vec3( 2, 1, 3) );
-    _walls[3].setModel( glm::vec3(0, 1, 1 + sqrt(2)), glm::vec3(M_PI/4,0,0), glm::vec3( 1, 1, 1 ) );
-    _walls[4].setModel( glm::vec3(0, 0, 4), glm::vec3(M_PI/6,0,0), glm::vec3( 1, 1, 1 ) );
-    _walls[5].setModel( glm::vec3(0, -2, 0), glm::vec3(0.1, 0.1, 0.1), glm::vec3( 3, 0.2, 3 ));
+    YAML::Node conf = YAML::LoadFile("level1.yaml");
+    if( conf["walls"] )
+        loadWallsFromYAML( conf["walls"] );
     
     _physics->dynamicsWorld->addRigidBody( _player.body() );
     
     vec_for_each( i, _walls )
-        _physics->dynamicsWorld->addRigidBody( _walls[i].body() );
-    
-    vec_for_each( i, _bombs )
-        _physics->dynamicsWorld->addRigidBody( _bombs[i]->body() );
+        _physics->dynamicsWorld->addRigidBody( _walls[i]->body() );
     
     _spinnies[0]->setColor( glm::vec4( 10, 10, 10, 10 ) );
 }
@@ -98,10 +127,11 @@ void Level1::onKeyAction ( int key, int scancode, int action, int mods )
             case GLFW_KEY_E:
             {
                 Bomb * nb = new Bomb;
-                nb->setModel( _player.getPos() + glm::vec3(0, 0.3, 0), glm::vec3(2*M_PI, 0, 0), glm::vec3(0.06) );
+                nb->setColor( glm::vec4(6, 0, 6, 6));
+                nb->setModel( _player.getPos() + glm::vec3(0, 0.4, 0), glm::vec3(2*M_PI, 0, 0), glm::vec3(0.06) );
                 _physics->dynamicsWorld->addRigidBody( nb->body() );
                 _lighting.addPointLight( &nb->light() );
-                nb->body()->applyCentralImpulse( btVector3( 0, 6, 0 ) );
+                nb->body()->applyCentralImpulse( btVector3( 0, 10, 0 ) );
                 _bombs.push_back( nb );
                 break;
             }
@@ -126,30 +156,52 @@ void Level1::update ( double dt )
     _shock.setCenter( _player.getPos() );
     _shock.step( dt );
     
-    static std::vector<bool> hit;
-    hit.resize(_bombs.size());
-    
-    vec_for_each( i, _bombs )
+    for( auto it = _bombs.begin() ; it != _bombs.end() ;  )
     {
-        if( _shock.isActive() && !hit[i] )
+        Bomb * b = *it;
+        b->step( dt );
+        
+        if( b->isSharp() )
         {
-            glm::vec3 d = bt2glm(_bombs[i]->body()->getCenterOfMassPosition()) - _shock.getCenter();
-            if( glm::dot(d, d) < _shock.getRadius()*_shock.getRadius() )
-            {
-                _bombs[i]->body()->applyCentralImpulse( 10*glm2bt(glm::normalize(d))/(1 + _shock.getRadius()) );
-                hit[i] = true;
-            }
+            Shockwave * s = new Shockwave( _gBuffer, _canvas );
+            s->setCenter( b->getPos() );
+            s->setAcceleration( 20 );
+            s->setDuration( 2 );
+            s->setColor( glm::vec3(b->getColor()) );
+            _shocks.push_back( s );
+            s->fire();
+            _physics->dynamicsWorld->removeRigidBody( b->body() );
+            _lighting.removePointLight( &b->light() );
+            delete b;
+            it = _bombs.erase( it );
         }
-        else if( !_shock.isActive() )
+        else
         {
-            hit[i] = false;
+            ++it;
         }
-        _bombs[i]->step( dt );
+    }
+    
+    for( auto it = _shocks.begin(); it != _shocks.end() ;  )
+    {
+        Shockwave * s = *it;
+        s->step( dt );
+        
+        if( glm::distance( _player.getPos(), s->getCenter() ) <= s->getRadius() )
+        
+        if( !(*it)->isVisible() )
+        {
+            it = _shocks.erase( it );
+            delete s;
+        }
+        else
+        { 
+            ++it;
+        }
     }
     
     vec_for_each( i, _spinnies )
     {
-        if( glm::length(_player.getPos() - _spinnies[i]->getPos()) < 2 )
+        if( glm::length(_player.getPos() - _spinnies[i]->getPos()) < 3 )
             _spinnies[i]->target( _player.getPos() );
         else
             _spinnies[i]->wait();
@@ -159,6 +211,11 @@ void Level1::update ( double dt )
  //   std::cout << _spinnies[0]._up << std::endl;
     
     Level::update ( dt );
+    
+    std::stringstream ss;
+    ss.precision( 5 );
+    ss << "Time: " << _time << " FPS: " << 1/dt;
+    _dbgString = ss.str();
 }
 
 void Level1::render()
@@ -176,11 +233,11 @@ void Level1::render()
     vec_for_each( i, _spinnies )
         _spinnies[i]->renderGeom();
         
-    vec_for_each( i, _bombs )
-        _bombs[i]->render();
+    for( auto it : _bombs )
+        it->render();
     
     vec_for_each( i, _walls )
-        _walls[i].render();
+        _walls[i]->render();
     
     glEnable( GL_BLEND );
     
@@ -192,6 +249,8 @@ void Level1::render()
     vec_for_each( i, _spinnies )
         _spinnies[i]->renderFX();
     _shock.renderFX();
+    for( auto it : _shocks )
+        it->renderFX();
         
     Level::render();
     
@@ -204,6 +263,8 @@ void Level1::render()
     
     Engine::ActiveCam = &_cam;
     _shock.render();
+    for( auto it : _shocks )
+        it->render();
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
     
     Engine::ActiveCam = &nullCam;
@@ -212,10 +273,7 @@ void Level1::render()
     bloom.render();
     
     static Font font( "/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf", 14 );
-    std::stringstream ss;
-    ss.precision( 5 );
-    ss << "Time: " << _time;
-    Text txt( &font, ss.str(), glm::vec2(_width, _height) );
+    Text txt( &font, _dbgString, glm::vec2(_width, _height) );
     txt.setColor( glm::vec4( 1, 1, 0.3, 0.7 ) );
     txt.setPosition( glm::vec2( 5, 2 ) );
     

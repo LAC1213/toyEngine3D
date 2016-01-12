@@ -1,0 +1,17 @@
+---
+walls:
+    - center: [10, -7, 10]
+      scale: [1, 0.2, 1]
+      color: [0, 0.8, 0.6, 1]
+      goal: true
+      
+    - scale: [3, 0.4, 3]
+      
+    - rotation: [0.523, 0, 0]
+      scale: [1, 0.2, 5]
+      center: [0, -2.3, 7]
+      
+    - rotation: [0.523, 0, 0]
+      scale: [1, 0.2, 2.5]
+      center: [2, -1.15, 5]
+---

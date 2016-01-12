@@ -6,12 +6,15 @@
 #include <spinny.h>
 #include <bomb.h>
 #include <shockwave.h>
+#include <yaml-cpp/yaml.h>
 
 class Level1 : public Level
 {
 public:
     Level1( GLFWwindow * window, int height, int width );
     virtual ~Level1();
+   
+    void loadWallsFromYAML( YAML::Node node );
     
     virtual void init();
     virtual void reset();
@@ -33,8 +36,12 @@ protected:
     Lighting _lighting;
     Shockwave _shock;
     
+    std::string _dbgString;
+    
     GoalListener _goal;
-    std::vector<Wall> _walls;
+    std::vector<Wall*> _walls;
     std::vector<Spinny*> _spinnies;
-    std::vector<Bomb*> _bombs;
+    
+    std::list<Bomb*> _bombs;
+    std::list<Shockwave*> _shocks;
 };

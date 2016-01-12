@@ -56,7 +56,7 @@ void Spinny::step ( double dt )
     }
     
     static double rotationspeed = 3;
-    constexpr float speed = 0.04;
+    constexpr float speed = 4;
     _angle += rotationspeed * dt;
     
     if( _waiting || timer > timerLen * 0.6)
@@ -68,7 +68,7 @@ void Spinny::step ( double dt )
     {
         rotationspeed = 6;
         _up = _target;
-        _p += speed * _up;
+        _p +=  (float)dt * speed * _up;
     }
     
     constexpr float maxWorldHeight = 100;

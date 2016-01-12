@@ -70,7 +70,7 @@ GLFWwindow * initContext()
 
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
-    glfwSwapInterval(1);
+    glfwSwapInterval(0);
 
     GLenum err = glewInit();
     if(err != GLEW_OK)

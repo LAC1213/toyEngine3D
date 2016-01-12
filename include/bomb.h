@@ -7,10 +7,13 @@
 class Bomb : public Mesh, public Entity
 {
 public:
-    Bomb();
+    Bomb( double timeToExplode = 5 );
     virtual ~Bomb();
    
     PointLight& light();
+    
+    bool isSharp() const;
+    glm::vec3 getPos() const;
     
     virtual void step(double dt);
     
@@ -19,6 +22,8 @@ public:
 protected:
     btSphereShape * _shape;
     btDefaultMotionState * _motionState;
+    
+    double _life;
     
     float _mass;
     glm::vec3 _scale;

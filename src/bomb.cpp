@@ -1,15 +1,19 @@
 #include <bomb.h>
 #include <engine.h>
 
-Bomb::Bomb() : Mesh( Engine::PrimitiveManager->request( P_Sphere ) ) , _mass(5), _scale(1)
+Bomb::Bomb( double timeToExplode ) 
+    : Mesh( Engine::PrimitiveManager->request( P_Sphere ) ) 
+    , _life( timeToExplode )
+    , _mass(5)
+    , _scale(1)
 {
     _motionState = new btDefaultMotionState;
-    _shape = new btSphereShape( 1 );
+    _shape = Engine::SphereShapeManager->request( 1 );
     btVector3 inertia(0, 0, 0);
     _shape->calculateLocalInertia( _mass, inertia );
     btRigidBody::btRigidBodyConstructionInfo bodyCI(_mass, _motionState, _shape, inertia);
-    bodyCI.m_restitution = 0.9f;
-    bodyCI.m_friction = 0.1f;
+    bodyCI.m_restitution = 0.7f;
+    bodyCI.m_friction = 0.2f;
     _body = new btRigidBody( bodyCI );
     _body->setActivationState( DISABLE_DEACTIVATION );
     
@@ -27,15 +31,29 @@ Bomb::~Bomb()
     Engine::PrimitiveManager->release( P_Sphere );
     delete _motionState;
     delete _body;
-    delete _shape;
+    Engine::SphereShapeManager->release( _shape );
 }
 
-void Bomb::step ( __attribute__((unused)) double dt )
+glm::vec3 Bomb::getPos() const
+{
+    return _light.position;
+}
+
+bool Bomb::isSharp() const
+{
+    return _life < 0;
+}
+
+void Bomb::step ( double dt )
 {
     glm::vec3 r = _body->getOrientation().getAngle() * bt2glm(_body->getOrientation().getAxis());
     glm::vec3 t = bt2glm(_body->getCenterOfMassPosition());
    
+    _diffuseColor += 0.2f*glm::vec4( dt );
+    _light.diffuse = glm::vec3(_diffuseColor);
+    _light.specular = glm::vec3(_diffuseColor);
     _light.position = t;
+    _life -= dt;
     
     _model = makeModel( t, r, _scale );
 }
@@ -51,7 +69,11 @@ void Bomb::setModel ( const glm::vec3& trans, const glm::vec3& rot, const glm::v
     t.setRotation( btQuaternion( glm2bt( glm::normalize( rot )), glm::length( rot ) ) );
     _body->setCenterOfMassTransform( t );
     
-    _shape->setLocalScaling( glm2bt( scale ) );
+    Engine::SphereShapeManager->release( _shape );
+    _shape = Engine::SphereShapeManager->request( _scale.x );
+    btVector3 inertia( 0, 0, 0 );
+    _shape->calculateLocalInertia( _mass, inertia );
+    _body->setCollisionShape( _shape );
 }
 
 PointLight& Bomb::light()

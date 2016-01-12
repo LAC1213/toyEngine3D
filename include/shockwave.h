@@ -6,7 +6,7 @@ class Shockwave : public Renderable
 {
 public:
     Shockwave( Framebuffer * gBuffer, Framebuffer * canvas );
-    ~Shockwave();
+    virtual ~Shockwave();
     
     void fire();
     
@@ -22,6 +22,7 @@ public:
     float getRadius() const;
     const glm::vec3& getCenter() const;
     bool isActive() const;
+    bool isVisible() const;
     
 protected:
     double _duration;

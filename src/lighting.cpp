@@ -27,12 +27,13 @@ void Lighting::addPointLight ( PointLight * light )
 
 void Lighting::removePointLight ( PointLight * light )
 {
-    for ( size_t i = 0 ; i < _lights.size() ; ++i )
-        if ( _lights[i] == light )
-        {
-            _lights.erase ( _lights.begin() + i );
-            return;
-        }
+    for( auto it = _lights.begin() ; it != _lights.end() ; )
+    {
+        if( *it == light )
+            it = _lights.erase( it );
+        else
+            ++it;
+    }
 }
 
 void Lighting::render()
@@ -62,20 +63,21 @@ void Lighting::render()
     _shader->use();
     Engine::ActiveCam = old;
 
-    for ( size_t i = 0 ; i < _lights.size() ; ++i )
+    for ( auto it = _lights.begin() ; it != _lights.end() ; ++it )
     {
 
-        if ( i == _lights.size() - 1 )
+        if ( *it == _lights.back() )
         {
             _shader->setUniform ( "ambient", _ambient );
             _shader->setUniform ( "sunDir", _sunDir );
             _shader->setUniform ( "sunDiffuse", _sunDiffuse );
             _shader->setUniform ( "sunSpecular", _sunSpecular );
         }
-        _shader->setUniform ( "lightPos", _lights[i]->position );
-        _shader->setUniform ( "diffuse", _lights[i]->diffuse );
-        _shader->setUniform ( "specular", _lights[i]->specular );
-        _shader->setUniform ( "attenuation", _lights[i]->attenuation );
+        PointLight * l = *it;
+        _shader->setUniform ( "lightPos", l->position );
+        _shader->setUniform ( "diffuse", l->diffuse );
+        _shader->setUniform ( "specular", l->specular );
+        _shader->setUniform ( "attenuation", l->attenuation );
 
         Engine::DrawScreenQuad->execute();
     }
