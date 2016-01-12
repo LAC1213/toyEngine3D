@@ -8,13 +8,27 @@ Player::Player ()
     : _billboard( &_tex )
     , _size( 0.04 )
     , _color( 10, 0, 0, 10 )
+    , _mass( 10 )
+    , _scale( 0.4, 0.4, 0.4 )
     , _p( 0, 2, 0 )
     , _a( 0, -9.81, 0 )
     , _surfaceNormal( 0, 1, 0 )
     , _canJump( false )
 {
+    _motionState = new btDefaultMotionState;
+    _shape = new btSphereShape( 0.4 );
+    btVector3 inertia( 0, 0, 0 );
+    _shape->calculateLocalInertia( _mass, inertia );
+    btRigidBody::btRigidBodyConstructionInfo bodyCI(_mass, _motionState, _shape, inertia);
+    bodyCI.m_restitution = 0.1f;
+    bodyCI.m_friction = 0.6f;
+    _body = new btRigidBody( bodyCI );
+    _body->setActivationState( DISABLE_DEACTIVATION );
+    
     _tex.loadFromFile( "res/textures/orange_blob.png" );
     _billboard.setSize( glm::vec2( _size, _size ) );
+    
+    setModel( _p, glm::vec3(0), _scale );
     
     _color = glm::vec4( 1, 1, 1, 1 );
     
@@ -40,36 +54,31 @@ Player::~Player()
 
 void Player::jump ()
 {
-    if( !_canJump )
-        return;
-    _v.y = 3;
+//    if( !_canJump )
+//        return;
+    _body->applyCentralImpulse( btVector3( 0, 30, 0 ) );
 }
 
 void Player::step ( float dt )
 {
-    _p += dt * _v;
-    _v += dt * _a;
+    _p = bt2glm( _body->getCenterOfMassPosition() );
     
     constexpr float maxWorldHeight = 100;
     constexpr float stickyness = 0.1;
     
     btVector3 p = glm2bt( _p );
-    btVector3 start = p + btVector3(0, 0.3, 0);
+    btVector3 start = p;
     btVector3 end = p - btVector3(0, maxWorldHeight, 0);
     btCollisionWorld::ClosestRayResultCallback cb( start, end );
     Engine::Physics->dynamicsWorld->rayTest( start, end, cb );
     
     if( cb.hasHit() )
     {
+        //NOTE maybe use bullet3 collision check
         _surfaceNormal = glm::normalize(bt2glm( cb.m_hitNormalWorld ));
         if( cb.m_hitPointWorld.getY() + stickyness + _size > _p.y )
         {
             _canJump = true;
-            if( _v.y <= 0 )
-            {
-                _v.y = 0;
-                _p = bt2glm(cb.m_hitPointWorld) + glm::vec3( 0, _size, 0 );
-            }
             
             if( cb.m_collisionObject->getUserPointer() )
                 ((CollisionListener*)cb.m_collisionObject->getUserPointer())->playerOnTop();
@@ -98,6 +107,9 @@ PointLight* Player::light()
 
 void Player::move ( const glm::vec3& d )
 {
+    if( _respondTimer > 0 )
+        return;
+    
     if( glm::dot( d, d ) < 0.01 )
     {
         _v = glm::vec3( 0, _v.y, 0 );
@@ -114,6 +126,9 @@ void Player::move ( const glm::vec3& d )
         _v.x = d.x;
         _v.z = d.z;
     }
+    
+    _body->clearForces();
+    _body->applyCentralImpulse( glm2bt( _v ) );
 }
 
 void Player::render()
@@ -121,4 +136,18 @@ void Player::render()
     Engine::ShaderManager->request( "./res/shader/billboard/", Shader::LOAD_GEOM )->setUniform( "color", _color );
     _tail.render();
     _billboard.render();
+}
+
+void Player::setModel ( const glm::vec3& trans, const glm::vec3& rot, const glm::vec3& scale )
+{
+    _scale = scale;
+     
+    btTransform t;
+    t.setIdentity();
+    t.setOrigin( glm2bt( trans ) );
+    if( glm::dot( rot, rot ) > 0.01 )
+        t.setRotation( btQuaternion( glm2bt( glm::normalize( rot )), glm::length( rot ) ) );
+    _body->setCenterOfMassTransform( t );
+    
+    _shape->setLocalScaling( glm2bt( scale ) );
 }

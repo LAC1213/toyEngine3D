@@ -2,7 +2,7 @@
 
 #include <map>
 
-template<class K, class R, class Compare = std::less<K>>
+template<typename K, class R, class Compare = std::less<K>>
 class ResourceManager
 {
 protected:

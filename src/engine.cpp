@@ -45,6 +45,7 @@ MeshObject * CubeObject = nullptr;
 
 Shader::Manager * ShaderManager = nullptr;
 Texture::Manager * TextureManager = nullptr;
+PrimitiveManagerT * PrimitiveManager = nullptr;
 BoxShapeManagerT * BoxShapeManager = nullptr;
 SphereShapeManagerT * SphereShapeManager = nullptr;
 
@@ -90,6 +91,7 @@ void init()
     
     ShaderManager = new Shader::Manager;
     TextureManager = new Texture::Manager;
+    PrimitiveManager = new PrimitiveManagerT;
     BoxShapeManager = new BoxShapeManagerT;
     SphereShapeManager = new SphereShapeManagerT;
 

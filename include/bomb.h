@@ -7,8 +7,6 @@
 class Bomb : public Mesh, public Entity
 {
 public:
-    static MeshObject * obj;
-    
     Bomb();
     virtual ~Bomb();
    

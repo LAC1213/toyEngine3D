@@ -1,9 +1,7 @@
 #include <bomb.h>
 #include <engine.h>
 
-MeshObject * Bomb::obj = nullptr;
-
-Bomb::Bomb() : Mesh( obj ), _mass(5), _scale(1)
+Bomb::Bomb() : Mesh( Engine::PrimitiveManager->request( P_Sphere ) ) , _mass(5), _scale(1)
 {
     _motionState = new btDefaultMotionState;
     _shape = new btSphereShape( 1 );
@@ -26,6 +24,7 @@ Bomb::Bomb() : Mesh( obj ), _mass(5), _scale(1)
 
 Bomb::~Bomb()
 {
+    Engine::PrimitiveManager->release( P_Sphere );
     delete _motionState;
     delete _body;
     delete _shape;

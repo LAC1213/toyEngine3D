@@ -27,9 +27,6 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     _shock.setAcceleration( 20 );
     _shock.setDuration( 1 );
     
-    static IcoSphere sphere;
-    Bomb::obj = &sphere;
-    
     static MeshObject * tetra = MeshObject::genTetrahedron();
     Spinny::obj = tetra;
     _spinnies[0] = new Spinny;
@@ -57,6 +54,8 @@ void Level1::init()
     _walls[3].setModel( glm::vec3(0, 1, 1 + sqrt(2)), glm::vec3(M_PI/4,0,0), glm::vec3( 1, 1, 1 ) );
     _walls[4].setModel( glm::vec3(0, 0, 4), glm::vec3(M_PI/6,0,0), glm::vec3( 1, 1, 1 ) );
     _walls[5].setModel( glm::vec3(0, -2, 0), glm::vec3(0.1, 0.1, 0.1), glm::vec3( 3, 0.2, 3 ));
+    
+    _physics->dynamicsWorld->addRigidBody( _player.body() );
     
     vec_for_each( i, _walls )
         _physics->dynamicsWorld->addRigidBody( _walls[i].body() );

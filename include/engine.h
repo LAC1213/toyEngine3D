@@ -19,6 +19,7 @@
 
 #include <btBulletDynamicsCommon.h>
 #include <shapemanager.hpp>
+#include <primitivemanager.hpp>
 
 struct PhysicsVars
 {
@@ -39,6 +40,7 @@ extern std::string Root;
 
 extern Shader::Manager * ShaderManager;
 extern Texture::Manager * TextureManager;
+extern PrimitiveManagerT * PrimitiveManager;
 extern BoxShapeManagerT * BoxShapeManager;
 extern SphereShapeManagerT * SphereShapeManager;
 
