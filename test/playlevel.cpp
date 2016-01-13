@@ -59,18 +59,39 @@ GLFWwindow * initContext()
 
     glfwSetErrorCallback(glfwErrorCallback);
 
-    /* Create a windowed mode window and its OpenGL context */
-    GLFWwindow * window = glfwCreateWindow(1000, 800, "Engine Demo", NULL, NULL);
+    //TODO get actual path
+    YAML::Node conf = YAML::LoadFile( "../config.yaml" );
+    
+    int w = 1000;
+    int h = 800;
+    int x = 200;
+    int y = 200;
+    if( conf["window"])
+    {
+        if( conf["window"]["width"] )
+            w = conf["window"]["width"].as<int>();
+        if( conf["window"]["height"] )
+            h = conf["window"]["height"].as<int>();
+        if( conf["window"]["x"] )
+            x = conf["window"]["x"].as<int>();
+        if( conf["window"]["y"] )
+            y = conf["window"]["y"].as<int>();
+    }
+        
+    GLFWwindow * window = glfwCreateWindow(w, h, "Engine Demo", NULL, NULL);
     if (!window)
         errorExit("Couldn't create glfw window.");
-    glfwSetWindowPos(window, 2800, 200);
+    glfwSetWindowPos(window, x, y);
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPos(window, 0, 0);
 
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
-    glfwSwapInterval(0);
+    if( conf["graphics"] && conf["graphics"]["vsync"] && conf["graphics"]["vsync"].as<bool>() )
+        glfwSwapInterval(1);
+    else
+        glfwSwapInterval(0);
 
     GLenum err = glewInit();
     if(err != GLEW_OK)

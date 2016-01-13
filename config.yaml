@@ -1,1 +1,10 @@
+window:
+    width: 960
+    height: 540
+    x: 2000
+    y: 300
+
+graphics:
+    vsync: Yes
+
 enableTerrain: No

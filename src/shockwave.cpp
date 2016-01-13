@@ -21,7 +21,7 @@ Shockwave::Shockwave ( Framebuffer* gBuffer, Framebuffer * canvas )
     _particles->initialParticle().color.setConstant( glm::vec4(1, 1, 1, 1) );
     _particles->initialParticle().position.setConstant( _center );
     _particles->initialParticle().size.setConstant( 0.1 );
-    _particles->initialParticle().life = 3;
+    _particles->setLifeTime( 1 );
 }
 
 Shockwave::~Shockwave()
@@ -40,6 +40,7 @@ void Shockwave::fire()
         _v = _duration*_a;
         
         _particles->addParticles( 100 );
+        _particles->setSpawnFrequency( 100 );
     }
 }
 
@@ -47,6 +48,10 @@ void Shockwave::step ( double dt )
 {
     _particles->step( dt );
     _timer += dt;
+    
+    if( _timer > _particles->getLifeTime() )
+        _particles->setSpawnFrequency( 0 );
+    
     if( !isActive() )
         return;
     
@@ -130,6 +135,6 @@ bool Shockwave::isActive() const
 
 bool Shockwave::isVisible() const
 {
-    return isActive() || _timer < _particles->initialParticle().life;
+    return isActive() || _timer < _particles->getLifeTime();
 }
 

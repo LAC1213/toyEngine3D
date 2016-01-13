@@ -53,6 +53,7 @@ void Level::render()
 {
     glDisable( GL_DEPTH_TEST );
     _physics->dynamicsWorld->debugDrawWorld();
+    _debugDrawer.render();
     glEnable( GL_DEPTH_TEST );
 }
 

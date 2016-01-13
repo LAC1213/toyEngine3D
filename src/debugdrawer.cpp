@@ -45,15 +45,8 @@ void DebugDrawer::drawLine ( const btVector3& from, const btVector3& to, const b
         toColor.getX(), toColor.getY(), toColor.getZ()
     };
 
-    _points.loadData( pointData, sizeof pointData );
-    _colors.loadData( colorData, sizeof colorData );
-
-    _shader->use();
-
-    _drawCall();
-
-//    _pointData.insert( std::end(_pointData), std::begin(pointData), std::end(pointData));
-//    _colorData.insert( std::end(_colorData), std::begin(colorData), std::end(colorData));
+    _pointData.insert( std::end(_pointData), std::begin(pointData), std::end(pointData));
+    _colorData.insert( std::end(_colorData), std::begin(colorData), std::end(colorData));
 }
 
 void DebugDrawer::render()
@@ -65,7 +58,8 @@ void DebugDrawer::render()
 
     _shader->use();
 
-    _drawCall.execute();
+    _drawCall.setElements( _pointData.size()/3 );
+    _drawCall();
 
     glEnable( GL_DEPTH_TEST );
 

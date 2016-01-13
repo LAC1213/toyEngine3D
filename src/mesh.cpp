@@ -6,7 +6,7 @@
 Shader * MeshObject::SHADER = 0;
 
 MeshObject::MeshObject( const MeshData& data, const Texture * tex )
-    :   buffers( 4 ), texture( tex )
+    : texture( tex ), buffers( 4 )
 {
     buffers[0].loadData( data.verts, 3*data.vertCount*sizeof( GLfloat ) );
     buffers[1].loadData( data.normals, 3*data.vertCount*sizeof( GLfloat ) );

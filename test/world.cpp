@@ -264,9 +264,6 @@ void World::onKeyAction ( int key, int scancode, int action, int mods )
         case GLFW_KEY_Z:
             _drawDebug ^= true;
             break;
-        case GLFW_KEY_X:
-            _bullets.shoot();
-            break;
         case GLFW_KEY_SPACE:
             _player.jump();
             break;

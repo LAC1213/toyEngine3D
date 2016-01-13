@@ -37,10 +37,10 @@ Player::Player ()
     _tail.setAnimSize( glm::vec2(4, 4));
     _tail.setAnimDuration( 4 );
     _tail.setSpawnFrequency( 300 );
-    _tail.setRandomness( 0.1 );
+    _tail.setRandomness( 0.2 );
     _tail.initialParticle().color = QuadraticCurve<glm::vec4>( glm::vec4( 1, 1, 1, 1 ) );
     _tail.initialParticle().size = QuadraticCurve<GLfloat>( 0.07, 0 );
-    _tail.initialParticle().life = 4;
+    _tail.setLifeTime(4);
 }
 
 Player::~Player()

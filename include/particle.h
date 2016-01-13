@@ -15,7 +15,6 @@ public:
     QuadraticCurve<glm::vec2> uv; //!< for texture animation
     QuadraticCurve<glm::vec4> color;
     QuadraticCurve<GLfloat> size;
-    float life;
 
     virtual void step( double dt );
 };
@@ -38,9 +37,12 @@ public:
     
     void setSpawnFrequency( double f );
     void setRandomness( double r );
+    void setLifeTime( double t );
     void setAnimSize( const glm::vec2& s );
     void setAnimDuration( double t );
     void setTexture( const Texture * tex );
+    
+    double getLifeTime() const;
     
     Particle& initialParticle();
 
@@ -61,6 +63,9 @@ protected:
     double _spawnFrequency;
     double _rnJesus;
     Particle _newParticle;
+    
+    double _lifeTime;
+    double _time;
     
     std::vector<Particle> _particles;
     
@@ -87,8 +92,7 @@ class LightWell : public ParticleEmitter
 public:
     LightWell( glm::vec3 pos );
 
-    void spawnParticle();
-    virtual void step( double dt );
+    virtual Particle genParticle();
 
 protected:
     glm::vec3   _pos;
@@ -99,8 +103,7 @@ class BulletSpawner : public ParticleEmitter
 public:
     BulletSpawner( PlayerCamera * cam, std::vector<Enemy*>* enemies );
 
-    virtual void step( double dt );
-    virtual void shoot();
+    virtual Particle genParticle();
 
 private:
     std::vector<Enemy*>* _enemies;

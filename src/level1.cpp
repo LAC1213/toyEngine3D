@@ -237,8 +237,10 @@ void Level1::update ( double dt )
     Level::update ( dt );
     
     std::stringstream ss;
-    ss.precision( 5 );
-    ss << "Time: " << _time << " FPS: " << 1/dt;
+    ss.precision( 3 + log(_time)/log(10) );
+    ss << "Time: " << _time;
+    ss.precision( 1 -log(dt)/log(10) );
+    ss << " FPS: " << 1/dt;
     _dbgString = ss.str();
 }
 

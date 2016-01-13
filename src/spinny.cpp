@@ -21,7 +21,7 @@ Spinny::Spinny()
         _tail[i]->initialParticle().color = QuadraticCurve<glm::vec4>( glm::vec4( 0.1, 0.9, 0.3, 1 ), glm::vec4(0.1, 0.1, 0.1, 0.1) );
         _tail[i]->initialParticle().size = QuadraticCurve<GLfloat>(0.05, -0.00, -0.0);
         _tail[i]->initialParticle().uv.setConstant( glm::vec2(0, 0) );
-        _tail[i]->initialParticle().life = 2;
+        _tail[i]->setLifeTime( 2 );
         _tail[i]->initialParticle().uv.setConstant( glm::vec2(0) );
     }
 }
