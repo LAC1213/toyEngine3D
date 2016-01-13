@@ -2,10 +2,8 @@
 #include <internal/util.h>
 #include <engine.h>
 
-MeshObject * Spinny::obj = 0;
-
 Spinny::Spinny() 
-    : Mesh( obj )
+    : Mesh( Engine::PrimitiveManager->request( P_Tetrahedron ) )
     , _up(0, 1, 0)
     , _scale(0.1, 0.1, 0.1)
     , _p( 0, 3, 0 )
@@ -33,6 +31,7 @@ Spinny::~Spinny()
     for( int i = 0 ; i < 3 ; ++i )
         delete _tail[i];
     Engine::TextureManager->release( "res/textures/particle4.png" );
+    Engine::PrimitiveManager->release( P_Tetrahedron );
 }
 
 void Spinny::step ( double dt )

@@ -6,7 +6,7 @@ Wall::Wall() : Mesh( Engine::PrimitiveManager->request( P_Cube ) )
     _motionState = new btDefaultMotionState;
     _shape = new btBoxShape( btVector3(1, 1, 1) );
     btRigidBody::btRigidBodyConstructionInfo bodyCI(0, _motionState, _shape, btVector3(0, 0, 0));
-    bodyCI.m_friction = 0.2f;
+    bodyCI.m_friction = 0.5f;
     bodyCI.m_restitution = 0.2f;
     _body = new btRigidBody( bodyCI );
     

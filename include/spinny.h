@@ -6,8 +6,6 @@
 
 class Spinny : public Mesh {
 public:
-    static MeshObject * obj;
-    
     Spinny();
     ~Spinny();
     

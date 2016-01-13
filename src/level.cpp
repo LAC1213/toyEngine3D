@@ -82,7 +82,7 @@ void Level::onKeyAction ( int key, int scancode, int action, int mods )
         switch( key )
         {
         case GLFW_KEY_R:
-            std::cerr << log_info << "Reseting..." << log_endl;
+            std::cerr << log_info << "Resetting..." << log_endl;
             reset();
             break;
         case GLFW_KEY_ESCAPE:

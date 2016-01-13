@@ -115,9 +115,9 @@ int main()
     int width, height;
     glfwGetFramebufferSize( window, &width, &height );
     
-    Level1 level( window, width, height );
-    currentLevel = &level;
-    level.init();
+    Level1 * level = new Level1( window, width, height );
+    currentLevel = level;
+    level->init();
 
     glfwSetKeyCallback( window, onKey );
     glfwSetCursorPosCallback( window, onMouseMove );
@@ -127,29 +127,30 @@ int main()
 
     double t0 = 0, dt;
 
-    while( !glfwWindowShouldClose( window ) && level.getStatus() == Level::Running )
+    while( !glfwWindowShouldClose( window ) && level->getStatus() == Level::Running )
     {
         dt = glfwGetTime() - t0;
         t0 = glfwGetTime();
 
-        level.update( dt );
+        level->update( dt );
 
-        level.render();
+        level->render();
 
         glfwSwapBuffers( window );
         glfwPollEvents();
     }
     
-    if( level.getStatus() == Level::Won )
+    if( level->getStatus() == Level::Won )
         std::cout << "Won\n";
-    else if( level.getStatus() == Level::Lost )
+    else if( level->getStatus() == Level::Lost )
         std::cout << "Lost\n";
-    else if( level.getStatus() == Level::Running )
+    else if( level->getStatus() == Level::Running )
         std::cout << "Crashed\n";
 
     glfwDestroyWindow(window);
     glfwTerminate();
 
+    delete level;
     Engine::destroy();
     
     return EXIT_SUCCESS;

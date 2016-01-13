@@ -26,7 +26,7 @@ class MeshObject : public Renderable
 {
 public:
     MeshObject() {}
-    MeshObject( const MeshData& data, const Texture * tex );
+    MeshObject( const MeshData& data, const Texture * tex = nullptr );
     virtual ~MeshObject();
 
     const Texture * texture;

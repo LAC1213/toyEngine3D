@@ -55,7 +55,5 @@ Hello Cube example:
 
 ## To Do
 
-1. `Engine::ActiveCam` -> `Camera::Active`
-3. drop rolling bomb, level1
 4. bad guys, level1
 5. load particles, walls, etc. from disk (yaml)

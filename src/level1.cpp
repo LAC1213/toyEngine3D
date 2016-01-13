@@ -27,8 +27,6 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     _shock.setAcceleration( 20 );
     _shock.setDuration( 2 );
     
-    static MeshObject * tetra = MeshObject::genTetrahedron();
-    Spinny::obj = tetra;
     _spinnies[0] = new Spinny;
     
     onResize( width, height );
@@ -38,12 +36,13 @@ Level1::~Level1()
 {
     delete _bloomed;
     delete _swapBuffer;
+    
     vec_for_each( i, _spinnies )
         delete _spinnies[i];
-    list_for_each( it, _bombs )
-        delete *it;
-    list_for_each( it, _shocks )
-        delete *it;
+    for( auto it : _bombs )
+        delete it;
+    for( auto it : _shocks )
+        delete it;
     vec_for_each( i, _walls )
         delete _walls[i];
 }
@@ -98,6 +97,21 @@ void Level1::init()
 void Level1::reset()
 {
     Level::reset();
+    _player.setModel( glm::vec3(0, 2, 0), glm::vec3(0), glm::vec3(0.2) );
+    auto it = _bombs.begin();
+    while( it != _bombs.end() )
+    {
+        _lighting.removePointLight( &(*it)->light() );
+        _physics->dynamicsWorld->removeRigidBody( (*it)->body() );
+        delete *it;
+        it = _bombs.erase( it );
+    }
+    auto jt = _shocks.begin();
+    while( jt != _shocks.end() )
+    {
+        delete *jt;
+        jt = _shocks.erase( jt );
+    }
 }
 
 void Level1::onMouseMove ( double x, double y )
@@ -189,7 +203,16 @@ void Level1::update ( double dt )
 //        if( glm::distance( _player.getPos(), s->getCenter() ) <= s->getRadius() )
 //            _player.body()->applyCentralImpulse
         
-        if( !(*it)->isVisible() )
+        if( s->isActive() )
+            for( auto it : _bombs )
+                if( glm::distance( it->getPos(), s->getCenter() ) < s->getRadius() )
+                {
+                    it->body()->activate();
+                    glm::vec3 d = glm::normalize(it->getPos() - s->getCenter());
+                    it->body()->applyCentralImpulse( glm2bt(d)/(1 + s->getRadius()) );
+                }
+        
+        if( !s->isVisible() )
         {
             it = _shocks.erase( it );
             delete s;

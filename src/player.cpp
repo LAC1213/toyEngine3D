@@ -6,7 +6,7 @@
 
 Player::Player () 
     : Mesh( Engine::PrimitiveManager->request( P_Sphere ) )
-    , _mass( 10 )
+    , _mass( 0 )
     , _scale( 0.2 )
     , _p( 0, 2, 0 )
     , _surfaceNormal( 0, 1, 0 )
@@ -20,8 +20,8 @@ Player::Player ()
     bodyCI.m_restitution = 0.1f;
     bodyCI.m_friction = 0.6f;
     _body = new btRigidBody( bodyCI );
-    _body->setActivationState( DISABLE_DEACTIVATION );
-//    _body->setCollisionFlags( btCollisionObject::CF_KINEMATIC_OBJECT );
+    _body->setCollisionFlags( btCollisionObject::CF_KINEMATIC_OBJECT );
+    _body->activate();
     _body->setDamping( 0.2, 0.4 );
     
     setModel( _p, glm::vec3(0), _scale );
@@ -36,7 +36,7 @@ Player::Player ()
     _tail.setTexture( Engine::TextureManager->request( "res/textures/particle4.png" ) );
     _tail.setAnimSize( glm::vec2(4, 4));
     _tail.setAnimDuration( 4 );
-    _tail.setSpawnFrequency( 1000 );
+    _tail.setSpawnFrequency( 300 );
     _tail.setRandomness( 0.1 );
     _tail.initialParticle().color = QuadraticCurve<glm::vec4>( glm::vec4( 1, 1, 1, 1 ) );
     _tail.initialParticle().size = QuadraticCurve<GLfloat>( 0.07, 0 );
@@ -95,6 +95,9 @@ void Player::step ( float dt )
     
     _tail.initialParticle().position.setConstant( _p );
     _tail.step( dt );
+    
+    _body->translate( glm2bt(dt * _v) );
+//    _v.y -= 9.81 * dt;
 }
 
 PointLight* Player::light()
@@ -121,6 +124,7 @@ void Player::move ( const glm::vec3& d )
         _v.z = d.z;
     }
     
+    _body->activate();
     _body->setLinearVelocity( btVector3(_v.x, _body->getLinearVelocity().getY(), _v.z) );
 }
 

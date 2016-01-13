@@ -6,7 +6,7 @@
 Shader * MeshObject::SHADER = 0;
 
 MeshObject::MeshObject( const MeshData& data, const Texture * tex )
-    :   buffers( 4 )
+    :   buffers( 4 ), texture( tex )
 {
     buffers[0].loadData( data.verts, 3*data.vertCount*sizeof( GLfloat ) );
     buffers[1].loadData( data.normals, 3*data.vertCount*sizeof( GLfloat ) );
@@ -26,7 +26,6 @@ MeshObject::MeshObject( const MeshData& data, const Texture * tex )
 
 MeshObject::~MeshObject()
 {
-    delete shader;
 }
 
 MeshObject * MeshObject::genCube()
@@ -215,7 +214,7 @@ MeshObject * MeshObject::genTetrahedron()
         0, 1, 0
     };
     
-    for( int i = 0 ; i < sizeof(normals)/sizeof(normals[0]) ; ++i )
+    for( size_t i = 0 ; i < sizeof(normals)/sizeof(normals[0]) ; ++i )
         normals[i] *= -1;
     
     GLfloat uvs[] = {

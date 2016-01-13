@@ -18,6 +18,8 @@ void __errorExit( const char * file, const char * func, unsigned int line, const
 #define vec_for_each( index, vec ) for( size_t index = 0 ; index < vec.size() ; ++index )
 #define list_for_each( it, xs ) for( auto it = xs.begin() ; it != xs.end() ; ++it )
 
+#define INVALID_CODE_PATH std::cerr << log_alert << "INVALID_CODE_PATH" << log_endl; abort();
+
 enum Log
 {
     log_warn,

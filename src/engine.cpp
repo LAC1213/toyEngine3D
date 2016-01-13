@@ -24,10 +24,10 @@ PhysicsVars::PhysicsVars()
 PhysicsVars::~PhysicsVars()
 {
     delete dynamicsWorld;
-    delete broadphase;
-    delete collisionConfig;
-    delete dispatcher;
     delete solver;
+    delete broadphase;
+    delete dispatcher;
+    delete collisionConfig;
 }
 
 namespace Engine
@@ -97,8 +97,7 @@ void init()
     ParticleEmitter::init();
     Text::init();
     
-    if( config["enableTerrain"] )
-    if( config["enableTerrain"].as<bool>() )
+    if( config["enableTerrain"] && config["enableTerrain"].as<bool>() )
         Terrain::init();
 
     MeshObject::init();
@@ -110,11 +109,6 @@ void destroy()
 {
     if( !initialized ) return;
 
-    delete ShaderManager;
-    delete TextureManager;
-    delete BoxShapeManager;
-    delete SphereShapeManager;
-
     Lighting::destroy();
     PostEffect::destroy();
     Billboard::destroy();
@@ -122,6 +116,11 @@ void destroy()
     Text::destroy();
     Terrain::destroy();
     MeshObject::destroy();
+    
+    delete ShaderManager;
+    delete TextureManager;
+    delete BoxShapeManager;
+    delete SphereShapeManager;
 
     delete QuadBuffer;
     delete DrawScreenQuad;

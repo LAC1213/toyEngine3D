@@ -3,6 +3,8 @@
 #include <resourcemanager.hpp>
 #include <mesh.h>
 
+#include <internal/util.h>
+
 enum PrimitiveType {
     P_Cube,
     P_Sphere,
@@ -23,5 +25,6 @@ public:
             case P_Tetrahedron:
                 return MeshObject::genTetrahedron();
         }
+        INVALID_CODE_PATH; return nullptr;
     }
 };
