@@ -4,6 +4,12 @@
 #include <player.h>
 
 Camera Camera::Null;
+Camera * Camera::Active = &Camera::Null;
+
+void Camera::use()
+{
+    Active = this;
+}
 
 const std::string PerspectiveCamera::PROJ_UNIFORM_STR = "proj";
 const std::string PerspectiveCamera::VIEW_UNIFORM_STR = "view";

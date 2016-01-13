@@ -1,7 +1,7 @@
 #include <wall.h>
 #include <engine.h>
 
-Wall::Wall() : Mesh( Engine::CubeObject )
+Wall::Wall() : Mesh( Engine::PrimitiveManager->request( P_Cube ) )
 {
     _motionState = new btDefaultMotionState;
     _shape = new btBoxShape( btVector3(1, 1, 1) );
@@ -15,6 +15,7 @@ Wall::Wall() : Mesh( Engine::CubeObject )
 
 Wall::~Wall()
 {
+    Engine::PrimitiveManager->release( P_Cube );
     delete _motionState;
     delete _body;
     delete _shape;

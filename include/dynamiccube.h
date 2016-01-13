@@ -2,9 +2,9 @@
 #define DYNAMICCUBE_H
 
 #include <entity.h>
-#include <renderable.h>
+#include <mesh.h>
 
-class DynamicCube : public Entity, public Renderable
+class DynamicCube : public Entity, public Mesh
 {
 public:
     DynamicCube( const glm::vec3& pos, float mass );

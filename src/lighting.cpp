@@ -56,12 +56,11 @@ void Lighting::render()
     _shader->setUniform ( "ambient", glm::vec3 ( 0, 0, 0 ) );
     _shader->setUniform ( "sunDir", glm::vec3 ( 0, 0, 0 ) );
 
-    _shader->setUniform ( "view", ((PerspectiveCamera*)Engine::ActiveCam)->getView() );
-    Camera nullCam;
-    Camera * old = Engine::ActiveCam;
-    Engine::ActiveCam = &nullCam;
+    _shader->setUniform ( "view", ((PerspectiveCamera*)Camera::Active)->getView() );
+    Camera * old = Camera::Active;
+    Camera::Null.use();
     _shader->use();
-    Engine::ActiveCam = old;
+    old->use();
 
     for ( auto it = _lights.begin() ; it != _lights.end() ; ++it )
     {

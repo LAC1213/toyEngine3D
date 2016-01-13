@@ -21,6 +21,7 @@ Player::Player ()
     bodyCI.m_friction = 0.6f;
     _body = new btRigidBody( bodyCI );
     _body->setActivationState( DISABLE_DEACTIVATION );
+//    _body->setCollisionFlags( btCollisionObject::CF_KINEMATIC_OBJECT );
     _body->setDamping( 0.2, 0.4 );
     
     setModel( _p, glm::vec3(0), _scale );

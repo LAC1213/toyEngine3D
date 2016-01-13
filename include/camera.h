@@ -14,6 +14,10 @@ class Camera
 {
 public:
     static Camera Null;
+    static Camera * Active;
+    
+    void use();
+    
     virtual void setUniforms( __attribute__((unused)) Shader * shader ) const {}
 };
 

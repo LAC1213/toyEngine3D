@@ -165,8 +165,8 @@ void Level1::update ( double dt )
         {
             Shockwave * s = new Shockwave( _gBuffer, _canvas );
             s->setCenter( b->getPos() );
-            s->setAcceleration( 20 );
-            s->setDuration( 2 );
+            s->setAcceleration( 10 );
+            s->setDuration( 3 );
             s->setColor( glm::vec3(b->getColor()) );
             _shocks.push_back( s );
             s->fire();
@@ -186,7 +186,8 @@ void Level1::update ( double dt )
         Shockwave * s = *it;
         s->step( dt );
         
-        if( glm::distance( _player.getPos(), s->getCenter() ) <= s->getRadius() )
+//        if( glm::distance( _player.getPos(), s->getCenter() ) <= s->getRadius() )
+//            _player.body()->applyCentralImpulse
         
         if( !(*it)->isVisible() )
         {
@@ -222,11 +223,10 @@ void Level1::render()
 {
     static Blend effect ( _bloomed, _swapBuffer );
     static Bloom bloom ( _swapBuffer );
-    static Camera nullCam;
     
     glViewport( 0, 0, _width, _height );
     
-    Engine::ActiveCam = &_cam;
+    _cam.use();
     glDisable( GL_BLEND );
     _gBuffer->clear();
     
@@ -258,16 +258,16 @@ void Level1::render()
     
     glBlendFunc( GL_ONE, GL_ONE );
     static PostEffect passthrogh( PostEffect::NONE, _canvas );
-    Engine::ActiveCam = &Camera::Null;
+    Camera::Null.use();
     passthrogh.render();
     
-    Engine::ActiveCam = &_cam;
+    _cam.use();
     _shock.render();
     for( auto it : _shocks )
         it->render();
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
     
-    Engine::ActiveCam = &nullCam;
+    Camera::Null.use();
     
     _bloomed->clear();
     bloom.render();

@@ -73,13 +73,12 @@ void Shockwave::render()
     _shader->setUniform ( "center", _center );
     _shader->setUniform ( "radius", _radius );
 
-    _shader->setUniform ( "view", ((PerspectiveCamera*)Engine::ActiveCam)->getView() );
-    
-    static Camera nullCam;
-    Camera * old = Engine::ActiveCam;
-    Engine::ActiveCam = &nullCam;
+    _shader->setUniform ( "view", ((PerspectiveCamera*)Camera::Active)->getView() );
+
+    Camera * old = Camera::Active;
+    Camera::Null.use();
     _shader->use();
-    Engine::ActiveCam = old;
+    old->use();
 
     Engine::DrawScreenQuad->execute();
 

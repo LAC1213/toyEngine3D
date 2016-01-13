@@ -62,7 +62,7 @@ void Bomb::setModel ( const glm::vec3& trans, const glm::vec3& rot, const glm::v
 {
     _model = makeModel( trans, rot, scale );
     _scale = scale;
-     
+    
     btTransform t;
     t.setIdentity();
     t.setOrigin( glm2bt( trans ) );

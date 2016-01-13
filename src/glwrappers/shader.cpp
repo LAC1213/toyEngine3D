@@ -26,7 +26,7 @@ Shader::~Shader()
  */
 void Shader::use()
 {
-    Engine::ActiveCam->setUniforms( this );
+    Camera::Active->setUniforms( this );
     if( this == Active )
         return;
     glUseProgram( _program );

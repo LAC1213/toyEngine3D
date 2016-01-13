@@ -36,12 +36,8 @@ namespace Engine
 std::string Root = ".";
 PhysicsVars * Physics = nullptr;
 
-static Camera nullCam;
-Camera * ActiveCam = &nullCam;
-
 BufferObject * QuadBuffer = nullptr;
 DrawCall * DrawScreenQuad = nullptr;
-MeshObject * CubeObject = nullptr;
 
 Shader::Manager * ShaderManager = nullptr;
 Texture::Manager * TextureManager = nullptr;
@@ -106,7 +102,6 @@ void init()
         Terrain::init();
 
     MeshObject::init();
-    CubeObject = MeshObject::genCube();
 
     initialized = true;
 }
@@ -130,7 +125,6 @@ void destroy()
 
     delete QuadBuffer;
     delete DrawScreenQuad;
-    delete CubeObject;
     initialized = false;
 }
 

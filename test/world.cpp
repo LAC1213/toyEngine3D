@@ -201,7 +201,7 @@ void World::render()
     txt.setColor ( glm::vec4 ( 0.3, 1, 0.6, 0.6 ) );
     txt.setPosition ( glm::vec2 ( 5, 2 ) );
     
-    Engine::ActiveCam = &_cam;
+    _cam.use();
     glDisable ( GL_BLEND );
     _gBuffer->clear();
   //  _terrain->render();
@@ -211,8 +211,6 @@ void World::render()
     
     glEnable ( GL_BLEND );
 
-    static Camera nullCam;
-  
     _canvas->clear();
     _canvas->copyDepth ( *_gBuffer );
     
@@ -242,7 +240,7 @@ void World::render()
     }
     glEnable( GL_DEPTH_TEST );
     
-    Engine::ActiveCam = &nullCam;
+    Camera::Null.use();
    
     _bloomed->clear();
     bloom.render();
@@ -252,8 +250,6 @@ void World::render()
     Framebuffer::Screen.clear();
     effect.render();
     txt.render();
-    
-    Engine::ActiveCam = &_cam;
 }
 
 void World::onKeyAction ( int key, int scancode, int action, int mods )
