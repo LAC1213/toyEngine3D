@@ -23,8 +23,6 @@ World::World ( GLFWwindow * window, int width, int height )
         _cam ( _window, &_player, ( float ) _width / _height ),
         _testobj( glm::vec3( 1.2, 11, 0 ), 1 ),
         _lighting ( _gBuffer ),
-        _bullets ( &_cam, &_enemies ),
-        _lightwell ( glm::vec3 ( 0, 0, 0 ) ),
         _heightmap ( HeightMap::genRandom ( 6 ) ),
         _spawnFrequency ( 0.1 ),
         _spawnTimer ( 1.0/_spawnFrequency ),
@@ -82,8 +80,6 @@ void World::step ( double dt )
 
     _player.step( dt );
     _cam.step( dt );
-    _bullets.step ( dt );
-    _lightwell.step ( dt );
     
     _cube.setModel( glm::vec3(0.2, 0, 0), glm::vec3(1, 1, 0), glm::vec3( 1, 2, 1 ) );
     
@@ -220,7 +216,6 @@ void World::render()
     {
         _enemies[i]->render();
     }
-    _bullets.render();
     _player.render();
    // _lightwell.render();
     

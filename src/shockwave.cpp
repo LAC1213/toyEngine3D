@@ -10,24 +10,19 @@ Shockwave::Shockwave ( Framebuffer* gBuffer, Framebuffer * canvas )
 {
     _shader = Engine::ShaderManager->request( "res/shader/shockwave", Shader::LOAD_BASIC );
     
+    //TODO maybe add a resourcemanager for yaml files
+    static YAML::Node node = YAML::LoadFile( "res/particles/explosion.yaml" );
+    
     _particles = new Explosion;
-    _particles->setExpandSpeed( 0.012 );
-    _particles->setMaxRadius( 0.1 );
-    _particles->setTexture( Engine::TextureManager->request( "res/textures/explosion.png" ) );
-    _particles->setAnimSize( glm::vec2(4, 4) );
-    _particles->setAnimDuration( 3 );
-    _particles->setRandomness( 0.035 );
-    _particles->setSpawnFrequency( 0 );
-    _particles->initialParticle().color.setConstant( glm::vec4(1, 1, 1, 1) );
-    _particles->initialParticle().position.setConstant( _center );
-    _particles->initialParticle().size.setConstant( 0.1 );
-    _particles->setLifeTime( 1 );
+    _particles->setExpandSpeed( 3 );
+    _particles->setMaxRadius( 0 );
+    _particles->loadFromYAML( node );
+    _particles->setInitialPosition( _center, 0.2 );
 }
 
 Shockwave::~Shockwave()
 {
     Engine::ShaderManager->release( _shader );
-    Engine::TextureManager->release( "res/textures/explosion.png" );
     delete _particles;
 }
 
@@ -39,8 +34,7 @@ void Shockwave::fire()
         _radius = 0;
         _v = _duration*_a;
         
-        _particles->addParticles( 100 );
-        _particles->setSpawnFrequency( 100 );
+        _particles->addParticles( 500 );
     }
 }
 
@@ -48,9 +42,6 @@ void Shockwave::step ( double dt )
 {
     _particles->step( dt );
     _timer += dt;
-    
-    if( _timer > _particles->getLifeTime() )
-        _particles->setSpawnFrequency( 0 );
     
     if( !isActive() )
         return;
@@ -104,13 +95,13 @@ void Shockwave::setAcceleration ( float a )
 void Shockwave::setCenter ( const glm::vec3& p )
 {
     _center = p;
-    _particles->initialParticle().position.setConstant( p );
+    _particles->setInitialPosition( _center, 0.2 );
 }
 
 void Shockwave::setColor ( const glm::vec3& color )
 {
     _color = color;
-    _particles->initialParticle().color.setConstant( glm::vec4(_color, 1) );
+    _particles->setInitialColor( glm::vec4(_color, 1) );
 }
 
 void Shockwave::setDuration ( double t )

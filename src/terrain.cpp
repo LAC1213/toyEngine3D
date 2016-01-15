@@ -242,8 +242,8 @@ HeightMap HeightMap::genRandom( unsigned int pow )
     HeightMap heightmap( width, width );
     
     float * flatdata = new float[width*width];
-    for(int i = 0 ; i < width ; ++i)
-        for(int j = 0 ; j < width ; ++j)
+    for(uintmax_t i = 0 ; i < width ; ++i)
+        for(uintmax_t j = 0 ; j < width ; ++j)
             flatdata[i*width + j] = bullet2glfactor*data[i][j];
         
     for( size_t i = 0 ; i < width ; ++i )

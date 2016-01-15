@@ -29,4 +29,6 @@ protected:
     glm::vec3 _scale;
     
     PointLight _light;
+    
+    double _time;
 };

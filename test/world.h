@@ -51,8 +51,6 @@ public:
     Wall            _cube;
     Player          _player;
     Lighting        _lighting;
-    BulletSpawner   _bullets;
-    LightWell       _lightwell;
     HeightMap       _heightmap;
     Terrain *       _terrain;
     std::vector<Enemy*> _enemies;

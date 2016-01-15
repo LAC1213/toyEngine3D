@@ -24,8 +24,11 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     
     _shock.setCenter( glm::vec3(0, 1, 0) );
     _shock.setColor( glm::vec3( 8, 8, 5 ) );
-    _shock.setAcceleration( 20 );
-    _shock.setDuration( 2 );
+    _shock.setAcceleration( 10 );
+    _shock.setDuration( 1.5 );
+    
+    static YAML::Node snowConf = YAML::LoadFile( "res/particles/snow.yaml" );
+    _snow.loadFromYAML( snowConf );
     
     _spinnies[0] = new Spinny;
     
@@ -169,6 +172,7 @@ void Level1::update ( double dt )
     _cam.step( dt );
     _shock.setCenter( _player.getPos() );
     _shock.step( dt );
+    _snow.step( dt );
     
     for( auto it = _bombs.begin() ; it != _bombs.end() ;  )
     {
@@ -195,9 +199,10 @@ void Level1::update ( double dt )
         }
     }
     
-    for( auto it = _shocks.begin(); it != _shocks.end() ;  )
+    for( auto it = _shocks.begin(); it != _shocks.end() ; )
     {
         Shockwave * s = *it;
+       // s->_particles->addParticles( 10 );
         s->step( dt );
         
 //        if( glm::distance( _player.getPos(), s->getCenter() ) <= s->getRadius() )
@@ -237,9 +242,10 @@ void Level1::update ( double dt )
     Level::update ( dt );
     
     std::stringstream ss;
-    ss.precision( 3 + log(_time)/log(10) );
+    ss.setf( std::ios::fixed );
+    ss.precision( 2 + log(_time)/log(10) );
     ss << "Time: " << _time;
-    ss.precision( 1 -log(dt)/log(10) );
+    ss.precision( -1 -log(dt)/log(10) );
     ss << " FPS: " << 1/dt;
     _dbgString = ss.str();
 }
@@ -270,7 +276,9 @@ void Level1::render()
     _canvas->copyDepth( *_gBuffer );
     
     _lighting.render();
+    
     _player.render();
+    _snow.render();
     vec_for_each( i, _spinnies )
         _spinnies[i]->renderFX();
     _shock.renderFX();
@@ -282,9 +290,9 @@ void Level1::render()
     _swapBuffer->clear();
     
     glBlendFunc( GL_ONE, GL_ONE );
-    static PostEffect passthrogh( PostEffect::NONE, _canvas );
+    static PostEffect passthrough( PostEffect::NONE, _canvas );
     Camera::Null.use();
-    passthrogh.render();
+    passthrough.render();
     
     _cam.use();
     _shock.render();
@@ -296,6 +304,8 @@ void Level1::render()
     
     _bloomed->clear();
     bloom.render();
+    
+    //TODO dither to avoid colorbanding
     
     static Font font( "/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf", 14 );
     Text txt( &font, _dbgString, glm::vec2(_width, _height) );

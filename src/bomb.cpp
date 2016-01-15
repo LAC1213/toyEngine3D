@@ -48,8 +48,10 @@ void Bomb::step ( double dt )
 {
     glm::vec3 r = _body->getOrientation().getAngle() * bt2glm(_body->getOrientation().getAxis());
     glm::vec3 t = bt2glm(_body->getCenterOfMassPosition());
-   
-    _diffuseColor += 0.2f*glm::vec4( dt );
+  
+    _time += dt;
+    
+    _diffuseColor = glm::vec4(0.5, 0, 0.5, 1) + (float)_time * 3 * (float)(sin( _time*_time*_time ) + 1) * glm::vec4( 1, 0, 1, 1 );
     _light.diffuse = glm::vec3(_diffuseColor);
     _light.specular = glm::vec3(_diffuseColor);
     _light.position = t;

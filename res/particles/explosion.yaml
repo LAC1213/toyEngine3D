@@ -1,0 +1,10 @@
+texture: "res/textures/explosion.png"
+animation_layout: [4, 4]
+
+max_age: 0.5
+particles_per_second: 0
+
+velocity_randomness: 0.05
+
+color: [1, 1, 1, 1]
+size: 0.05

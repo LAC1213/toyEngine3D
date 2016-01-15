@@ -36,6 +36,8 @@ protected:
     Lighting _lighting;
     Shockwave _shock;
     
+    ParticleEmitter _snow;
+    
     std::string _dbgString;
     
     GoalListener _goal;

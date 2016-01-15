@@ -5,74 +5,94 @@
 #include <vector>
 #include <internal/body.h>
 #include <camera.h>
+#include <yaml-cpp/yaml.h>
 
-class Particle  
+struct ParticleData
 {
-public:
-    Particle();
-    
-    QuadraticCurve<glm::vec3> position;
-    QuadraticCurve<glm::vec2> uv; //!< for texture animation
-    QuadraticCurve<glm::vec4> color;
-    QuadraticCurve<GLfloat> size;
-
-    virtual void step( double dt );
-};
+    float p[3]; //!^ position
+    float dp[3]; //!^ velocity
+    float uv[2]; //!^ uv texture coordinate
+    float c[4]; //!^ color
+    float s; //!^ size
+} 
+__attribute__((packed)); //save some GPU memory
 
 class ParticleEmitter : public Renderable
 {
 public:
-    enum BufferIndex {
-        POSITION,
-        COLOR,
-        UV,
-        SIZE
-    };
-
-    ParticleEmitter( const Texture * texture = nullptr );
+    ParticleEmitter( Texture * texture = nullptr );
     virtual ~ParticleEmitter();
 
     virtual void step( double dt );
     virtual void render();
     
+    virtual void loadFromYAML( YAML::Node node );
+    
     void setSpawnFrequency( double f );
     void setRandomness( double r );
     void setLifeTime( double t );
     void setAnimSize( const glm::vec2& s );
-    void setAnimDuration( double t );
-    void setTexture( const Texture * tex );
+    void setTexture( Texture * tex );
+    
+    void setInitialPosition( const glm::vec3& p, float radius = 0 );
+    void setInitialColor( const glm::vec4& c, float radius = 0 );
+    void setInitialSize( float s, float radius = 0 );
+    
+    void setPositionVelocity( const glm::vec3& v, float radius = 0 );
+    void setColorVelocity( const glm::vec4& v );
+    void setSizeVelocity( float v );
+    
+    void setPositionAcceleration( const glm::vec3& a );
+    void setSizeAcceleration( float a );
+    void setColorAcceleration( const glm::vec4& a );
     
     double getLifeTime() const;
     
-    Particle& initialParticle();
-
     static void init();
     static void destroy();
 
-    void addParticle( const Particle& p );
-    void addParticles( const std::vector<Particle>& ps );
     void addParticles( size_t n );
 
 protected:
-    virtual Particle genParticle();
+    virtual ParticleData genParticle();
+    virtual void stepParticle( ParticleData& p, double dt );
     
     static Shader * _shader;
     glm::vec2 _animSize;
-    double _animDuration;
     
     double _spawnFrequency;
     double _rnJesus;
-    Particle _newParticle;
+    
+    glm::vec3 _p;
+    float _pRadius;
+    glm::vec3 _dp;
+    float _dpRadius;
+    glm::vec3 _ddp;
+    
+    glm::vec4 _c;
+    float _cRadius;
+    glm::vec4 _dc;
+    glm::vec4 _ddc;
+    
+    float _s;
+    float _sRadius;
+    float _ds;
+    float _dds;
     
     double _lifeTime;
     double _time;
     
-    std::vector<Particle> _particles;
+    /** particles which get spawned with _spawnFrequency, always completely filled 
+     *  expect for 0 < _time < _lifeTime 
+     */
+    std::vector<ParticleData> _periodicParticles; 
+    //! groups of particles with the same age
+    std::list<std::pair<double, std::vector<ParticleData>*>> _arbitraryParticles;
     
 private:
-    std::vector<BufferObject> _buffers;
+    BufferObject _buffer;
     DrawCall _drawCall;
-    const Texture * _texture;
+    Texture * _texture;
 };
 
 class Explosion : public ParticleEmitter
@@ -81,31 +101,8 @@ public:
     void setMaxRadius( float r );
     void setExpandSpeed( float v );
     
-    virtual Particle genParticle();
+    virtual ParticleData genParticle();
 protected:
     float _expandSpeed;
     float _maxRadius;
-};
-
-class LightWell : public ParticleEmitter
-{
-public:
-    LightWell( glm::vec3 pos );
-
-    virtual Particle genParticle();
-
-protected:
-    glm::vec3   _pos;
-};
-
-class BulletSpawner : public ParticleEmitter
-{
-public:
-    BulletSpawner( PlayerCamera * cam, std::vector<Enemy*>* enemies );
-
-    virtual Particle genParticle();
-
-private:
-    std::vector<Enemy*>* _enemies;
-    PlayerCamera * _playerCam;
 };

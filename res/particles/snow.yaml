@@ -1,0 +1,15 @@
+particles_per_second: 10000
+max_age: 20
+
+size: 0.05
+color: [1, 1, 1, 1]
+
+position: [0, 10, 0]
+position_randomness: 10
+
+velocity: [0, -0.5, 0]
+velocity_randomness: 0.2
+
+acceleration: [0, -0.3, 0]
+
+texture: "res/textures/blob.png"

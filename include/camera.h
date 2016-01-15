@@ -127,11 +127,9 @@ public:
     void onMouseMove( double dx, double dy );
 
     virtual void step( double dt );
-    void jump();
 
 protected:
     void pollInput();
-    bool    _canJump;
 
     Player * _player;
 

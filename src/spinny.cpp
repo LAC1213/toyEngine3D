@@ -9,20 +9,12 @@ Spinny::Spinny()
     , _p( 0, 3, 0 )
     , _waiting( true )
 {
-    Texture * animationAtlas = Engine::TextureManager->request( "res/textures/particle4.png" );
+    static YAML::Node particleConf = YAML::LoadFile( "res/particles/spinnytail.yaml" );
     
     for( int i = 0 ; i < 3 ; ++i )
     {
-        _tail[i] = new ParticleEmitter( animationAtlas );
-        _tail[i]->setAnimSize( glm::vec2( 4, 4) );
-        _tail[i]->setAnimDuration( 2 );
-        _tail[i]->setSpawnFrequency( 120 );
-        _tail[i]->setRandomness( 0.03 );
-        _tail[i]->initialParticle().color = QuadraticCurve<glm::vec4>( glm::vec4( 0.1, 0.9, 0.3, 1 ), glm::vec4(0.1, 0.1, 0.1, 0.1) );
-        _tail[i]->initialParticle().size = QuadraticCurve<GLfloat>(0.05, -0.00, -0.0);
-        _tail[i]->initialParticle().uv.setConstant( glm::vec2(0, 0) );
-        _tail[i]->setLifeTime( 2 );
-        _tail[i]->initialParticle().uv.setConstant( glm::vec2(0) );
+        _tail[i] = new ParticleEmitter;
+        _tail[i]->loadFromYAML( particleConf );
     }
 }
 
@@ -30,7 +22,6 @@ Spinny::~Spinny()
 {
     for( int i = 0 ; i < 3 ; ++i )
         delete _tail[i];
-    Engine::TextureManager->release( "res/textures/particle4.png" );
     Engine::PrimitiveManager->release( P_Tetrahedron );
 }
 
@@ -45,7 +36,7 @@ void Spinny::step ( double dt )
         setColor( glm::vec4( 1, 1, 1, 1 ) );
     
     for( int i = 0 ; i < 3 ; ++i )
-        _tail[i]->initialParticle().color.setConstant( _diffuseColor );
+        _tail[i]->setInitialColor( _diffuseColor );
     
     constexpr double timerLen = 6;
     if( timer > timerLen )
@@ -107,9 +98,9 @@ void Spinny::step ( double dt )
     glm::vec3 p2 = glm::vec3(_model * glm::vec4(1, 0.5 -sqrt(2)/sqrt(3), -sqrt(3)/3, 1) );
     glm::vec3 p3 = glm::vec3(_model * glm::vec4(-1, 0.5 -sqrt(2)/sqrt(3), -sqrt(3)/3, 1) );
     
-    _tail[0]->initialParticle().position.setConstant( p1 );
-    _tail[1]->initialParticle().position.setConstant( p2 );
-    _tail[2]->initialParticle().position.setConstant( p3 );
+    _tail[0]->setInitialPosition( p1, 0.02 );
+    _tail[1]->setInitialPosition( p2, 0.02 );
+    _tail[2]->setInitialPosition( p3, 0.02 );
    
     for( int i = 0 ; i < 3 ; ++i )
         _tail[i]->step( dt );

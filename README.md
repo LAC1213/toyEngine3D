@@ -55,5 +55,5 @@ Hello Cube example:
 
 ## To Do
 
-4. bad guys, level1
-5. load particles, walls, etc. from disk (yaml)
+1. shadows
+2. bad guys, level1

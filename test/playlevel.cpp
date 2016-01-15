@@ -51,6 +51,7 @@ void onResize( __attribute__((unused)) GLFWwindow * window, int width, int heigh
     currentLevel->onResize( width, height );
 }
 
+//TODO maybe move to Engine::init()
 GLFWwindow * initContext()
 {
     /* Initialize the library */

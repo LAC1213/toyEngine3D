@@ -6,7 +6,7 @@
 
 Player::Player () 
     : Mesh( Engine::PrimitiveManager->request( P_Sphere ) )
-    , _mass( 0 )
+    , _mass( 5 )
     , _scale( 0.2 )
     , _p( 0, 2, 0 )
     , _surfaceNormal( 0, 1, 0 )
@@ -20,7 +20,7 @@ Player::Player ()
     bodyCI.m_restitution = 0.1f;
     bodyCI.m_friction = 0.6f;
     _body = new btRigidBody( bodyCI );
-    _body->setCollisionFlags( btCollisionObject::CF_KINEMATIC_OBJECT );
+ // _body->setCollisionFlags( btCollisionObject::CF_KINEMATIC_OBJECT );
     _body->activate();
     _body->setDamping( 0.2, 0.4 );
     
@@ -33,19 +33,13 @@ Player::Player ()
     _light.specular = glm::vec3 ( _diffuseColor );
     _light.attenuation = glm::vec3 ( 0.2, 0.2, 0.4 );
     
-    _tail.setTexture( Engine::TextureManager->request( "res/textures/particle4.png" ) );
-    _tail.setAnimSize( glm::vec2(4, 4));
-    _tail.setAnimDuration( 4 );
-    _tail.setSpawnFrequency( 300 );
-    _tail.setRandomness( 0.2 );
-    _tail.initialParticle().color = QuadraticCurve<glm::vec4>( glm::vec4( 1, 1, 1, 1 ) );
-    _tail.initialParticle().size = QuadraticCurve<GLfloat>( 0.07, 0 );
-    _tail.setLifeTime(4);
+    static YAML::Node particleConf = YAML::LoadFile( "res/particles/playertail.yaml" );
+    _tail.loadFromYAML( particleConf );
+    _tail.setInitialPosition( _p, 0.2 );
 }
 
 Player::~Player()
 {
-    Engine::TextureManager->release( "res/textures/particle4.png" );
     Engine::SphereShapeManager->release( _shape );
     Engine::PrimitiveManager->release( P_Sphere );
     delete _body;
@@ -59,7 +53,8 @@ void Player::jump ()
     if( !_canJump )
         return;
 #endif
-    _body->setLinearVelocity(_body->getLinearVelocity() + btVector3(0, 4, 0) );
+    _body->activate();
+    _body->applyCentralForce( btVector3( 0, 1000, 0 ) );
 }
 
 void Player::step ( float dt )
@@ -67,9 +62,6 @@ void Player::step ( float dt )
     _p = bt2glm( _body->getCenterOfMassPosition() );
     glm::vec3 r = _body->getOrientation().getAngle() * bt2glm(_body->getOrientation().getAxis());
     _model = makeModel( _p, r, _scale );
-    
-    constexpr float maxWorldHeight = 100;
-    constexpr float stickyness = 0.1;
     
     btVector3 p = glm2bt( _p );
     btVector3 start = p;
@@ -93,10 +85,10 @@ void Player::step ( float dt )
     
     _light.position = _p;
     
-    _tail.initialParticle().position.setConstant( _p );
+    _tail.setInitialPosition( _p, 0.2 );
     _tail.step( dt );
     
-    _body->translate( glm2bt(dt * _v) );
+    //_body->translate( glm2bt(dt * _v) );
 //    _v.y -= 9.81 * dt;
 }
 

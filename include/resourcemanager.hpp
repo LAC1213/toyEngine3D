@@ -46,6 +46,20 @@ public:
         }
     }
     
+    /** Increments usage count for a resource.
+     * @param ptr resource to increment usage count
+     */
+    virtual void take( R* ptr )
+    {
+        for(auto iterator = _resources.begin(); iterator != _resources.end(); ++iterator) {
+            if( iterator->second.first == ptr )
+            {
+                iterator->second.second++;
+                return;
+            }
+        }
+    }
+    
     /** Release by Pointer obtained from request().
      * When everybody who requested a resource releases it the memory gets freed with delete.
      * @param ptr from request()
@@ -58,7 +72,7 @@ public:
                 iterator->second.second--;
                 if( iterator->second.second == 0 )
                 {
-                    delete iterator->second.first;
+                    delete ptr;
                     _resources.erase( iterator );
                 }
                 break;
