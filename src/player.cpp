@@ -120,11 +120,9 @@ void Player::move ( const glm::vec3& d )
     _body->setLinearVelocity( btVector3(_v.x, _body->getLinearVelocity().getY(), _v.z) );
 }
 
-void Player::render()
+void Player::renderFX()
 {
     _tail.render();
-    
-    Mesh::render();
 }
 
 void Player::setModel ( const glm::vec3& trans, const glm::vec3& rot, const glm::vec3& scale )

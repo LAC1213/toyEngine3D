@@ -11,6 +11,35 @@ void Camera::use()
     Active = this;
 }
 
+OrthogonalCamera::OrthogonalCamera ( glm::vec3 eye, glm::vec3 dir, float near, float far, float width, float height )
+    : _eye( eye )
+    , _direction( dir )
+    , _near( near )
+    , _far( far )
+    , _width( width )
+    , _height( height )
+{
+
+    _view = glm::lookAt( _eye, _eye + dir, glm::vec3(0, 1, 0) );
+    _proj = glm::ortho( -0.5f*_width, 0.5f*_width, -0.5f*height, 0.5f*_height, _near, _far );
+}
+
+void OrthogonalCamera::setUniforms ( Shader* shader ) const
+{
+    shader->setUniform( "proj", glm::rotate(glm::mat4(1), 0.05f, glm::vec3(0, 1, 0)) * _proj );
+    shader->setUniform( "view", _view );
+}
+
+const glm::mat4& OrthogonalCamera::getView() const
+{
+    return _view;
+}
+
+const glm::mat4& OrthogonalCamera::getProj() const
+{
+    return _proj;
+}
+
 const std::string PerspectiveCamera::PROJ_UNIFORM_STR = "proj";
 const std::string PerspectiveCamera::VIEW_UNIFORM_STR = "view";
 

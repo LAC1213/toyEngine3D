@@ -33,7 +33,7 @@ protected:
     float _a;
     glm::vec3 _color;
     
-public:
+private:
     Shader * _shader;
     Framebuffer * _gBuffer;
     Framebuffer * _canvas;

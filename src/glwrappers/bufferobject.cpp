@@ -56,7 +56,7 @@ void BufferObject::setHint( GLenum hint )
  * \param data pointer to data
  * \param n size of data in bytes
  */
-void BufferObject::loadData( const void * data, size_t n )
+void BufferObject::loadData( const void * data, size_t n ) const
 {
     bind();
     glBufferData( _target, n, data, _hint );
@@ -67,7 +67,7 @@ void BufferObject::loadData( const void * data, size_t n )
  * \param offset offset into data store where replacement will begin
  * \param n number of bytes to be replaced
  */
-void BufferObject::loadSubData ( const void* data, size_t offset, size_t n )
+void BufferObject::loadSubData ( const void* data, size_t offset, size_t n ) const
 {
     bind();
     glBufferSubData( _target, offset, n, data );

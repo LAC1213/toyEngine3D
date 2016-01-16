@@ -16,7 +16,7 @@ public:
 
     void addAttachment();
     void enableDepthTexture( GLenum internalFormat = GL_DEPTH_COMPONENT16 );
-    void enableDepthRenderBuffer( GLenum internalFormat = GL_DEPTH_COMPONENT16 );
+    void enableDepthRenderbuffer( GLenum internalFormat = GL_DEPTH_COMPONENT16 );
 
     static Framebuffer * genGeometryBuffer();
     static Framebuffer * genScreenBuffer();

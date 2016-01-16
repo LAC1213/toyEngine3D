@@ -21,6 +21,26 @@ public:
     virtual void setUniforms( __attribute__((unused)) Shader * shader ) const {}
 };
 
+class OrthogonalCamera : public Camera
+{
+public:
+    OrthogonalCamera( glm::vec3 eye, glm::vec3 dir, float near, float far, float width, float height );
+    virtual void setUniforms( Shader * shader ) const;
+    
+    const glm::mat4& getView() const;
+    const glm::mat4& getProj() const;
+    
+protected:
+    glm::vec3 _eye;
+    glm::vec3 _direction;
+    float _near;
+    float _far;
+    float _width;
+    float _height;
+    glm::mat4 _view;
+    glm::mat4 _proj;
+};
+
 class PerspectiveCamera : public Camera
 {
 public:

@@ -19,10 +19,12 @@ target_link_libraries( engine m yaml-cpp freetype GL GLU GLEW SOIL ${BULLET_LIBR
 set_property( TARGET engine PROPERTY CXX_STANDARD 14 )
 
 include_directories( "test" )
-file( GLOB TESTSRC test/main.cpp test/world.cpp )
-add_executable( app.old ${TESTSRC} )
-target_link_libraries( app.old engine glfw )
-set_property( TARGET app.old PROPERTY CXX_STANDARD 14 )
+
+# old testapp
+#file( GLOB TESTSRC test/main.cpp test/world.cpp )
+#add_executable( app.old ${TESTSRC} )
+#target_link_libraries( app.old engine glfw )
+#set_property( TARGET app.old PROPERTY CXX_STANDARD 14 )
 
 file( GLOB TESTSRC test/playlevel.cpp )
 add_executable( app ${TESTSRC} )

@@ -18,13 +18,13 @@ public:
         DITHER
     };
 
-    PostEffect( Type type, Framebuffer * canvas );
+    PostEffect( Type type, const Texture * canvas );
     virtual ~PostEffect();
     
     virtual void render();
     
     void setType( Type type ) { _type = type; }
-    void setCanvas( Framebuffer * canvas ) { _canvas = canvas; }
+    void setCanvas( const Texture * canvas ) { _src = canvas; }
 
     static void init();
     static void destroy();
@@ -33,24 +33,24 @@ protected:
     static Shader * _shader;
 
     Type    _type;
-    Framebuffer *   _canvas;
+    const Texture * _src;
     BufferObject  _vbo;
 };
 
 class Blend : public PostEffect
 {
 public:
-    Blend( Framebuffer * a, Framebuffer * b );
+    Blend( const Texture * a, const Texture * b );
     virtual void render();
 
 protected:
-    Framebuffer *   _blendFBO;
+    const Texture *   _blendTex;
 };
 
 class Bloom : public PostEffect
 {
 public:
-    Bloom( Framebuffer * in );
+    Bloom( const Texture * in );
 
     virtual void render();
 

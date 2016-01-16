@@ -11,6 +11,7 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     , _swapBuffer( Framebuffer::genScreenBuffer() )
     , _lighting( _gBuffer )
     , _shock( _gBuffer, _canvas )
+    , _boxes( 2 )
     , _spinnies( 1 )
 {    
     static PointLight p;
@@ -19,18 +20,30 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     p.specular = glm::vec3 ( 1, 1, 1 );
     p.attenuation = glm::vec3 ( 0.1, 0.1, 1 );
     _lighting.addPointLight ( &p );
-    _lighting.setAmbient ( glm::vec3 ( 0.3, 0.3, 0.3 ) );
+    _lighting.setAmbient ( glm::vec3 ( 0.4, 0.4, 0.4 ) );
     _lighting.addPointLight( _player.light() );
+    _lighting.setSunDiffuse( glm::vec3( 10, 0, 0 ) );
     
     _shock.setCenter( glm::vec3(0, 1, 0) );
     _shock.setColor( glm::vec3( 8, 8, 5 ) );
-    _shock.setAcceleration( 10 );
+    _shock.setAcceleration( 20 );
     _shock.setDuration( 1.5 );
     
     static YAML::Node snowConf = YAML::LoadFile( "res/particles/snow.yaml" );
     _snow.loadFromYAML( snowConf );
     
     _spinnies[0] = new Spinny;
+    
+    _boxes[0] = new DynamicCube( glm::vec3( 1, 1, 0 ), 2 );
+    _boxes[1] = new DynamicCube( glm::vec3( -1, 1, 1 ), 2 );
+    
+    _lighting.addShadowCaster( _boxes[0] );
+    _lighting.addShadowCaster( _boxes[1] );
+    
+    _lighting.addShadowCaster( &_player );
+    
+    vec_for_each( i, _boxes )
+        _physics->dynamicsWorld->addRigidBody( _boxes[i]->body() );
     
     onResize( width, height );
 }
@@ -48,6 +61,8 @@ Level1::~Level1()
         delete it;
     vec_for_each( i, _walls )
         delete _walls[i];
+    vec_for_each( i, _boxes )
+        delete _boxes[i];
 }
 
 void Level1::loadWallsFromYAML( YAML::Node node )
@@ -76,6 +91,8 @@ void Level1::loadWallsFromYAML( YAML::Node node )
         _walls.push_back( new Wall );
         _walls.back()->setModel( origin, rot, scale );
         _walls.back()->setColor( color );
+        
+        _lighting.addShadowCaster( _walls.back() );
         
         if(node[i]["goal"] && node[i]["goal"].as<bool>() )
             _walls.back()->body()->setUserPointer( &_goal );
@@ -251,11 +268,14 @@ void Level1::update ( double dt )
 }
 
 void Level1::render()
-{
-    static Blend effect ( _bloomed, _swapBuffer );
-    static Bloom bloom ( _swapBuffer );
+    {
+    static Blend effect ( _canvas->getAttachments()[0], _bloomed->getAttachments()[0] );
+    static Bloom bloom ( _swapBuffer->getAttachments()[0] );
     
     glViewport( 0, 0, _width, _height );
+    
+    OrthogonalCamera shadowCam( glm::vec3( 0, 2, 4 ), glm::vec3(0, -2, -4), 0, 50, 4, 4 );
+    shadowCam.use();
     
     _cam.use();
     glDisable( GL_BLEND );
@@ -269,6 +289,11 @@ void Level1::render()
     
     vec_for_each( i, _walls )
         _walls[i]->render();
+        
+    vec_for_each( i, _boxes )
+        _boxes[i]->render();
+        
+    _player.render();
     
     glEnable( GL_BLEND );
     
@@ -277,7 +302,7 @@ void Level1::render()
     
     _lighting.render();
     
-    _player.render();
+    _player.renderFX();
     _snow.render();
     vec_for_each( i, _spinnies )
         _spinnies[i]->renderFX();
@@ -290,7 +315,7 @@ void Level1::render()
     _swapBuffer->clear();
     
     glBlendFunc( GL_ONE, GL_ONE );
-    static PostEffect passthrough( PostEffect::NONE, _canvas );
+    static PostEffect passthrough( PostEffect::NONE, _canvas->getAttachments()[0] );
     Camera::Null.use();
     passthrough.render();
     
@@ -305,7 +330,11 @@ void Level1::render()
     _bloomed->clear();
     bloom.render();
     
-    //TODO dither to avoid colorbanding
+    _canvas->clear();
+ //   static PostEffect dither( PostEffect::DITHER, _swapBuffer );
+    static PostEffect dither( PostEffect::NONE, _swapBuffer->getAttachments()[0] );
+    
+    dither.render();
     
     static Font font( "/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf", 14 );
     Text txt( &font, _dbgString, glm::vec2(_width, _height) );

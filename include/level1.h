@@ -7,6 +7,7 @@
 #include <bomb.h>
 #include <shockwave.h>
 #include <yaml-cpp/yaml.h>
+#include <dynamiccube.h>
 
 class Level1 : public Level
 {
@@ -42,6 +43,7 @@ protected:
     
     GoalListener _goal;
     std::vector<Wall*> _walls;
+    std::vector<DynamicCube*> _boxes;
     std::vector<Spinny*> _spinnies;
     
     std::list<Bomb*> _bombs;

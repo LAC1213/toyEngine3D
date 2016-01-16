@@ -15,8 +15,8 @@ public:
     void setTarget( GLenum target );
     void setHint( GLenum hint );
 
-    void loadData( const void * data, size_t n );
-    void loadSubData( const void * data, size_t offset, size_t n );
+    void loadData( const void * data, size_t n ) const;
+    void loadSubData( const void * data, size_t offset, size_t n ) const;
 
     GLuint getID() const;
     GLenum getTarget() const;

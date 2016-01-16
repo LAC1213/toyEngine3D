@@ -24,7 +24,7 @@ public:
     PointLight * light();
     
     virtual void step( float dt );
-    virtual void render();
+    void renderFX();
     
     void setModel( const glm::vec3& trans, const glm::vec3& rot, const glm::vec3& scale );
     

@@ -78,7 +78,7 @@ void Framebuffer::enableDepthTexture( GLenum internalFormat )
 
 /** Create Depth Renderbuffer and add it to the Frambuffer
  */
-void Framebuffer::enableDepthRenderBuffer( GLenum internalFormat )
+void Framebuffer::enableDepthRenderbuffer( GLenum internalFormat )
 {
     glGenRenderbuffers( 1, &_depthRBO );
     glBindRenderbuffer( GL_RENDERBUFFER, _depthRBO );
@@ -97,7 +97,7 @@ void Framebuffer::enableDepthRenderBuffer( GLenum internalFormat )
 Framebuffer * Framebuffer::genGeometryBuffer()
 {
     Framebuffer * fb = new Framebuffer();
-    fb->enableDepthRenderBuffer();
+    fb->enableDepthRenderbuffer();
     // colors
     fb->addAttachment();
     fb->getAttachments().back()->setInternalFormat( GL_RGBA16F );

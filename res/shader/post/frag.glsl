@@ -18,6 +18,8 @@ uniform sampler2D blendTex;
 uniform int effect = NONE;
 uniform int n = 16;
 
+uniform vec2 seed = vec2(0, 0);
+
 float off[3] = float[]( 0.0, 1.3846153846, 3.2307692308  );
 float weight[3] = float[]( 0.2270270270, 0.3162162162, 0.0702702703  );
 
@@ -102,6 +104,10 @@ float dither8x8(vec2 position, float brightness) {
   return brightness < limit ? 0.0 : 1.0;
 }
 
+float rand(vec2 co){
+    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
+
 void main()
 {
     vec2 tex_offset = 1.0 / textureSize(tex, 0);
@@ -163,7 +169,7 @@ void main()
 
     if( effect == BLEND )
     {
-        fragColor.rgb = texture( tex, vUV ).rgb + texture( blendTex, vUV ).rgb;
+        fragColor.rgb = texture(tex, vUV).rgb + texture( blendTex, vUV ).rgb;
         //HDR reduction
         fragColor.rgb = fragColor.rgb / (vec3(1) + fragColor.rgb);
         //gamma correction
@@ -173,12 +179,12 @@ void main()
     
     if( effect == DITHER )
     {
-        fragColor = texture( tex, vUV ) * dither8x8( gl_FragCoord.xy/2, brightness( texture( tex, vUV ).rgb ) );
+        fragColor = texture( tex, vUV ) * (0.4 + rand( gl_FragCoord.xy + seed ));
         fragColor.a = 1;
     }
 
     if(effect == NONE)
     {
-        fragColor = texture(tex, vUV);
+        fragColor = texture( tex, vUV );
     }
 }

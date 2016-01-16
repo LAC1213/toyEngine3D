@@ -5,6 +5,6 @@ window:
     y: 300
 
 graphics:
-    vsync: No
+    vsync: Yes
 
 enableTerrain: No

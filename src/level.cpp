@@ -18,7 +18,7 @@ Level::Level( GLFWwindow * win, int w, int h )
     _physics->dynamicsWorld->setDebugDrawer( &_debugDrawer );
     _physics->dynamicsWorld->setGravity( btVector3(0, -9.81, 0 ) );
     
-    _canvas->enableDepthRenderBuffer();
+    _canvas->enableDepthRenderbuffer();
 }
 
 Level::~Level()
