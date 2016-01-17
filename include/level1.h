@@ -42,6 +42,9 @@ protected:
     std::string _dbgString;
     
     GoalListener _goal;
+    
+    Terrain * _terrain;
+    
     std::vector<Wall*> _walls;
     std::vector<DynamicCube*> _boxes;
     std::vector<Spinny*> _spinnies;

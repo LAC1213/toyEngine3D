@@ -6,15 +6,15 @@
 
 Shader * Terrain::SHADER = 0;
 
-constexpr float bullet2glfactor = 1000;
+constexpr float bullet2glfactor = 1;
 
 Terrain::Terrain( HeightMap * heightmap, const Texture * texture )
     :   _heightmap( heightmap )
 {
-    _width = 25;
-    _depth = 25;
+    _width = 50;
+    _depth = 50;
     _maxHeight = 15;
-    _quadCount = 25;
+    _quadCount = 10;
     
     _shape = new btHeightfieldTerrainShape( 
         heightmap->width, heightmap->height, 
@@ -29,15 +29,13 @@ Terrain::Terrain( HeightMap * heightmap, const Texture * texture )
     btRigidBody::btRigidBodyConstructionInfo ci(0, _motionState, _shape, btVector3( 0, 0, 0 ) );
     _body = new btRigidBody( ci );
     
-    Engine::Physics->dynamicsWorld->addRigidBody( _body );
-
     _meshObject = new MeshObject();
 
     _meshObject->texture = texture;
     _wireframe = false;
     _diffuseColor = glm::vec4( 0.6, 0.6, 0.6, 1 );
     glm::mat4 s = glm::scale( glm::mat4( 1 ), glm::vec3( _width, _maxHeight, _depth ) );
-    _model = glm::translate( glm::mat4( 1.0f ), glm::vec3( -12.5, -0.5*_maxHeight, -12.5 ) ) * s;
+    _model = glm::translate( glm::mat4( 1.0f ), glm::vec3( -0.5*_width, -0.5*_maxHeight, -0.5*_depth ) ) * s;
 
     _meshObject->shader = SHADER;
     _meshObject->drawCall.setMode( GL_PATCHES );

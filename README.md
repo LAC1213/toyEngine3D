@@ -55,5 +55,12 @@ Hello Cube example:
 
 ## To Do
 
-1. shadows
+1. pointlight shadows
 2. bad guys, level1
+3. mesh importer
+
+## Ideas
+
+Game Concept: 
+
+Flying over a world and drop bombs. dodge bad stuff, destroy things on the ground.

@@ -1,13 +1,13 @@
 particles_per_second: 5000
 max_age: 20
 
-size: 0.05
+size: 0.1
 color: [1, 1, 1, 1]
 
-position: [0, 10, 0]
-position_randomness: 10
+position: [0, 30, 0]
+position_randomness: 30
 
-velocity: [0, -0.5, 0]
+velocity: [0, -1, 0]
 velocity_randomness: 0.2
 
 acceleration: [0, -0.3, 0]

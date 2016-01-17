@@ -32,18 +32,28 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     static YAML::Node snowConf = YAML::LoadFile( "res/particles/snow.yaml" );
     _snow.loadFromYAML( snowConf );
     
+    Texture * groundTex = Engine::TextureManager->request( "res/textures/ground.jpg" );
+    groundTex->setParameter( GL_TEXTURE_WRAP_S, GL_REPEAT );
+    groundTex->setParameter( GL_TEXTURE_WRAP_T, GL_REPEAT );
+    static HeightMap heightmap = HeightMap::genRandom( 6 );
+    _terrain = new Terrain( &heightmap, groundTex );
+    _terrain->toggleWireframe();
+    
     _spinnies[0] = new Spinny;
     
-    _boxes[0] = new DynamicCube( glm::vec3( 1, 1, 0 ), 2 );
-    _boxes[1] = new DynamicCube( glm::vec3( -1, 1, 1 ), 2 );
+    _boxes[0] = new DynamicCube( glm::vec3( 1, 3, 2 ), 2 );
+    _boxes[1] = new DynamicCube( glm::vec3( -1, 3, 1 ), 2 );
     
     _lighting.addShadowCaster( _boxes[0] );
     _lighting.addShadowCaster( _boxes[1] );
+    _lighting.addShadowCaster( _spinnies[0] );
     
     _lighting.addShadowCaster( &_player );
     
     vec_for_each( i, _boxes )
         _physics->dynamicsWorld->addRigidBody( _boxes[i]->body() );
+        
+    _physics->dynamicsWorld->addRigidBody( _terrain->body() );
     
     onResize( width, height );
 }
@@ -52,6 +62,9 @@ Level1::~Level1()
 {
     delete _bloomed;
     delete _swapBuffer;
+    
+    delete _terrain;
+    Engine::TextureManager->release( "res/textures/ground.jpg" );
     
     vec_for_each( i, _spinnies )
         delete _spinnies[i];
@@ -117,7 +130,7 @@ void Level1::init()
 void Level1::reset()
 {
     Level::reset();
-    _player.setModel( glm::vec3(0, 2, 0), glm::vec3(0), glm::vec3(0.2) );
+    _player.setModel( glm::vec3(0, 2, 0), glm::vec3(0), glm::vec3(0.5) );
     auto it = _bombs.begin();
     while( it != _bombs.end() )
     {
@@ -292,6 +305,8 @@ void Level1::render()
         
     vec_for_each( i, _boxes )
         _boxes[i]->render();
+        
+    _terrain->render();
         
     _player.render();
     

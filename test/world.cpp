@@ -50,7 +50,7 @@ World::World ( GLFWwindow * window, int width, int height )
     
     _lighting.addPointLight ( _player.light() );
     
-    _canvas->enableDepthRenderBuffer();
+    _canvas->enableDepthRenderbuffer();
     onResize ( width, height );
     
     Engine::Physics->dynamicsWorld->getPairCache()->setInternalGhostPairCallback( new btGhostPairCallback );

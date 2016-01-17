@@ -9,17 +9,23 @@ Shader * Lighting::_shader = nullptr;
 
 Lighting::Lighting ( Framebuffer * gBuffer )
     :   _gBuffer ( gBuffer ),
-        _sunShadowWidth( 10 ),
-        _sunShadowHeight( 10 ),
-        _shadowRange( 100 ),
+        _sunShadowWidth( 20 ),
+        _sunShadowHeight( 20 ),
+        _shadowRange( 50 ),
         _ambient ( 0.01, 0.01, 0.01 ),
-        _sunPos ( -20, 40, 0 ),
+        _sunPos ( -10, 20, 0 ),
         _sunDir ( 0.5, -1, 0 ),
         _sunDiffuse ( 0.5, 0.5, 0.5 ),
         _sunSpecular ( 0.5, 0.5, 0.5 )
 {
     _sunShadowMap.enableDepthTexture();
-    _sunShadowMap.resize( 1024, 1024 );
+    _sunShadowMap.resize( 4096, 4096 );
+    _sunShadowMap.getDepthTexture()->setParameter( GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    _sunShadowMap.getDepthTexture()->setParameter( GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    _sunShadowMap.getDepthTexture()->setParameter( GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
+    _sunShadowMap.getDepthTexture()->setParameter( GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
+    static GLfloat borderColor[] = { 0.0, 0.0, 0.0, 0.0 };
+    glTexParameterfv( GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor );
 }
 
 Lighting::~Lighting()
@@ -79,6 +85,9 @@ void Lighting::render()
     shadowCam.use();
     _sunShadowMap.clear();
 
+    /* TODO figure out a way to properly handle objects that are close to each other.
+     * Maybe add a pure virtual renderDepth() function to Renderable, 
+     * to get shadows right every time. Sadly shadows require A LOT of tweaking */
     for( auto it : _shadowCasters )
         it->render();
     

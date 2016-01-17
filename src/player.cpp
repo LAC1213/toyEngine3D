@@ -85,7 +85,7 @@ void Player::step ( float dt )
     
     _light.position = _p;
     
-    _tail.setInitialPosition( _p, 0.2 );
+    _tail.setInitialPosition( _p, _scale.x );
     _tail.step( dt );
     
     //_body->translate( glm2bt(dt * _v) );

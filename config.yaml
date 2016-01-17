@@ -7,4 +7,4 @@ window:
 graphics:
     vsync: Yes
 
-enableTerrain: No
+enableTerrain: Yes

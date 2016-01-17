@@ -21,7 +21,7 @@ OrthogonalCamera::OrthogonalCamera ( glm::vec3 eye, glm::vec3 dir, float near, f
 {
 
     _view = glm::lookAt( _eye, _eye + dir, glm::vec3(0, 1, 0) );
-    _proj = glm::ortho( -0.5f*_width, 0.5f*_width, -0.5f*height, 0.5f*_height, _near, _far );
+    _proj = glm::ortho( -0.5f*_width, 0.5f*_width, -0.5f*_height, 0.5f*_height, _near, _far );
 }
 
 void OrthogonalCamera::setUniforms ( Shader* shader ) const
@@ -133,7 +133,7 @@ void PlayerCamera::onMouseMove( double dx, double dy )
 void PlayerCamera::pollInput()
 {
     glm::vec2 v;
-    constexpr float ds = 1.5;
+    constexpr float ds = 5;
     if( glfwGetKey( _window, GLFW_KEY_D ) == GLFW_PRESS )
     {
         v.x = 1;

@@ -321,9 +321,11 @@ void ParticleEmitter::step ( double dt )
         stepParticle ( _periodicParticles[i], dt );
         if ( _animSize.x != 0 && _animSize.y != 0 && glm::dot ( _animSize, _animSize ) > 3 )
         {
-            int pos = ( ( double ) ( ( i - insertIndex ) % _periodicParticles.size() ) /_spawnFrequency ) /_lifeTime*_animSize.x*_animSize.y;
+            size_t n = _periodicParticles.size();
+            double age = (( n + i - insertIndex ) % n) / _spawnFrequency;
+            int pos = age/_lifeTime*_animSize.x*_animSize.y;
             int x = pos % ( int ) _animSize.x;
-            int y = pos / ( int ) _animSize.y;
+            int y = pos / ( int ) _animSize.x;
             _periodicParticles[i].uv[0] = ( float ) x/_animSize.x;
             _periodicParticles[i].uv[1] = ( float ) y/_animSize.y;
         }

@@ -5,8 +5,8 @@
 Spinny::Spinny() 
     : Mesh( Engine::PrimitiveManager->request( P_Tetrahedron ) )
     , _up(0, 1, 0)
-    , _scale(0.1, 0.1, 0.1)
-    , _p( 0, 3, 0 )
+    , _scale(1, 1, 1)
+    , _p( 0, 7, 0 )
     , _waiting( true )
 {
     static YAML::Node particleConf = YAML::LoadFile( "res/particles/spinnytail.yaml" );

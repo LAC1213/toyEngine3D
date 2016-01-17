@@ -24,6 +24,8 @@ uniform sampler2D shadowMap;
 
 uniform mat4 view;
 
+uniform float shadowBias = 0.0;
+
 #define M_PI 3.1415926535897932384626433832795
 
 //blinn-phong lighting for a point light
@@ -49,9 +51,18 @@ float getShadowFactor( vec3 position )
     vec4 lp = shadowProj * shadowView * vec4(position, 1);
     vec3 depthCoord = lp.xyz/lp.w;
     depthCoord = depthCoord * 0.5 + vec3( 0.5 );
-    float depth = texture( shadowMap, depthCoord.xy ).r;
     
-    return depthCoord.z > depth ? 0.0 : 1.0;
+    vec2 texelSize = 1.0 / textureSize( shadowMap, 0 );
+    
+    float shadow = 0.0;
+    for( int x = -1 ; x < 2 ; ++x )
+        for( int y = -1 ; y < 2 ; ++y )
+        {
+            float depth = texture( shadowMap, depthCoord.xy + vec2(x, y) * texelSize ).r;
+            shadow += depthCoord.z - shadowBias < depth ? 1.0 : 0.0;
+        }
+    
+    return shadow/9;
 }
 
 void main()
