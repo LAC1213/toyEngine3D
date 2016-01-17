@@ -14,6 +14,9 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     , _boxes( 2 )
     , _spinnies( 1 )
 {    
+    
+    _player.setModel( glm::vec3(0, 3, 0), glm::vec3(0), glm::vec3(0.5) );
+    
     static PointLight p;
     p.position = glm::vec3 ( 0, 0, 0 );
     p.diffuse = glm::vec3 ( 1, 1, 1 );
@@ -35,7 +38,7 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     Texture * groundTex = Engine::TextureManager->request( "res/textures/ground.jpg" );
     groundTex->setParameter( GL_TEXTURE_WRAP_S, GL_REPEAT );
     groundTex->setParameter( GL_TEXTURE_WRAP_T, GL_REPEAT );
-    static HeightMap heightmap = HeightMap::genRandom( 6 );
+    static HeightMap heightmap = HeightMap::genRandom( 7 );
     _terrain = new Terrain( &heightmap, groundTex );
     _terrain->toggleWireframe();
     
@@ -175,7 +178,7 @@ void Level1::onKeyAction ( int key, int scancode, int action, int mods )
             {
                 Bomb * nb = new Bomb;
                 nb->setColor( glm::vec4(6, 0, 6, 6));
-                nb->setModel( _player.getPos() + glm::vec3(0, 0.4, 0), glm::vec3(2*M_PI, 0, 0), glm::vec3(0.06) );
+                nb->setModel( _player.getPos() + glm::vec3(0, 1.6, 0), glm::vec3(2*M_PI, 0, 0), glm::vec3(0.2) );
                 _physics->dynamicsWorld->addRigidBody( nb->body() );
                 _lighting.addPointLight( &nb->light() );
                 nb->body()->applyCentralImpulse( btVector3( 0, 10, 0 ) );

@@ -6,6 +6,7 @@ Bomb::Bomb( double timeToExplode )
     , _life( timeToExplode )
     , _mass(5)
     , _scale(1)
+    , _time(0)
 {
     _motionState = new btDefaultMotionState;
     _shape = Engine::SphereShapeManager->request( 1 );

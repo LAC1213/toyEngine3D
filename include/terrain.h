@@ -15,6 +15,8 @@ public:
     HeightMap( size_t w, size_t h );
     ~HeightMap();
     
+    void loadFromFile( const std::string& path );
+    
     const Texture * texture;
     float * data;
     size_t width;

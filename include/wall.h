@@ -15,8 +15,8 @@ public:
     const btBoxShape * getShape() const;
     
 protected:
-    btDefaultMotionState * _motionState;
-    btBoxShape * _shape;
+    btDefaultMotionState * _motionState = nullptr;
+    btBoxShape * _shape = nullptr;
 };
 
 #endif //WALL_H

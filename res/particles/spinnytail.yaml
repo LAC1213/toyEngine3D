@@ -1,11 +1,11 @@
 particles_per_second: 160
-max_age: 2
+max_age: 0.5
 
-size: 0.05
+size: 0.2
 color: [0.1, 0.9, 0.3, 0.6]
 linear_color_change: [0.2, 0.2, 0.2, 0.2]
 
-velocity_randomness: 0.01
+velocity_randomness: 0.05
 
 texture: "res/textures/particle4.png"
 animation_layout: [4, 4]

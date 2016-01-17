@@ -44,10 +44,10 @@ public:
     operator GLuint() { return _id; }
 
 protected:
-    int _width;
-    int _height;
+    int _width = 0;
+    int _height = 0;
 
-    GLuint _id; //!< openGL ID
+    GLuint _id = 0; //!< openGL ID
     GLint _internalFormat; //!< GL_RGB16F GL_R32F etc.
     GLenum _format; //!< GL_RGB GL_RGBA etc.
     GLenum _target; //!< GL_TEXTURE_2D etc.

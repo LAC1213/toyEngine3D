@@ -43,7 +43,7 @@ protected:
     
     GoalListener _goal;
     
-    Terrain * _terrain;
+    Terrain * _terrain = nullptr;
     
     std::vector<Wall*> _walls;
     std::vector<DynamicCube*> _boxes;

@@ -3,10 +3,9 @@
 #include <random>
 
 #include <engine.h>
+#include <internal/util.h>
 
 Shader * Terrain::SHADER = 0;
-
-constexpr float bullet2glfactor = 1;
 
 Terrain::Terrain( HeightMap * heightmap, const Texture * texture )
     :   _heightmap( heightmap )
@@ -22,12 +21,13 @@ Terrain::Terrain( HeightMap * heightmap, const Texture * texture )
         -0.5, 0.5, 1, PHY_FLOAT, false
     );
     
-    _shape->setLocalScaling( btVector3( (float)_width/heightmap->width, _maxHeight/bullet2glfactor, (float)_width/heightmap->height ) );
+    _shape->setLocalScaling( btVector3( (float)_width/heightmap->width, _maxHeight, (float)_width/heightmap->height ) );
     
     _motionState = new btDefaultMotionState;
     
     btRigidBody::btRigidBodyConstructionInfo ci(0, _motionState, _shape, btVector3( 0, 0, 0 ) );
     _body = new btRigidBody( ci );
+    _body->setRestitution( 0.3 );
     
     _meshObject = new MeshObject();
 
@@ -206,6 +206,12 @@ static void diamondSquare( float ** data, unsigned int size )
     }
 }
 
+void HeightMap::loadFromFile ( const std::__cxx11::string& path )
+{
+    //TODO implement this
+    INVALID_CODE_PATH
+}
+
 /* using diamond square algorithm */
 HeightMap HeightMap::genRandom( unsigned int pow )
 {
@@ -215,7 +221,16 @@ HeightMap HeightMap::genRandom( unsigned int pow )
     for( size_t i = 0 ; i < width ; ++i )
     {
         data[ i ] = new float[ width ];
+        
+        // this prevents valgrind from complaining about uninitialized stuff
+        // TODO remove when going to production
+        memset( data[i], 0, width * sizeof(float) );
     }
+    
+    data[0][0] = 0;
+    data[0][width - 1] = 0;
+    data[width - 1][0] = 0;
+    data[width - 1][width - 1] = 0;
 
     diamondSquare( data, width );
 
@@ -242,7 +257,7 @@ HeightMap HeightMap::genRandom( unsigned int pow )
     float * flatdata = new float[width*width];
     for(uintmax_t i = 0 ; i < width ; ++i)
         for(uintmax_t j = 0 ; j < width ; ++j)
-            flatdata[i*width + j] = bullet2glfactor*data[i][j];
+            flatdata[i*width + j] = data[i][j];
         
     for( size_t i = 0 ; i < width ; ++i )
         delete[] data[i];

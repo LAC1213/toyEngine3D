@@ -119,6 +119,7 @@ void destroy()
     
     delete ShaderManager;
     delete TextureManager;
+    delete PrimitiveManager;
     delete BoxShapeManager;
     delete SphereShapeManager;
 

@@ -11,7 +11,7 @@ uniform mat4 view;
 uniform vec3 center;
 uniform float radius;
 uniform vec3 color;
-uniform float lambda = 1;
+uniform float lambda = 0.1;
 
 void main()
 {

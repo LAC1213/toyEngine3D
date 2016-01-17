@@ -29,7 +29,6 @@ public:
     virtual void loadFromYAML( YAML::Node node );
     
     void setSpawnFrequency( double f );
-    void setRandomness( double r );
     void setLifeTime( double t );
     void setAnimSize( const glm::vec2& s );
     void setTexture( Texture * tex );
@@ -55,29 +54,28 @@ public:
 
 protected:
     virtual ParticleData genParticle();
-    virtual void stepParticle( ParticleData& p, double dt );
+    virtual void stepParticle( ParticleData& p, float dt );
     
     static Shader * _shader;
     glm::vec2 _animSize;
     
     double _spawnFrequency;
-    double _rnJesus;
     
     glm::vec3 _p;
-    float _pRadius;
+    float _pRadius = 0;
     glm::vec3 _dp;
-    float _dpRadius;
+    float _dpRadius = 0;
     glm::vec3 _ddp;
     
     glm::vec4 _c;
-    float _cRadius;
+    float _cRadius = 0;
     glm::vec4 _dc;
     glm::vec4 _ddc;
     
     float _s;
-    float _sRadius;
-    float _ds;
-    float _dds;
+    float _sRadius = 0;
+    float _ds = 0;
+    float _dds = 0;
     
     double _lifeTime;
     double _time;
@@ -103,6 +101,6 @@ public:
     
     virtual ParticleData genParticle();
 protected:
-    float _expandSpeed;
-    float _maxRadius;
+    float _expandSpeed = 1;
+    float _maxRadius = 1;
 };

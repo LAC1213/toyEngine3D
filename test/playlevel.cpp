@@ -134,7 +134,7 @@ int main()
 
     Engine::init();
 
-    int width, height;
+    int width = 0, height = 0;
     glfwGetFramebufferSize( window, &width, &height );
     
     Level1 * level = new Level1( window, width, height );

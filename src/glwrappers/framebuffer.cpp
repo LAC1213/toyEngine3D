@@ -44,6 +44,8 @@ Framebuffer::~Framebuffer()
         glDeleteFramebuffers( 1, &_fbo );
     if( _depthRBO )
         glDeleteRenderbuffers( 1, &_depthRBO );
+    if( _depthTexture )
+        delete _depthTexture;
     for( size_t i = 0 ; i < _attachments.size() ; ++i )
         delete _attachments[i];
 }
@@ -68,7 +70,10 @@ void Framebuffer::addAttachment()
  */
 void Framebuffer::enableDepthTexture( GLenum internalFormat )
 {
-    _depthTexture = new Texture();
+    if( _depthTexture )
+        return;
+    
+    _depthTexture = new Texture;
     _depthTexture->setInternalFormat( internalFormat );
     _depthTexture->setFormat( GL_DEPTH_COMPONENT );
     _depthTexture->resize( _width, _height );

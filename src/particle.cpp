@@ -10,17 +10,15 @@ Shader * ParticleEmitter::_shader = nullptr;
 ParticleEmitter::ParticleEmitter ( Texture * texture )
     :   _animSize ( 1, 1 ),
         _spawnFrequency ( 60 ),
-        _rnJesus ( 0 ),
         _c ( 1, 1, 1, 1 ),
-        _s ( 0.04 ),
+        _s ( 0.1 ),
         _lifeTime ( 4 ),
+        _time( 0 ),
         _drawCall ( GL_POINTS ),
         _texture ( texture )
 {
     if ( _texture )
-    {
         Engine::TextureManager->take ( _texture );
-    }
 
     ParticleData test;
     VertexAttribute pAttr ( &_buffer, GL_FLOAT, 3 );
@@ -181,12 +179,12 @@ ParticleData ParticleEmitter::genParticle()
     return p;
 }
 
-void ParticleEmitter::stepParticle ( ParticleData& p, double dt )
+void ParticleEmitter::stepParticle ( ParticleData& p, float dt )
 {
-    p.c[0] += ( _dc.x + dt*_ddc.x ) *dt;
-    p.c[1] += ( _dc.y + dt*_ddc.y ) *dt;
-    p.c[2] += ( _dc.z + dt*_ddc.z ) *dt;
-    p.c[3] += ( _dc.w + dt*_ddc.w ) *dt;
+    p.c[0] += ( _dc.x + dt*_ddc.x ) * dt;
+    p.c[1] += ( _dc.y + dt*_ddc.y ) * dt;
+    p.c[2] += ( _dc.z + dt*_ddc.z ) * dt;
+    p.c[3] += ( _dc.w + dt*_ddc.w ) * dt;
 
     p.dp[0] += dt * _ddp.x;
     p.dp[1] += dt * _ddp.y;
@@ -209,11 +207,6 @@ void ParticleEmitter::addParticles ( size_t n )
     ( *entry.second ) [i] = genParticle();
 
     _arbitraryParticles.push_back ( entry );
-}
-
-void ParticleEmitter::setRandomness ( double r )
-{
-    _rnJesus = r;
 }
 
 void ParticleEmitter::setLifeTime ( double t )
@@ -336,7 +329,7 @@ void ParticleEmitter::step ( double dt )
         }
     }
 
-    size_t elements = _spawnFrequency * _lifeTime;
+    size_t elements = _periodicParticles.size();
 
     auto it = _arbitraryParticles.begin();
     while ( it != _arbitraryParticles.end() )
@@ -353,14 +346,22 @@ void ParticleEmitter::step ( double dt )
         }
     }
 
-    //resize buffer
-    _buffer.loadData ( nullptr, elements * sizeof ( ParticleData ) );
     _drawCall.setElements ( elements );
+    if( !elements )
+        return;
+    if( elements == _periodicParticles.size() )
+    {
+        _buffer.loadData( _periodicParticles.data(), _periodicParticles.size() * sizeof( ParticleData ) );
+        return;
+    }
+    else
+    {
+        _buffer.loadData ( nullptr, elements * sizeof ( ParticleData ) );
+        _buffer.loadSubData ( _periodicParticles.data(), 0, _periodicParticles.size()*sizeof ( ParticleData ) );
+    }
 
     //reuse to calculate offsets
     elements = _spawnFrequency * _lifeTime;
-
-    _buffer.loadSubData ( _periodicParticles.data(), 0, _periodicParticles.size()*sizeof ( ParticleData ) );
 
     /* update arbitrary particles */
     it = _arbitraryParticles.begin();

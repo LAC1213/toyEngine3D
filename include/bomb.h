@@ -20,8 +20,8 @@ public:
     void setModel( const glm::vec3& trans, const glm::vec3& rot, const glm::vec3& scale );
     
 protected:
-    btSphereShape * _shape;
-    btDefaultMotionState * _motionState;
+    btSphereShape * _shape = nullptr;
+    btDefaultMotionState * _motionState = nullptr;
     
     double _life;
     

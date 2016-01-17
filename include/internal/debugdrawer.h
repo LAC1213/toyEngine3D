@@ -33,7 +33,7 @@ public:
     }
 
 private:
-    int _debugMode;
+    int _debugMode = DBG_NoDebug;
     DrawCall _drawCall;
     BufferObject _points;
     BufferObject _colors;
@@ -41,7 +41,7 @@ private:
     std::vector<float> _pointData;
     std::vector<float> _colorData;
 
-    Shader * _shader;
+    Shader * _shader = nullptr;
 };
 
 #endif // INTERNAL_DEBUGDRAWER_H

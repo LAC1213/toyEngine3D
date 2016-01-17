@@ -121,6 +121,7 @@ void Text::init()
 
 void Text::destroy()
 {
+    FT_Done_FreeType( Font::ft );
     Engine::ShaderManager->release( _shader );
 }
 

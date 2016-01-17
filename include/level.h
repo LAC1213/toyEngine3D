@@ -44,7 +44,7 @@ protected:
     DebugDrawer _debugDrawer;
     bool _drawCollisionShapes;
     
-    PhysicsVars * _physics;
+    PhysicsVars * _physics = nullptr;
     
 private:
     Status _status;

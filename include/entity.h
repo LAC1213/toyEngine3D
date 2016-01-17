@@ -14,7 +14,7 @@ public:
     };
 
 protected:
-    btRigidBody * _body;
+    btRigidBody * _body = nullptr;
 };
 
 #endif //ENTITY_H

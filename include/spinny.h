@@ -23,7 +23,7 @@ protected:
     glm::vec3 _up;
     glm::vec3 _scale;
     glm::vec3 _p;
-    double _angle;
+    double _angle = 0;
     
     bool _waiting;
     glm::vec3 _target;

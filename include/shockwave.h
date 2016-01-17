@@ -28,14 +28,14 @@ protected:
     double _duration;
     double _timer;
     glm::vec3 _center;
-    float _radius;
-    float _v;
-    float _a;
+    float _radius = 0;
+    float _v = 0;
+    float _a = 0;
     glm::vec3 _color;
     
 private:
-    Shader * _shader;
+    Shader * _shader = nullptr;
     Framebuffer * _gBuffer;
     Framebuffer * _canvas;
-    Explosion * _particles;
+    Explosion * _particles = nullptr;
 };

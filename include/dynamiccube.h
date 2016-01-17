@@ -13,8 +13,8 @@ public:
     virtual void render();
 
 protected:
-    btDefaultMotionState * _motionState;
-    btBoxShape * _shape;
+    btDefaultMotionState * _motionState = nullptr;
+    btBoxShape * _shape = nullptr;
 };
 
 #endif // DYNAMICCUBE_H

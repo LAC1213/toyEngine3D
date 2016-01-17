@@ -33,8 +33,8 @@ protected:
     
     ParticleEmitter _tail;
     
-    btSphereShape * _shape;
-    btDefaultMotionState * _motionState;
+    btSphereShape * _shape = nullptr;
+    btDefaultMotionState * _motionState = nullptr;
     
     float _mass;
     glm::vec3 _scale;

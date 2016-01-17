@@ -54,7 +54,7 @@ void Player::jump ()
         return;
 #endif
     _body->activate();
-    _body->applyCentralForce( btVector3( 0, 1000, 0 ) );
+    _body->applyCentralImpulse( btVector3( 0, 20, 0 ) );
 }
 
 void Player::step ( float dt )
