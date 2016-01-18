@@ -18,6 +18,8 @@ uniform float alphaThreshold = 0.1;
 uniform mat4 model;
 uniform mat4 view;
 
+in vec3 gDebugColor;
+
 float amplify(float d, float scale, float offset)
 {
     d = scale * d + offset;
@@ -41,7 +43,6 @@ void main()
     }
 
     FragColor = color;
-    FragColor.a = 0.1;
     position = vec4(view * vec4(gPosition, 1));
     normal.xyz = mat3(view) * N;
     normal.a = 1;

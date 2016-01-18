@@ -101,9 +101,20 @@ void Player::move ( const glm::vec3& d )
 {
     if( glm::dot( d, d ) < 0.01 )
     {
-        _v = glm::vec3( 0, _v.y, 0 );
+        if( _canJump )
+        {
+            _body->setGravity( btVector3(0, 0, 0) );
+            _body->clearForces();
+            _body->setLinearVelocity( btVector3(0, 0, 0) );
+            _body->setAngularVelocity( btVector3(0, 0, 0) );
+        }
+        else
+        {
+            _v = glm::vec3( 0, _v.y, 0 );
+        }
         return;
     }
+    _body->setGravity( btVector3(0, -9.81, 0) );
     
     if( _canJump )
     {

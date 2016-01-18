@@ -18,9 +18,9 @@ vec4 getPoint( vec2 coord )
 
 float getLOD( vec3 a, vec3 b )
 {
-    float d = length( 0.5*( a + b ) );
+    float d = length( getPoint( (0.5*( a + b )).xz) );
     float lod;
-    if( d < 2 )
+    if( d < 4 )
         lod = 64;
     else if( d < 8 )
         lod = 32;
@@ -46,10 +46,10 @@ void main()
     vec3 p2 = vec3( view * model * getPoint( vPosition[2] ) );
     vec3 p3 = vec3( view * model * getPoint( vPosition[3] ) );
 
-    gl_TessLevelOuter[0] = getLOD( p0, p1 );
-    gl_TessLevelOuter[3] = getLOD( p1, p2 );
+    gl_TessLevelOuter[1] = getLOD( p0, p3 );
     gl_TessLevelOuter[2] = getLOD( p2, p3 );
-    gl_TessLevelOuter[1] = getLOD( p3, p1 );
+    gl_TessLevelOuter[3] = getLOD( p1, p2 );
+    gl_TessLevelOuter[0] = getLOD( p0, p1 );
     float inner = 0.25*( gl_TessLevelOuter[0] + gl_TessLevelOuter[1] + gl_TessLevelOuter[2] + gl_TessLevelOuter[3] );
     gl_TessLevelInner[0] = inner;
     gl_TessLevelInner[1] = inner;

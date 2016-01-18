@@ -12,6 +12,7 @@ out vec3 gTriDistance;
 out vec3 gPosition;
 out vec3 gNormal;
 
+
 void main()
 {
     vec3 facetNormal = cross( tePosition[1] - tePosition[0], tePosition[2] - tePosition[0] );

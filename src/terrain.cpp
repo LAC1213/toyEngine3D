@@ -12,7 +12,7 @@ Terrain::Terrain( HeightMap * heightmap, const Texture * texture )
 {
     _width = 50;
     _depth = 50;
-    _maxHeight = 15;
+    _maxHeight = 10;
     _quadCount = 10;
     
     _shape = new btHeightfieldTerrainShape( 
@@ -56,10 +56,10 @@ Terrain::Terrain( HeightMap * heightmap, const Texture * texture )
             if( i < _quadCount && j < _quadCount )
             {
                 size_t idx = i*_quadCount + j;
-                indices[ 4*idx ] = index;
-                indices[ 4*idx + 1] = index + 1;
-                indices[ 4*idx + 2 ] = index + _quadCount + 2;
-                indices[ 4*idx + 3 ] = index + _quadCount + 1;
+                indices[ 4*idx + 0 ] = index + _quadCount + 1;
+                indices[ 4*idx + 1 ] = index + _quadCount + 2;
+                indices[ 4*idx + 2 ] = index + 1;
+                indices[ 4*idx + 3 ] = index;
             }
         }
     }

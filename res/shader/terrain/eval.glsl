@@ -1,6 +1,6 @@
 #version 450
 
-layout(quads, equal_spacing, cw) in;
+layout(quads, equal_spacing, ccw) in;
 in vec2 tcPosition[];
 out vec3 tePosition;
 out vec3 teNormal;

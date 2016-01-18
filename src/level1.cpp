@@ -40,7 +40,7 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     groundTex->setParameter( GL_TEXTURE_WRAP_T, GL_REPEAT );
     static HeightMap heightmap = HeightMap::genRandom( 7 );
     _terrain = new Terrain( &heightmap, groundTex );
-    _terrain->toggleWireframe();
+//    _terrain->toggleWireframe();
     
     _spinnies[0] = new Spinny;
     

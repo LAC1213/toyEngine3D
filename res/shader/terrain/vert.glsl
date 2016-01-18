@@ -5,6 +5,6 @@ out vec2 vPosition;
 
 void main()
 {
-        vPosition = Position;
+    vPosition = Position;
 }
 
