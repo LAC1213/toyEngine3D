@@ -1,9 +1,7 @@
 #pragma once
 
 #include <mesh.h>
-#include <actor.h>
 #include <vector>
-#include <internal/body.h>
 #include <camera.h>
 #include <yaml-cpp/yaml.h>
 

@@ -89,21 +89,6 @@ PlayerCamera::PlayerCamera( GLFWwindow * window, Player * player, float aspect )
 {
 }
 
-void PlayerCamera::addCollider( Collider * collider )
-{
-    _colliders.push_back( collider );
-}
-
-void PlayerCamera::removeCollider( Collider * collider )
-{
-    for( size_t i = 0 ; i < _colliders.size() ; ++i )
-        if( _colliders[i] == collider )
-        {
-            _colliders.erase( _colliders.begin() + i );
-            return;
-        }
-}
-
 void PlayerCamera::step( __attribute__((unused)) double dt )
 {
     pollInput();

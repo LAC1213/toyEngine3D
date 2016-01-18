@@ -6,8 +6,6 @@
 #include <GL/glew.h>
 
 #include <GLFW/glfw3.h>
-#include <collider.h>
-#include <actor.h>
 #include <vector>
 
 class Camera
@@ -128,9 +126,6 @@ public:
     PlayerCamera() {}
     PlayerCamera( GLFWwindow * window, Player * player, float aspect );
 
-    void addCollider( Collider * collider );
-    void removeCollider( Collider * collider );
-
     void setPivot( const glm::vec3& p )
     {
         _pivot = p;
@@ -156,7 +151,6 @@ protected:
     glm::vec3 _pivot;
     glm::vec3 _pivotPoint;
 
-    std::vector<Collider*> _colliders;
     GLFWwindow * _window;
 };
 

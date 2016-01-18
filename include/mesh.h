@@ -4,7 +4,6 @@
 #include <renderable.h>
 #include <drawcall.h>
 #include <texture.h>
-#include <actor.h>
 
 /** POD for mesh data on cpu ( without textures )
  */
