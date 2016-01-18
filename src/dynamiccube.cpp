@@ -21,6 +21,7 @@ DynamicCube::~DynamicCube()
     Engine::PrimitiveManager->release( P_Cube );
     Engine::BoxShapeManager->release( _shape );
     delete _motionState;
+    Engine::Physics->dynamicsWorld->removeRigidBody( _body );
     delete _body;
 }
 

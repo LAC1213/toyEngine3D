@@ -31,6 +31,7 @@ Bomb::~Bomb()
 {
     Engine::PrimitiveManager->release( P_Sphere );
     delete _motionState;
+    Engine::Physics->dynamicsWorld->removeRigidBody( _body );
     delete _body;
     Engine::SphereShapeManager->release( _shape );
 }

@@ -221,7 +221,6 @@ void Level1::update ( double dt )
             s->setColor( glm::vec3(b->getColor()) );
             _shocks.push_back( s );
             s->fire();
-            _physics->dynamicsWorld->removeRigidBody( b->body() );
             _lighting.removePointLight( &b->light() );
             delete b;
             it = _bombs.erase( it );

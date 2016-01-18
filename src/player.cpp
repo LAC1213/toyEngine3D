@@ -42,6 +42,7 @@ Player::~Player()
 {
     Engine::SphereShapeManager->release( _shape );
     Engine::PrimitiveManager->release( P_Sphere );
+    Engine::Physics->dynamicsWorld->removeRigidBody( _body );
     delete _body;
     delete _motionState;
 }

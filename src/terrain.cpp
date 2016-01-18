@@ -80,6 +80,7 @@ Terrain::~Terrain()
 {
     delete _meshObject;
     
+    Engine::Physics->dynamicsWorld->removeRigidBody( _body );
     delete _body;
     delete _motionState;
     delete _shape;
