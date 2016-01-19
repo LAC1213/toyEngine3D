@@ -6,8 +6,8 @@
 
 Shader * Text::_shader = 0;
 
-Text::Text( Font * font, std::string str, glm::vec2 screen )
-    : _font( font ), _screen( screen ), _color( 1, 1, 1, 1 )
+Text::Text ( Font * font, std::string str, glm::vec2 screen )
+    : _font ( font ), _screen ( screen ), _color ( 1, 1, 1, 1 )
 {
     size_t n = str.length();
     GLuint _elements = 6*n;
@@ -16,16 +16,16 @@ Text::Text( Font * font, std::string str, glm::vec2 screen )
     float * uvs = new float[8*n];
     unsigned short * indices = new unsigned short[6*n];
 
-    memset( indices, 0, 6*n*sizeof( unsigned short ) );
+    memset ( indices, 0, 6*n*sizeof ( unsigned short ) );
 
     float x = -1;
-    float y = 1 - 2*_font->getSize()/_screen.y;
+    float y = 1 - 2*_font->getSize() /_screen.y;
     size_t i = 0;
     float sx = 2.0/_screen.x;
     float sy = 2.0/_screen.y;
 
     Font::CharInfo * info = _font->getCharInfo();
-    for( const char * p = str.c_str() ; *p ; ++p )
+    for ( const char * p = str.c_str() ; *p ; ++p )
     {
         unsigned int idx = *p;
         float x2 =  x + info[idx].bl * sx;
@@ -38,8 +38,10 @@ Text::Text( Font * font, std::string str, glm::vec2 screen )
         y += info[idx].ay * sy;
 
         /* Skip glyphs that have no pixels */
-        if( !w || !h )
+        if ( !w || !h )
+        {
             continue;
+        }
 
         indices[6*i] = 4*i;
         indices[6*i + 1] = 4*i + 2;
@@ -69,16 +71,16 @@ Text::Text( Font * font, std::string str, glm::vec2 screen )
         ++i;
     }
 
-    _buffers[2].setTarget( GL_ELEMENT_ARRAY_BUFFER );
+    _buffers[2].setTarget ( GL_ELEMENT_ARRAY_BUFFER );
 
-    _buffers[0].loadData( vertices, 8*n*sizeof( float ) );
-    _buffers[1].loadData( uvs, 8*n*sizeof( float ) );
-    _buffers[2].loadData( indices, 6*n*sizeof( unsigned short ) );
+    _buffers[0].loadData ( vertices, 8*n*sizeof ( float ) );
+    _buffers[1].loadData ( uvs, 8*n*sizeof ( float ) );
+    _buffers[2].loadData ( indices, 6*n*sizeof ( unsigned short ) );
 
-    _drawCall.setElements( _elements );
-    _drawCall.setIndexBuffer( &_buffers[2] );
-    _drawCall.addAttribute( VertexAttribute( &_buffers[0], GL_FLOAT, 2 ) );
-    _drawCall.addAttribute( VertexAttribute( &_buffers[1], GL_FLOAT, 2 ) );
+    _drawCall.setElements ( _elements );
+    _drawCall.setIndexBuffer ( &_buffers[2] );
+    _drawCall.addAttribute ( VertexAttribute ( &_buffers[0], GL_FLOAT, 2 ) );
+    _drawCall.addAttribute ( VertexAttribute ( &_buffers[1], GL_FLOAT, 2 ) );
 
     delete[] vertices;
     delete[] uvs;
@@ -89,23 +91,23 @@ Text::~Text()
 {
 }
 
-void Text::resize( int width, int height )
+void Text::resize ( int width, int height )
 {
-    _screen = glm::vec2( width, height );
+    _screen = glm::vec2 ( width, height );
 }
 
 void Text::render()
 {
-    _shader->setUniform( "tex", 0 );
-    glActiveTexture( GL_TEXTURE0 );
-    glBindTexture( GL_TEXTURE_2D, _font->getAtlas() );
+    _shader->setUniform ( "tex", 0 );
+    glActiveTexture ( GL_TEXTURE0 );
+    glBindTexture ( GL_TEXTURE_2D, _font->getAtlas() );
 
-    _shader->setUniform( "textColor", _color );
+    _shader->setUniform ( "textColor", _color );
 
     glm::vec2 start;
     start.x = 2*_pos.x/_screen.x;
     start.y = 2*_pos.y/_screen.y;
-    _shader->setUniform( "start", start );
+    _shader->setUniform ( "start", start );
 
     _shader->use();
     _drawCall.execute();
@@ -113,19 +115,21 @@ void Text::render()
 
 void Text::init()
 {
-    if( FT_Init_FreeType( &Font::ft ) )
-        errorExit( "Couldn't initialize freetype" );
+    if ( FT_Init_FreeType ( &Font::ft ) )
+    {
+        errorExit ( "Couldn't initialize freetype" );
+    }
 
-    _shader = Engine::ShaderManager->request( "./res/shader/text/", Shader::LOAD_BASIC );
+    _shader = Engine::ShaderManager->request ( "./res/shader/text/", Shader::LOAD_BASIC );
 }
 
 void Text::destroy()
 {
-    FT_Done_FreeType( Font::ft );
-    Engine::ShaderManager->release( _shader );
+    FT_Done_FreeType ( Font::ft );
+    Engine::ShaderManager->release ( _shader );
 }
 
-void Text::setPosition( glm::vec2 pos )
+void Text::setPosition ( glm::vec2 pos )
 {
     _pos = pos;
 }
@@ -135,7 +139,7 @@ glm::vec2 Text::getPosition() const
     return _pos;
 }
 
-void Text::setColor( glm::vec4 c )
+void Text::setColor ( glm::vec4 c )
 {
     _color = c;
 }

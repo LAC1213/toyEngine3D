@@ -13,21 +13,21 @@ class Camera
 public:
     static Camera Null;
     static Camera * Active;
-    
+
     void use();
-    
-    virtual void setUniforms( __attribute__((unused)) Shader * shader ) const {}
+
+    virtual void setUniforms ( __attribute__ ( ( unused ) ) Shader * shader ) const {}
 };
 
 class OrthogonalCamera : public Camera
 {
 public:
-    OrthogonalCamera( glm::vec3 eye, glm::vec3 dir, float near, float far, float width, float height );
-    virtual void setUniforms( Shader * shader ) const;
-    
+    OrthogonalCamera ( glm::vec3 eye, glm::vec3 dir, float near, float far, float width, float height );
+    virtual void setUniforms ( Shader * shader ) const;
+
     const glm::mat4& getView() const;
     const glm::mat4& getProj() const;
-    
+
 protected:
     glm::vec3 _eye;
     glm::vec3 _direction;
@@ -46,60 +46,50 @@ public:
     static const std::string VIEW_UNIFORM_STR;
 
     PerspectiveCamera() {}
-    PerspectiveCamera( float fov, float aspect, float near, float far );
+    PerspectiveCamera ( float fov, float aspect, float near, float far );
 
-    virtual void setUniforms( Shader * shader ) const;
-    void onResize( int width, int height );
+    virtual void setUniforms ( Shader * shader ) const;
+    void onResize ( int width, int height );
 
-    void lookAt( glm::vec3 p );
+    void lookAt ( glm::vec3 p );
 
-    glm::vec3 getPosition() const
-    {
+    glm::vec3 getPosition() const {
         return _eye;
     }
-    void setPosition( const glm::vec3& eye )
-    {
+    void setPosition ( const glm::vec3& eye ) {
         _eye = eye;
         updateView();
     }
-    void translate( const glm::vec3& t )
-    {
+    void translate ( const glm::vec3& t ) {
         _eye += t;
         updateView();
     }
 
-    float getAngleY() const
-    {
+    float getAngleY() const {
         return _angleY;
     }
-    void setAngleY( const float& a )
-    {
+    void setAngleY ( const float& a ) {
         _angleY = a;
         updateView();
     }
-    void turnY( const float& a )
-    {
+    void turnY ( const float& a ) {
         _angleY += a;
         updateView();
     }
 
-    float getAngleX() const
-    {
+    float getAngleX() const {
         return _angleX;
     }
-    void setAngleX( const float& a )
-    {
+    void setAngleX ( const float& a ) {
         _angleX = a;
         updateView();
     }
-    void turnX( const float& a )
-    {
+    void turnX ( const float& a ) {
         _angleX += a;
         updateView();
     }
 
-    glm::mat4 getView() const
-    {
+    glm::mat4 getView() const {
         return _view;
     }
 
@@ -124,24 +114,21 @@ class PlayerCamera : public PerspectiveCamera
 {
 public:
     PlayerCamera() {}
-    PlayerCamera( GLFWwindow * window, Player * player, float aspect );
+    PlayerCamera ( GLFWwindow * window, Player * player, float aspect );
 
-    void setPivot( const glm::vec3& p )
-    {
+    void setPivot ( const glm::vec3& p ) {
         _pivot = p;
     }
-    const glm::vec3& getPivot() const
-    {
+    const glm::vec3& getPivot() const {
         return _pivot;
     }
-    glm::vec3 getPivotPoint() const
-    {
+    glm::vec3 getPivotPoint() const {
         return _pivotPoint;
     }
 
-    void onMouseMove( double dx, double dy );
+    void onMouseMove ( double dx, double dy );
 
-    virtual void step( double dt );
+    virtual void step ( double dt );
 
 protected:
     void pollInput();

@@ -13,12 +13,14 @@ ParticleEmitter::ParticleEmitter ( Texture * texture )
         _c ( 1, 1, 1, 1 ),
         _s ( 0.1 ),
         _lifeTime ( 4 ),
-        _time( 0 ),
+        _time ( 0 ),
         _drawCall ( GL_POINTS ),
         _texture ( texture )
 {
     if ( _texture )
+    {
         Engine::TextureManager->take ( _texture );
+    }
 
     ParticleData test;
     VertexAttribute pAttr ( &_buffer, GL_FLOAT, 3 );
@@ -315,7 +317,7 @@ void ParticleEmitter::step ( double dt )
         if ( _animSize.x != 0 && _animSize.y != 0 && glm::dot ( _animSize, _animSize ) > 3 )
         {
             size_t n = _periodicParticles.size();
-            double age = (( n + i - insertIndex ) % n) / _spawnFrequency;
+            double age = ( ( n + i - insertIndex ) % n ) / _spawnFrequency;
             int pos = age/_lifeTime*_animSize.x*_animSize.y;
             int x = pos % ( int ) _animSize.x;
             int y = pos / ( int ) _animSize.x;
@@ -347,17 +349,19 @@ void ParticleEmitter::step ( double dt )
     }
 
     _drawCall.setElements ( elements );
-    if( !elements )
-        return;
-    if( elements == _periodicParticles.size() )
+    if ( !elements )
     {
-        _buffer.loadData( _periodicParticles.data(), _periodicParticles.size() * sizeof( ParticleData ) );
+        return;
+    }
+    if ( elements == _periodicParticles.size() )
+    {
+        _buffer.loadData ( _periodicParticles.data(), _periodicParticles.size() * sizeof ( ParticleData ) );
         return;
     }
     else
     {
         _buffer.loadData ( nullptr, elements * sizeof ( ParticleData ) );
-        _buffer.loadSubData ( _periodicParticles.data(), 0, _periodicParticles.size()*sizeof ( ParticleData ) );
+        _buffer.loadSubData ( _periodicParticles.data(), 0, _periodicParticles.size() *sizeof ( ParticleData ) );
     }
 
     //reuse to calculate offsets

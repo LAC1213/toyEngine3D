@@ -26,10 +26,10 @@ public:
 
     void addPointLight ( PointLight * light );
     void removePointLight ( PointLight * light );
-    
+
     void addShadowCaster ( Renderable * r );
     void removeShadowCaster ( Renderable * r );
-    
+
     void resizeShadowMap ( int w, int h );
     void setShadowArea ( float w, float h );
     void setShadowRange ( float r );
@@ -58,7 +58,7 @@ protected:
     float _sunShadowWidth;
     float _sunShadowHeight;
     float _shadowRange;
-    
+
     std::list<Renderable*> _shadowCasters;
     std::list<PointLight*> _lights;
 

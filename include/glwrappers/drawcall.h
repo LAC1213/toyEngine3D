@@ -6,7 +6,7 @@
 class VertexAttribute
 {
 public:
-    VertexAttribute( const BufferObject * data, GLenum type, GLuint length );
+    VertexAttribute ( const BufferObject * data, GLenum type, GLuint length );
 
     const BufferObject * data_;
 
@@ -22,25 +22,23 @@ public:
 class DrawCall
 {
 public:
-    DrawCall( GLenum mode = GL_TRIANGLES );
+    DrawCall ( GLenum mode = GL_TRIANGLES );
     ~DrawCall();
 
     void execute() const;
 
-    void addAttribute( const VertexAttribute& attrib );
-    void setIndexBuffer( const BufferObject * buffer );
-    void setIndexType( GLenum indexType );
+    void addAttribute ( const VertexAttribute& attrib );
+    void setIndexBuffer ( const BufferObject * buffer );
+    void setIndexType ( GLenum indexType );
 
-    void setElements( GLuint elements );
-    void setMode( GLenum mode );
-    void setInstances( GLuint instances );
+    void setElements ( GLuint elements );
+    void setMode ( GLenum mode );
+    void setInstances ( GLuint instances );
 
-    GLuint getVAO() const
-    {
+    GLuint getVAO() const {
         return _vao;
     }
-    void operator()()
-    {
+    void operator() () {
         execute();
     }
 
@@ -55,8 +53,8 @@ protected:
     GLuint  _attribIndex;
 
 private:
-    DrawCall( const DrawCall& dc ) = delete;
-    DrawCall& operator=( const DrawCall& dc ) = delete;
+    DrawCall ( const DrawCall& dc ) = delete;
+    DrawCall& operator= ( const DrawCall& dc ) = delete;
 };
 
 #endif //DRAWCALL_H

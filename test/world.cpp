@@ -21,7 +21,7 @@ World::World ( GLFWwindow * window, int width, int height )
         _time ( 0 ),
         _score ( 0 ),
         _cam ( _window, &_player, ( float ) _width / _height ),
-        _testobj( glm::vec3( 1.2, 11, 0 ), 1 ),
+        _testobj ( glm::vec3 ( 1.2, 11, 0 ), 1 ),
         _lighting ( _gBuffer ),
         _heightmap ( HeightMap::genRandom ( 6 ) ),
         _spawnFrequency ( 0.1 ),
@@ -29,17 +29,17 @@ World::World ( GLFWwindow * window, int width, int height )
         _drawDebug ( false )
 {
     _groundTex = new Texture ();
-    _groundTex->loadFromFile( "./res/textures/ground.jpg" );
-    _groundTex->setParameter( GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-    _groundTex->setParameter( GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-    _groundTex->setParameter( GL_TEXTURE_WRAP_S, GL_REPEAT );
-    _groundTex->setParameter( GL_TEXTURE_WRAP_T, GL_REPEAT );
+    _groundTex->loadFromFile ( "./res/textures/ground.jpg" );
+    _groundTex->setParameter ( GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    _groundTex->setParameter ( GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+    _groundTex->setParameter ( GL_TEXTURE_WRAP_S, GL_REPEAT );
+    _groundTex->setParameter ( GL_TEXTURE_WRAP_T, GL_REPEAT );
     _groundTex->genMipmap();
-    
-    _cube.setModel( glm::vec3(0), glm::vec3(0), glm::vec3( 0.1, 0.1, 0.1 ) );
-    
-   // _terrain = new Terrain ( &_heightmap, _groundTex );
-   // _terrain->toggleWireframe();
+
+    _cube.setModel ( glm::vec3 ( 0 ), glm::vec3 ( 0 ), glm::vec3 ( 0.1, 0.1, 0.1 ) );
+
+    // _terrain = new Terrain ( &_heightmap, _groundTex );
+    // _terrain->toggleWireframe();
     static PointLight p;
     p.position = glm::vec3 ( 0, 0, 0 );
     p.diffuse = glm::vec3 ( 1, 1, 1 );
@@ -47,15 +47,15 @@ World::World ( GLFWwindow * window, int width, int height )
     p.attenuation = glm::vec3 ( 0.1, 0.1, 1 );
     _lighting.addPointLight ( &p );
     _lighting.setAmbient ( glm::vec3 ( 0.3, 0.3, 0.3 ) );
-    
+
     _lighting.addPointLight ( _player.light() );
-    
+
     _canvas->enableDepthRenderbuffer();
     onResize ( width, height );
-    
-    Engine::Physics->dynamicsWorld->getPairCache()->setInternalGhostPairCallback( new btGhostPairCallback );
-    _debugDrawer.setDebugMode( btIDebugDraw::DBG_DrawWireframe );
-    Engine::Physics->dynamicsWorld->setDebugDrawer( &_debugDrawer );
+
+    Engine::Physics->dynamicsWorld->getPairCache()->setInternalGhostPairCallback ( new btGhostPairCallback );
+    _debugDrawer.setDebugMode ( btIDebugDraw::DBG_DrawWireframe );
+    Engine::Physics->dynamicsWorld->setDebugDrawer ( &_debugDrawer );
 }
 
 World::~World()
@@ -78,50 +78,50 @@ void World::step ( double dt )
 
     _fps = 1.0/dt;
 
-    _player.step( dt );
-    _cam.step( dt );
-    
-    _cube.setModel( glm::vec3(0.2, 0, 0), glm::vec3(1, 1, 0), glm::vec3( 1, 2, 1 ) );
-    
-    Engine::Physics->dynamicsWorld->stepSimulation( dt, 10 );
+    _player.step ( dt );
+    _cam.step ( dt );
+
+    _cube.setModel ( glm::vec3 ( 0.2, 0, 0 ), glm::vec3 ( 1, 1, 0 ), glm::vec3 ( 1, 2, 1 ) );
+
+    Engine::Physics->dynamicsWorld->stepSimulation ( dt, 10 );
 
     /*
     btManifoldArray manifoldArray;
     btBroadphasePairArray& pairArray = _player.ghostObj()->getOverlappingPairCache()->getOverlappingPairArray();
-    
+
     for( int i = 0 ; i < pairArray.size() ; ++i )
     {
         std::cout << "bla" << std::endl;
         manifoldArray.clear();
-        
+
         const btBroadphasePair& pair = pairArray[i];
-        
+
         btBroadphasePair * collisionPair = Engine::Physics->dynamicsWorld->getPairCache()->findPair(
             pair.m_pProxy0, pair.m_pProxy1);
-        
+
         if( !collisionPair ) continue;
-        
+
         if (collisionPair->m_algorithm)
             collisionPair->m_algorithm->getAllContactManifolds(manifoldArray);
-        
+
         for (int j=0;j<manifoldArray.size();j++)
         {
             btPersistentManifold* manifold = manifoldArray[j];
-            
+
             bool isFirstBody = manifold->getBody0() == _player.ghostObj();
-            
+
             btScalar direction = isFirstBody ? btScalar(-1.0) : btScalar(1.0);
-            
+
             for (int p = 0; p < manifold->getNumContacts(); ++p)
             {
                 const btManifoldPoint&pt = manifold->getContactPoint(p);
-                
+
                 if (pt.getDistance() < 0.f)
                 {
                     const btVector3& ptA = pt.getPositionWorldOnA();
                     const btVector3& ptB = pt.getPositionWorldOnB();
                     const btVector3& normalOnB = pt.m_normalWorldOnB;
-                    
+
                     std::cout << "Collision detected" << std::endl;
                 }
             }
@@ -196,20 +196,20 @@ void World::render()
     Text txt ( &_font, ss.str(), glm::vec2 ( _width, _height ) );
     txt.setColor ( glm::vec4 ( 0.3, 1, 0.6, 0.6 ) );
     txt.setPosition ( glm::vec2 ( 5, 2 ) );
-    
+
     _cam.use();
     glDisable ( GL_BLEND );
     _gBuffer->clear();
-  //  _terrain->render();
-    
+    //  _terrain->render();
+
     _cube.render();
     _testobj.render();
-    
+
     glEnable ( GL_BLEND );
 
     _canvas->clear();
     _canvas->copyDepth ( *_gBuffer );
-    
+
     _lighting.render();
 
     for ( size_t i = 0 ; i < _enemies.size() ; ++i )
@@ -217,31 +217,35 @@ void World::render()
         _enemies[i]->render();
     }
     _player.render();
-   // _lightwell.render();
-    
-    if( _drawDebug )
-        _debugDrawer.setDebugMode( btIDebugDraw::DBG_DrawWireframe );
+    // _lightwell.render();
+
+    if ( _drawDebug )
+    {
+        _debugDrawer.setDebugMode ( btIDebugDraw::DBG_DrawWireframe );
+    }
     else
-        _debugDrawer.setDebugMode( btIDebugDraw::DBG_NoDebug );
-    
-    glDisable( GL_DEPTH_TEST );
+    {
+        _debugDrawer.setDebugMode ( btIDebugDraw::DBG_NoDebug );
+    }
+
+    glDisable ( GL_DEPTH_TEST );
     Engine::Physics->dynamicsWorld->debugDrawWorld();
     /* x: green, y: blue, z: red */
-    if( _drawDebug )
+    if ( _drawDebug )
     {
-        _debugDrawer.drawLine( btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(0, 1, 0));
-        _debugDrawer.drawLine( btVector3(0, 0, 0), btVector3(0, 1, 0), btVector3(0, 0, 1));
-        _debugDrawer.drawLine( btVector3(0, 0, 0), btVector3(0, 0, 1), btVector3(1, 0, 0));
+        _debugDrawer.drawLine ( btVector3 ( 0, 0, 0 ), btVector3 ( 1, 0, 0 ), btVector3 ( 0, 1, 0 ) );
+        _debugDrawer.drawLine ( btVector3 ( 0, 0, 0 ), btVector3 ( 0, 1, 0 ), btVector3 ( 0, 0, 1 ) );
+        _debugDrawer.drawLine ( btVector3 ( 0, 0, 0 ), btVector3 ( 0, 0, 1 ), btVector3 ( 1, 0, 0 ) );
     }
-    glEnable( GL_DEPTH_TEST );
-    
+    glEnable ( GL_DEPTH_TEST );
+
     Camera::Null.use();
-   
+
     _bloomed->clear();
     bloom.render();
 
     /* post processing and text */
-    
+
     Framebuffer::Screen.clear();
     effect.render();
     txt.render();
@@ -263,7 +267,7 @@ void World::onKeyAction ( int key, int scancode, int action, int mods )
             _player.jump();
             break;
         case GLFW_KEY_F:
-            _testobj.body()->applyImpulse( btVector3( 0, 3, 0 ), btVector3( 0, 0, 0 ) );
+            _testobj.body()->applyImpulse ( btVector3 ( 0, 3, 0 ), btVector3 ( 0, 0, 0 ) );
             break;
         }
     }

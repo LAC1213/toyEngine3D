@@ -30,112 +30,120 @@
 
 static World * gWorld;
 
-void glfwErrorCallback(int error, const char* description)
+void glfwErrorCallback ( int error, const char* description )
 {
-    errorExit("GLFW [%i]: %s\n", error, description);
+    errorExit ( "GLFW [%i]: %s\n", error, description );
 }
 
-void onKey( GLFWwindow * window, int key, int scancode, int action, int mods )
+void onKey ( GLFWwindow * window, int key, int scancode, int action, int mods )
 {
-    gWorld->onKeyAction( key, scancode, action, mods );
+    gWorld->onKeyAction ( key, scancode, action, mods );
 }
 
-void onMouseMove( GLFWwindow * window, double x, double y )
+void onMouseMove ( GLFWwindow * window, double x, double y )
 {
-    gWorld->onMouseMove( x, y );
+    gWorld->onMouseMove ( x, y );
 }
 
-void onResize( GLFWwindow * window, int width, int height )
+void onResize ( GLFWwindow * window, int width, int height )
 {
-    gWorld->onResize( width, height );
+    gWorld->onResize ( width, height );
 }
 
 GLFWwindow * initContext()
 {
     /* Initialize the library */
-    if (!glfwInit())
-        errorExit("GLFW Initialization failed");
+    if ( !glfwInit() )
+    {
+        errorExit ( "GLFW Initialization failed" );
+    }
 
-    glfwSetErrorCallback(glfwErrorCallback);
+    glfwSetErrorCallback ( glfwErrorCallback );
 
     /* Create a windowed mode window and its OpenGL context */
-    GLFWwindow * window = glfwCreateWindow(1000, 800, "Engine Demo", NULL, NULL);
-    if (!window)
-        errorExit("Couldn't create glfw window.");
-    glfwSetWindowPos(window, 2800, 200);
+    GLFWwindow * window = glfwCreateWindow ( 1000, 800, "Engine Demo", NULL, NULL );
+    if ( !window )
+    {
+        errorExit ( "Couldn't create glfw window." );
+    }
+    glfwSetWindowPos ( window, 2800, 200 );
 
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwSetCursorPos(window, 0, 0);
+    glfwSetInputMode ( window, GLFW_CURSOR, GLFW_CURSOR_DISABLED );
+    glfwSetCursorPos ( window, 0, 0 );
 
     /* Make the window's context current */
-    glfwMakeContextCurrent(window);
-    glfwSwapInterval(1);
+    glfwMakeContextCurrent ( window );
+    glfwSwapInterval ( 1 );
 
     GLenum err = glewInit();
-    if(err != GLEW_OK)
-        errorExit("GLEW Initalization failed [%i]", err);
+    if ( err != GLEW_OK )
+    {
+        errorExit ( "GLEW Initalization failed [%i]", err );
+    }
 
-    glEnable(GL_DEPTH_TEST);
+    glEnable ( GL_DEPTH_TEST );
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable ( GL_BLEND );
+    glBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
-    glEnable(GL_CULL_FACE);
+    glEnable ( GL_CULL_FACE );
 
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glPixelStorei ( GL_UNPACK_ALIGNMENT, 1 );
 
-    glClearColor(0, 0, 0, 0);
+    glClearColor ( 0, 0, 0, 0 );
 
     return window;
 }
 
-int main(int argc, char ** argv)
+int main ( int argc, char ** argv )
 {
     int errFd = -1;
-    errFd = open("stderr_log.txt", O_TRUNC | O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    errFd = open ( "stderr_log.txt", O_TRUNC | O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH );
 
-    if(errFd == -1)
-        perror("Couldn't set error logfile");
+    if ( errFd == -1 )
+    {
+        perror ( "Couldn't set error logfile" );
+    }
     else
     {
-        close(STDERR_FILENO);
-        dup(errFd);
-        close(errFd);
-        write(STDERR_FILENO, " ", 1);
-        fprintf(stderr, "\x1b[1;32mBuilt %s %s \x1b[0;39m: \n", __TIME__, __DATE__);
+        close ( STDERR_FILENO );
+        dup ( errFd );
+        close ( errFd );
+        write ( STDERR_FILENO, " ", 1 );
+        fprintf ( stderr, "\x1b[1;32mBuilt %s %s \x1b[0;39m: \n", __TIME__, __DATE__ );
     }
 
     GLFWwindow * window = initContext();
 
-    srand( time(0) );
+    srand ( time ( 0 ) );
 
     Engine::init();
 
     int width, height;
-    glfwGetFramebufferSize( window, &width, &height );
-    World world( window, width, height );
+    glfwGetFramebufferSize ( window, &width, &height );
+    World world ( window, width, height );
     gWorld = &world;
 
-    glfwSetKeyCallback( window, onKey );
-    glfwSetCursorPosCallback( window, onMouseMove );
-    glfwSetFramebufferSizeCallback( window, onResize );
+    glfwSetKeyCallback ( window, onKey );
+    glfwSetCursorPosCallback ( window, onMouseMove );
+    glfwSetFramebufferSizeCallback ( window, onResize );
 
     double t0 = 0, dt;
 
-    while( !glfwWindowShouldClose( window ) )
+    while ( !glfwWindowShouldClose ( window ) )
     {
         dt = glfwGetTime() - t0;
         t0 = glfwGetTime();
 
-        world.step( dt );
+        world.step ( dt );
 
         world.render();
 
-        glfwSwapBuffers( window );
+        glfwSwapBuffers ( window );
         glfwPollEvents();
     }
 
-    glfwDestroyWindow(window);
+    glfwDestroyWindow ( window );
     glfwTerminate();
 
     Engine::destroy();

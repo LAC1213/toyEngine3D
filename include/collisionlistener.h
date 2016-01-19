@@ -12,8 +12,7 @@ class GoalListener : public CollisionListener
 {
 public:
     bool win = false;
-    virtual void playerOnTop()
-    {
+    virtual void playerOnTop() {
         win = true;
     };
 };

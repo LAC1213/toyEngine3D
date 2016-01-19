@@ -7,7 +7,7 @@
 class DynamicCube : public Entity, public Mesh
 {
 public:
-    DynamicCube( const glm::vec3& pos, float mass );
+    DynamicCube ( const glm::vec3& pos, float mass );
     virtual ~DynamicCube();
 
     virtual void render();

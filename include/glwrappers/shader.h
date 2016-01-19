@@ -26,30 +26,36 @@ public:
     class Manager : public ResourceManager<std::pair<std::string, LoadFlag>, Shader>
     {
     protected:
-        virtual Shader * loadResource( const std::pair<std::string, LoadFlag>& ci );
+        virtual Shader * loadResource ( const std::pair<std::string, LoadFlag>& ci );
     public:
-        virtual Shader * request( const std::pair<std::string, LoadFlag>& ci );
-        Shader * request( const std::string& shaderDir, LoadFlag flags );
+        virtual Shader * request ( const std::pair<std::string, LoadFlag>& ci );
+        Shader * request ( const std::string& shaderDir, LoadFlag flags );
     };
-    
-    Shader( const std::string& shaderDir, LoadFlag loadFlags );
+
+    Shader ( const std::string& shaderDir, LoadFlag loadFlags );
     ~Shader();
-   
+
     void use();
 
-    GLint getUniformLocation( const std::string& name );
+    GLint getUniformLocation ( const std::string& name );
 
-    bool setUniform( const std::string& name, GLint val );
-    bool setUniform( const std::string& name, GLfloat val );
-    bool setUniform( const std::string& name, const glm::vec2& val );
-    bool setUniform( const std::string& name, const glm::vec3& val );
-    bool setUniform( const std::string& name, const glm::vec4& val );
-    bool setUniform( const std::string& name, const glm::mat4& val );
-    
-    static const Shader * getActive() { return Active; }
+    bool setUniform ( const std::string& name, GLint val );
+    bool setUniform ( const std::string& name, GLfloat val );
+    bool setUniform ( const std::string& name, const glm::vec2& val );
+    bool setUniform ( const std::string& name, const glm::vec3& val );
+    bool setUniform ( const std::string& name, const glm::vec4& val );
+    bool setUniform ( const std::string& name, const glm::mat4& val );
 
-    operator GLuint() { return _program; }
-    GLuint getID() const { return _program; }
+    static const Shader * getActive() {
+        return Active;
+    }
+
+    operator GLuint() {
+        return _program;
+    }
+    GLuint getID() const {
+        return _program;
+    }
 
 private:
     GLuint _program;
@@ -57,8 +63,8 @@ private:
 
     static const Shader * Active;
 
-    Shader( const Shader& shader ) = delete;
-    Shader& operator=( const Shader& shader ) = delete;
+    Shader ( const Shader& shader ) = delete;
+    Shader& operator= ( const Shader& shader ) = delete;
     Shader() = delete;
 };
 

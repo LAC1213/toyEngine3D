@@ -7,8 +7,7 @@
 
 /** POD for mesh data on cpu ( without textures )
  */
-struct MeshData 
-{
+struct MeshData {
 public:
     GLfloat * verts;
     GLfloat * normals;
@@ -25,7 +24,7 @@ class MeshObject : public Renderable
 {
 public:
     MeshObject() {}
-    MeshObject( const MeshData& data, const Texture * tex = nullptr );
+    MeshObject ( const MeshData& data, const Texture * tex = nullptr );
     virtual ~MeshObject();
 
     const Texture * texture;
@@ -46,8 +45,8 @@ protected:
     static Shader * SHADER;
 
 private:
-    MeshObject( const MeshObject& obj ) = delete;
-    MeshObject& operator=( const MeshObject& obj ) = delete;
+    MeshObject ( const MeshObject& obj ) = delete;
+    MeshObject& operator= ( const MeshObject& obj ) = delete;
 };
 
 class IcoSphere : public MeshObject
@@ -63,21 +62,27 @@ class Mesh : public Renderable
 {
 public:
     Mesh() {}
-    Mesh( MeshObject * meshObject );
+    Mesh ( MeshObject * meshObject );
     virtual ~Mesh();
-    
+
     virtual void render();
 
     void toggleWireframe();
 
-    void setColor( const glm::vec4& color ) { _diffuseColor = color; }
-    const glm::vec4& getColor() const { return _diffuseColor; }
-    
-    void setModel( const glm::mat4& model ) { _model = model; }
-    
+    void setColor ( const glm::vec4& color ) {
+        _diffuseColor = color;
+    }
+    const glm::vec4& getColor() const {
+        return _diffuseColor;
+    }
+
+    void setModel ( const glm::mat4& model ) {
+        _model = model;
+    }
+
 protected:
     MeshObject * _meshObject;
-    
+
     /* uniforms */
     bool        _wireframe;
     glm::vec4   _diffuseColor;

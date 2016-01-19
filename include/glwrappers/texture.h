@@ -11,37 +11,39 @@ public:
     class Manager : public ResourceManager<std::string, Texture>
     {
     protected:
-        virtual Texture * loadResource( const std::string& path );
+        virtual Texture * loadResource ( const std::string& path );
     };
-    
+
     static Texture Null; //!< bind() to this texture to unbind any previous texture
 
     Texture();
-    Texture( GLuint id );
+    Texture ( GLuint id );
     ~Texture();
 
     void bind() const;
 
-    void setInternalFormat( GLint internalFormat );
-    void setFormat( GLenum format );
-    void setTarget( GLenum target );
+    void setInternalFormat ( GLint internalFormat );
+    void setFormat ( GLenum format );
+    void setTarget ( GLenum target );
 
-    void setParameter( GLenum name, GLint param ) const;
-    void setParameter( GLenum name, GLfloat param ) const;
-    
+    void setParameter ( GLenum name, GLint param ) const;
+    void setParameter ( GLenum name, GLfloat param ) const;
+
     void genMipmap() const;
 
-    void loadFromFile( const std::string& path );
-    void loadData( float * data ) const;
-    void loadData( unsigned short * data ) const;
-    void loadData( unsigned char * data ) const;
+    void loadFromFile ( const std::string& path );
+    void loadData ( float * data ) const;
+    void loadData ( unsigned short * data ) const;
+    void loadData ( unsigned char * data ) const;
 
-    void resize( int w, int h );
+    void resize ( int w, int h );
 
     static const Texture * getActive();
 
     GLuint getID() const;
-    operator GLuint() { return _id; }
+    operator GLuint() {
+        return _id;
+    }
 
 protected:
     int _width = 0;
@@ -55,8 +57,8 @@ protected:
 private:
     static const Texture * Active; //!< last bound Texture with bind()
 
-    Texture( const Texture& tex ) = delete;
-    Texture& operator=( const Texture& tex ) = delete;
+    Texture ( const Texture& tex ) = delete;
+    Texture& operator= ( const Texture& tex ) = delete;
 };
 
 #endif //TEXTURE_H

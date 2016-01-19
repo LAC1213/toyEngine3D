@@ -5,7 +5,8 @@
 
 #include <internal/util.h>
 
-enum PrimitiveType {
+enum PrimitiveType
+{
     P_Cube,
     P_Sphere,
     P_Tetrahedron
@@ -14,17 +15,18 @@ enum PrimitiveType {
 class PrimitiveManagerT : public ResourceManager<PrimitiveType, MeshObject>
 {
 public:
-    virtual MeshObject * loadResource( const PrimitiveType& p )
+    virtual MeshObject * loadResource ( const PrimitiveType& p )
     {
-        switch(p)
+        switch ( p )
         {
-            case P_Cube:
-                return MeshObject::genCube();
-            case P_Sphere:
-                return new IcoSphere;
-            case P_Tetrahedron:
-                return MeshObject::genTetrahedron();
+        case P_Cube:
+            return MeshObject::genCube();
+        case P_Sphere:
+            return new IcoSphere;
+        case P_Tetrahedron:
+            return MeshObject::genTetrahedron();
         }
-        INVALID_CODE_PATH; return nullptr;
+        INVALID_CODE_PATH;
+        return nullptr;
     }
 };

@@ -15,10 +15,10 @@ PhysicsVars::PhysicsVars()
 {
     broadphase = new btDbvtBroadphase();
     collisionConfig = new btDefaultCollisionConfiguration();
-    dispatcher = new btCollisionDispatcher(collisionConfig);
+    dispatcher = new btCollisionDispatcher ( collisionConfig );
     solver = new btSequentialImpulseConstraintSolver();
-    dynamicsWorld = new btDiscreteDynamicsWorld( dispatcher, broadphase, solver, collisionConfig);
-    dynamicsWorld->setGravity(btVector3(0, -1, 0));
+    dynamicsWorld = new btDiscreteDynamicsWorld ( dispatcher, broadphase, solver, collisionConfig );
+    dynamicsWorld->setGravity ( btVector3 ( 0, -1, 0 ) );
 }
 
 PhysicsVars::~PhysicsVars()
@@ -49,7 +49,10 @@ static bool initialized = false;
 
 void init()
 {
-    if( initialized ) return;
+    if ( initialized )
+    {
+        return;
+    }
 
     /* init graphics */
     QuadBuffer = new BufferObject();
@@ -62,29 +65,29 @@ void init()
         1, 1,
         -1, 1
     };
-    QuadBuffer->loadData( quadVerts, sizeof quadVerts );
+    QuadBuffer->loadData ( quadVerts, sizeof quadVerts );
 
     DrawScreenQuad = new DrawCall();
-    DrawScreenQuad->setElements( 6 );
-    DrawScreenQuad->addAttribute( VertexAttribute( QuadBuffer, GL_FLOAT, 2 ) );
+    DrawScreenQuad->setElements ( 6 );
+    DrawScreenQuad->addAttribute ( VertexAttribute ( QuadBuffer, GL_FLOAT, 2 ) );
 
-    char * resPath = getenv( "ENGINE_ROOT" );
-    if( resPath )
+    char * resPath = getenv ( "ENGINE_ROOT" );
+    if ( resPath )
     {
-        chdir( resPath );
-        std::cerr << log_info << "engine root at " << std::string( resPath ) << log_endl;
-        Root = std::string(resPath);
+        chdir ( resPath );
+        std::cerr << log_info << "engine root at " << std::string ( resPath ) << log_endl;
+        Root = std::string ( resPath );
     }
     else
     {
         char wd[4096];
-        getcwd( wd, sizeof wd );
-        std::cerr << log_info << "engine root at " << std::string( wd ) << log_endl;
-        Root = std::string(wd);
+        getcwd ( wd, sizeof wd );
+        std::cerr << log_info << "engine root at " << std::string ( wd ) << log_endl;
+        Root = std::string ( wd );
     }
 
-    YAML::Node config = YAML::LoadFile( "config.yaml" );
-    
+    YAML::Node config = YAML::LoadFile ( "config.yaml" );
+
     ShaderManager = new Shader::Manager;
     TextureManager = new Texture::Manager;
     PrimitiveManager = new PrimitiveManagerT;
@@ -96,9 +99,11 @@ void init()
     Billboard::init();
     ParticleEmitter::init();
     Text::init();
-    
-    if( config["enableTerrain"] && config["enableTerrain"].as<bool>() )
+
+    if ( config["enableTerrain"] && config["enableTerrain"].as<bool>() )
+    {
         Terrain::init();
+    }
 
     MeshObject::init();
 
@@ -107,7 +112,10 @@ void init()
 
 void destroy()
 {
-    if( !initialized ) return;
+    if ( !initialized )
+    {
+        return;
+    }
 
     Lighting::destroy();
     PostEffect::destroy();
@@ -116,7 +124,7 @@ void destroy()
     Text::destroy();
     Terrain::destroy();
     MeshObject::destroy();
-    
+
     delete ShaderManager;
     delete TextureManager;
     delete PrimitiveManager;

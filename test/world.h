@@ -17,21 +17,21 @@
 class World
 {
 public:
-    World( GLFWwindow * window, int width, int height );
+    World ( GLFWwindow * window, int width, int height );
     ~World();
 
-    void step( double dt );
+    void step ( double dt );
     void render();
 
-    void onResize( int width, int height );
-    void onKeyAction( int key, int scancode, int action, int mods );
-    void onMouseMove( double x, double y );
+    void onResize ( int width, int height );
+    void onKeyAction ( int key, int scancode, int action, int mods );
+    void onMouseMove ( double x, double y );
 
 public:
     GLFWwindow *    _window;
     int             _width;
     int             _height;
-    
+
     DebugDrawer      _debugDrawer;
 
 //    MultiSampleFBO  _msaa;
@@ -59,7 +59,7 @@ public:
     double          _spawnTimer;
 
     double          _fps;
-    
+
     bool            _drawDebug;
 };
 

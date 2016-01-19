@@ -8,22 +8,19 @@
 class Billboard : public Renderable
 {
 public:
-    Billboard( const Texture * texture );
+    Billboard ( const Texture * texture );
     ~Billboard();
 
     virtual void render();
-    void setPosition( glm::vec3 pos );
-    glm::vec3 getPosition() const
-    {
+    void setPosition ( glm::vec3 pos );
+    glm::vec3 getPosition() const {
         return _pos;
     }
 
-    void setSize( glm::vec2 size )
-    {
+    void setSize ( glm::vec2 size ) {
         _scale = size;
     }
-    glm::vec2 getSize() const
-    {
+    glm::vec2 getSize() const {
         return _scale;
     }
 

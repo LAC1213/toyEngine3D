@@ -13,11 +13,10 @@ class Font
 public:
     static FT_Library ft;
 
-    Font( const char * name, int fontSize );
+    Font ( const char * name, int fontSize );
     ~Font();
 
-    struct CharInfo
-    {
+    struct CharInfo {
         float ax;
         float ay;
 
@@ -30,25 +29,20 @@ public:
         float tx;
     };
 
-    CharInfo * getCharInfo()
-    {
+    CharInfo * getCharInfo() {
         return _info;
     }
-    GLuint getAtlas() const
-    {
+    GLuint getAtlas() const {
         return _atlas;
     }
-    unsigned int getAtlasHeight() const
-    {
+    unsigned int getAtlasHeight() const {
         return _atlasHeight;
     }
-    unsigned int getAtlasWidth() const
-    {
+    unsigned int getAtlasWidth() const {
         return _atlasWidth;
     }
 
-    int getSize() const
-    {
+    int getSize() const {
         return _size;
     }
 private:

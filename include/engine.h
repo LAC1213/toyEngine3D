@@ -21,8 +21,7 @@
 #include <shapemanager.hpp>
 #include <primitivemanager.hpp>
 
-struct PhysicsVars
-{
+struct PhysicsVars {
 public:
     PhysicsVars();
     ~PhysicsVars();

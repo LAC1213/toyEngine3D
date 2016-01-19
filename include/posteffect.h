@@ -18,13 +18,17 @@ public:
         DITHER
     };
 
-    PostEffect( Type type, const Texture * canvas );
+    PostEffect ( Type type, const Texture * canvas );
     virtual ~PostEffect();
-    
+
     virtual void render();
-    
-    void setType( Type type ) { _type = type; }
-    void setCanvas( const Texture * canvas ) { _src = canvas; }
+
+    void setType ( Type type ) {
+        _type = type;
+    }
+    void setCanvas ( const Texture * canvas ) {
+        _src = canvas;
+    }
 
     static void init();
     static void destroy();
@@ -40,7 +44,7 @@ protected:
 class Blend : public PostEffect
 {
 public:
-    Blend( const Texture * a, const Texture * b );
+    Blend ( const Texture * a, const Texture * b );
     virtual void render();
 
 protected:
@@ -50,11 +54,11 @@ protected:
 class Bloom : public PostEffect
 {
 public:
-    Bloom( const Texture * in );
+    Bloom ( const Texture * in );
 
     virtual void render();
 
-    void setBlursteps( unsigned int blurs );
+    void setBlursteps ( unsigned int blurs );
     unsigned int getBlursteps() const;
 
 private:

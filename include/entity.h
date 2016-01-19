@@ -8,8 +8,7 @@ class Entity
 public:
     Entity() {};
     virtual ~Entity() {};
-    btRigidBody * body()
-    {
+    btRigidBody * body() {
         return _body;
     };
 

@@ -3,22 +3,22 @@
 #include <engine.h>
 #include <iostream>
 
-DebugDrawer::DebugDrawer() : _drawCall( GL_LINES )
+DebugDrawer::DebugDrawer() : _drawCall ( GL_LINES )
 {
-    _drawCall.addAttribute( VertexAttribute( &_points, GL_FLOAT, 3) );
-    _drawCall.addAttribute( VertexAttribute( &_colors, GL_FLOAT, 3) );
-    _drawCall.setElements( 2 );
-    _shader = Engine::ShaderManager->request("./res/shader/line/", Shader::LOAD_BASIC );
+    _drawCall.addAttribute ( VertexAttribute ( &_points, GL_FLOAT, 3 ) );
+    _drawCall.addAttribute ( VertexAttribute ( &_colors, GL_FLOAT, 3 ) );
+    _drawCall.setElements ( 2 );
+    _shader = Engine::ShaderManager->request ( "./res/shader/line/", Shader::LOAD_BASIC );
 }
 
 DebugDrawer::~DebugDrawer()
 {
-    Engine::ShaderManager->release( _shader );
+    Engine::ShaderManager->release ( _shader );
 }
 
 void DebugDrawer::drawLine ( const btVector3& from, const btVector3& to, const btVector3& color )
 {
-    drawLine( from, to, color, color );
+    drawLine ( from, to, color, color );
 }
 
 void DebugDrawer::draw3dText ( const btVector3& location, const char* textString )
@@ -45,23 +45,23 @@ void DebugDrawer::drawLine ( const btVector3& from, const btVector3& to, const b
         toColor.getX(), toColor.getY(), toColor.getZ()
     };
 
-    _pointData.insert( std::end(_pointData), std::begin(pointData), std::end(pointData));
-    _colorData.insert( std::end(_colorData), std::begin(colorData), std::end(colorData));
+    _pointData.insert ( std::end ( _pointData ), std::begin ( pointData ), std::end ( pointData ) );
+    _colorData.insert ( std::end ( _colorData ), std::begin ( colorData ), std::end ( colorData ) );
 }
 
 void DebugDrawer::render()
 {
-    glDisable( GL_DEPTH_TEST );
+    glDisable ( GL_DEPTH_TEST );
 
-    _points.loadData( _pointData.data(), _pointData.size() * sizeof(GLfloat) );
-    _colors.loadData( _colorData.data(), _colorData.size() * sizeof(GLfloat) );
+    _points.loadData ( _pointData.data(), _pointData.size() * sizeof ( GLfloat ) );
+    _colors.loadData ( _colorData.data(), _colorData.size() * sizeof ( GLfloat ) );
 
     _shader->use();
 
-    _drawCall.setElements( _pointData.size()/3 );
+    _drawCall.setElements ( _pointData.size() /3 );
     _drawCall();
 
-    glEnable( GL_DEPTH_TEST );
+    glEnable ( GL_DEPTH_TEST );
 
     _pointData.clear();
     _colorData.clear();
