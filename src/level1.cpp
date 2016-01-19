@@ -14,7 +14,7 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     , _boxes( 2 )
     , _spinnies( 1 )
 {    
-    
+    Engine::Physics = _physics;
     _player.setModel( glm::vec3(0, 3, 0), glm::vec3(0), glm::vec3(0.5) );
     
     static PointLight p;
@@ -25,11 +25,11 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     _lighting.addPointLight ( &p );
     _lighting.setAmbient ( glm::vec3 ( 0.4, 0.4, 0.4 ) );
     _lighting.addPointLight( _player.light() );
-    _lighting.setSunDiffuse( glm::vec3( 10, 0, 0 ) );
+    _lighting.setSunDiffuse( glm::vec3( 1, 1, 1 ) );
     
     _shock.setCenter( glm::vec3(0, 1, 0) );
     _shock.setColor( glm::vec3( 8, 8, 5 ) );
-    _shock.setAcceleration( 20 );
+    _shock.setAcceleration( 80 );
     _shock.setDuration( 1.5 );
     
     static YAML::Node snowConf = YAML::LoadFile( "res/particles/snow.yaml" );
@@ -38,9 +38,7 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     Texture * groundTex = Engine::TextureManager->request( "res/textures/ground.jpg" );
     groundTex->setParameter( GL_TEXTURE_WRAP_S, GL_REPEAT );
     groundTex->setParameter( GL_TEXTURE_WRAP_T, GL_REPEAT );
-    static HeightMap heightmap = HeightMap::genRandom( 7 );
-    _terrain = new Terrain( &heightmap, groundTex );
-//    _terrain->toggleWireframe();
+    _terrainWorld = new TerrainWorld( groundTex );
     
     _spinnies[0] = new Spinny;
     
@@ -56,8 +54,6 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     vec_for_each( i, _boxes )
         _physics->dynamicsWorld->addRigidBody( _boxes[i]->body() );
         
-    _physics->dynamicsWorld->addRigidBody( _terrain->body() );
-    
     onResize( width, height );
 }
 
@@ -66,7 +62,6 @@ Level1::~Level1()
     delete _bloomed;
     delete _swapBuffer;
     
-    delete _terrain;
     Engine::TextureManager->release( "res/textures/ground.jpg" );
     
     vec_for_each( i, _spinnies )
@@ -202,6 +197,9 @@ void Level1::update ( double dt )
 {
     Engine::Physics = _physics;
     _player.step( dt );
+    _terrainWorld->setCenter( _player.getPos().x/50, _player.getPos().z/50 );
+    _snow.setInitialPosition( _player.getPos() + glm::vec3(0, 50, 0), 50 );
+    _lighting.setSunPos( _player.getPos() - 20.f*_lighting.getSunDir() );
     _cam.step( dt );
     _shock.setCenter( _player.getPos() );
     _shock.step( dt );
@@ -216,7 +214,7 @@ void Level1::update ( double dt )
         {
             Shockwave * s = new Shockwave( _gBuffer, _canvas );
             s->setCenter( b->getPos() );
-            s->setAcceleration( 10 );
+            s->setAcceleration( 40 );
             s->setDuration( 3 );
             s->setColor( glm::vec3(b->getColor()) );
             _shocks.push_back( s );
@@ -308,7 +306,7 @@ void Level1::render()
     vec_for_each( i, _boxes )
         _boxes[i]->render();
         
-    _terrain->render();
+    _terrainWorld->render();
         
     _player.render();
     

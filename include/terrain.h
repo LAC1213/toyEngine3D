@@ -12,30 +12,45 @@ class HeightMap
 public:
     HeightMap() {}
     HeightMap( const HeightMap& copy );
+    HeightMap( HeightMap&& src );
     HeightMap( size_t w, size_t h );
     ~HeightMap();
     
+    HeightMap& operator=( const HeightMap& c ) = delete;
+    HeightMap& operator=( HeightMap&& c ) = delete;
+    
     void loadFromFile( const std::string& path );
     
-    const Texture * texture;
-    float * data;
+    void blur();
+    
+    void uploadToGPU();
+    void releaseFromGPU();
+    
+    Texture * texture = nullptr;
+    float * data = nullptr;
     size_t width;
     size_t height;
 
-    static HeightMap genRandom( unsigned int pow );
+    static HeightMap genRandom( unsigned int size, float ** edges = nullptr );
 };
 
 class Terrain : public Mesh, public Entity
 {
 public:
-    Terrain( HeightMap * heightmap, const Texture * texture );
-    Terrain() {}
+    Terrain( HeightMap * heightmap, Texture * texture );
+    Terrain(); 
     virtual ~Terrain();
 
     virtual void render();
 
     static void init();
     static void destroy();
+    
+    void setPosition( const glm::vec3& p );
+    void setHeightMap( HeightMap * heightmap );
+    void setTexture( Texture * texture );
+    void setSize( float width, float depth );
+    void setMaxHeight( float height );
 
 protected:
     static Shader * SHADER;

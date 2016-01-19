@@ -8,6 +8,7 @@
 #include <shockwave.h>
 #include <yaml-cpp/yaml.h>
 #include <dynamiccube.h>
+#include <terrainworld.h>
 
 class Level1 : public Level
 {
@@ -43,7 +44,7 @@ protected:
     
     GoalListener _goal;
     
-    Terrain * _terrain = nullptr;
+    TerrainWorld * _terrainWorld;
     
     std::vector<Wall*> _walls;
     std::vector<DynamicCube*> _boxes;

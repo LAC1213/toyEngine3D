@@ -29,9 +29,9 @@ Player::Player ()
     _diffuseColor = glm::vec4( 5, 8, 4, 1 );
     
     _light.position = glm::vec3 ( 0, 0, 0 );
-    _light.diffuse = glm::vec3 ( _diffuseColor );
-    _light.specular = glm::vec3 ( _diffuseColor );
-    _light.attenuation = glm::vec3 ( 0.2, 0.2, 0.4 );
+    _light.diffuse = glm::vec3 ( glm::normalize( _diffuseColor ) );
+    _light.specular = glm::vec3 ( glm::normalize( _diffuseColor ) );
+    _light.attenuation = glm::vec3 ( 0, 0.1, 0.4 );
     
     static YAML::Node particleConf = YAML::LoadFile( "res/particles/playertail.yaml" );
     _tail.loadFromYAML( particleConf );

@@ -82,7 +82,7 @@ void PerspectiveCamera::updateView()
 //////////////////////////////////////////////////////////////////
 
 PlayerCamera::PlayerCamera( GLFWwindow * window, Player * player, float aspect )
-    : PerspectiveCamera( 45, aspect, 0.01f, 100.f )
+    : PerspectiveCamera( 45, aspect, 0.01f, 1000.f )
     , _player( player )
     , _pivot( 0, -1, 3 )
     , _window( window )

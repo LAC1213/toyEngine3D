@@ -5,10 +5,10 @@ in vec2 vPosition[];
 out vec2 tcPosition[];
 uniform mat4 model;
 uniform mat4 view;
+uniform mat4 proj;
 
 #define ID gl_InvocationID
 
-uniform float baseLOD = 32;
 uniform sampler2D heightmap;
 
 vec4 getPoint( vec2 coord )
@@ -18,23 +18,9 @@ vec4 getPoint( vec2 coord )
 
 float getLOD( vec3 a, vec3 b )
 {
-    float d = length( getPoint( (0.5*( a + b )).xz) );
-    float lod;
-    if( d < 4 )
-        lod = 64;
-    else if( d < 8 )
-        lod = 32;
-    else if ( d < 16 )
-        lod = 16;
-    else if( d < 32 )
-        lod = 8;
-    else if( d < 64 )
-        lod = 4;
-    else if( d < 128 )
-        lod = 2;
-    else
-        lod = 1;
-    return lod;
+    vec4 q1 = proj * vec4(a, 1);
+    vec4 q2 = proj * vec4(b, 1);
+    return 32*length( q1.xy/q1.w - q2.xy/q2.w );
 }
 
 void main()

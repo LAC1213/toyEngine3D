@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.3)
 
 set(CMAKE_BUILD_TYPE DEBUG)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -O2")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Ofast")
 
 file( GLOB SRC src/*.cpp src/glwrappers/*.cpp )
 
