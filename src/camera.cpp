@@ -2,6 +2,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <player.h>
+#include <internal/util.h>
 
 Camera Camera::Null;
 Camera * Camera::Active = &Camera::Null;
@@ -98,8 +99,23 @@ void PlayerCamera::step ( __attribute__ ( ( unused ) ) double dt )
     lookAt ( _pivotPoint );
 }
 
-void PlayerCamera::onMouseMove ( double dx, double dy )
+void PlayerCamera::onMouseMove ( double x, double y )
 {
+    static double old_x = 0, old_y = 0;
+
+    double dx = x - old_x;
+    double dy = y - old_y;
+    old_x = x;
+    old_y = y;
+
+    if ( glfwGetMouseButton ( _window, GLFW_MOUSE_BUTTON_2 ) != GLFW_PRESS )
+    {
+        glfwSetInputMode ( _window, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
+        return;
+    }
+
+    glfwSetInputMode ( _window, GLFW_CURSOR, GLFW_CURSOR_DISABLED );
+
     constexpr double dphi = 0.001;
 
     _angleY += dphi*dx;
@@ -113,6 +129,23 @@ void PlayerCamera::onMouseMove ( double dx, double dy )
 
     _eye = _pivotPoint - _pivot;
     lookAt ( _pivotPoint );
+}
+
+void PlayerCamera::onMouseScroll ( double dx, double dy )
+{
+    constexpr double dscroll = 0.1;
+    _pivot *= 1 - dscroll*dy;
+    constexpr double maxPivotLength = 100;
+    if ( glm::length ( _pivot ) > maxPivotLength )
+    {
+        _pivot *= maxPivotLength / glm::length ( _pivot );
+    }
+    constexpr double minPivotLength = 1.5;
+    if ( glm::length ( _pivot ) < minPivotLength )
+    {
+        _pivot *= minPivotLength / glm::length ( _pivot );
+    }
+    _eye = _pivotPoint - _pivot;
 }
 
 void PlayerCamera::pollInput()

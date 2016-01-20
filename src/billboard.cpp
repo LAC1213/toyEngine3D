@@ -18,7 +18,7 @@ Billboard::~Billboard()
 {
 }
 
-void Billboard::setPosition ( glm::vec3 pos )
+void Billboard::setPosition ( const glm::vec3& pos )
 {
     _pos = pos;
     _pointBuffer.loadData ( glm::value_ptr ( _pos ), 3*sizeof ( GLfloat ) );
@@ -30,6 +30,7 @@ void Billboard::render()
     _texture->bind();
     _shader->setUniform ( "tex", 0 );
     _shader->setUniform ( "scale", _scale );
+    _shader->setUniform ( "color", _color );
 
     _shader->use();
     _drawCall.execute();

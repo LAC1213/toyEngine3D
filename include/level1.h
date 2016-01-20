@@ -27,7 +27,9 @@ public:
 
     virtual void onResize ( int w, int h );
     virtual void onMouseMove ( double x, double y );
+    virtual void onMouseScroll ( double x, double y );
     virtual void onKeyAction ( int key, int scancode, int action, int mods );
+    virtual void onMouseAction ( int button, int action, int mods );
 
 protected:
     PlayerCamera _cam;
@@ -37,6 +39,8 @@ protected:
     Framebuffer * _swapBuffer;
     Lighting _lighting;
     Shockwave _shock;
+
+    Billboard _rayPickBillboard;
 
     ParticleEmitter _snow;
 

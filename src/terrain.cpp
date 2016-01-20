@@ -208,13 +208,13 @@ static void diamondSquare ( float ** data, unsigned int size, float ** edges )
     if ( edges[0] )
         for ( unsigned int i = 0 ; i < size ; ++i )
         {
-            data[0][i] = edges[0][i];
+            data[0][i] = edges[0][ size* ( size - 1 ) + i];
         }
 
     if ( edges[1] )
         for ( unsigned int i = 0 ; i < size ; ++i )
         {
-            data[i][size - 1] = edges[1][i];
+            data[i][size - 1] = edges[1][size*i];
         }
 
     if ( edges[2] )
@@ -226,11 +226,11 @@ static void diamondSquare ( float ** data, unsigned int size, float ** edges )
     if ( edges[3] )
         for ( unsigned int i = 0 ; i < size ; ++i )
         {
-            data[i][0] = edges[3][i];
+            data[i][0] = edges[3][size - 1 + size*i];
         }
 
     //value 2^n+1
-    unsigned int DATA_SIZE = size;
+    int DATA_SIZE = size;
 
     float h = 0.5;//the range (-h -> +h) for the average offset
     //for the new value in range of h
@@ -251,9 +251,9 @@ static void diamondSquare ( float ** data, unsigned int size, float ** edges )
         int halfSide = sideLength/2;
 
         //generate the new square values
-        for ( unsigned int x=0; x<DATA_SIZE-1; x+=sideLength )
+        for ( int x=0; x<DATA_SIZE-1; x+=sideLength )
         {
-            for ( unsigned int y=0; y<DATA_SIZE-1; y+=sideLength )
+            for ( int y=0; y<DATA_SIZE-1; y+=sideLength )
             {
                 //x, y is upper left corner of square
                 //calculate average of existing corners
@@ -263,7 +263,6 @@ static void diamondSquare ( float ** data, unsigned int size, float ** edges )
                             data[x+sideLength][y+sideLength];//lower right
                 avg /= 4.0;
 
-                //center is average plus random offset
                 if ( x + halfSide == size - 1 && edges[1] )
                 {
                     continue;
@@ -294,29 +293,61 @@ static void diamondSquare ( float ** data, unsigned int size, float ** edges )
         //by half side
         //NOTE: if the data shouldn't wrap then x < DATA_SIZE
         //to generate the far edge values
-        for ( unsigned int x=0; x<DATA_SIZE; x+=halfSide )
+        for ( int x=0; x<DATA_SIZE; x+=halfSide )
         {
             //and y is x offset by half a side, but moved by
             //the full side length
             //NOTE: if the data shouldn't wrap then y < DATA_SIZE
             //to generate the far edge values
-            for ( unsigned int y= ( x+halfSide ) %sideLength; y<DATA_SIZE; y+=sideLength )
+            for ( int y= ( x+halfSide ) %sideLength; y<DATA_SIZE; y+=sideLength )
             {
                 //x, y is center of diamond
                 //note we must use mod  and add DATA_SIZE for subtraction
                 //so that we can wrap around the array to find the corners
-                float avg =
-                    data[ ( x-halfSide+DATA_SIZE ) %DATA_SIZE][y] + //left of center
-                    data[ ( x+halfSide ) %DATA_SIZE][y] + //right of center
-                    data[x][ ( y+halfSide ) %DATA_SIZE] + //below center
-                    data[x][ ( y-halfSide+DATA_SIZE ) %DATA_SIZE]; //above center
+                float avg = 0;
+                if ( x - halfSide < 0 && edges[3] )
+                {
+                    avg += edges[3][y*size + size + x - halfSide ];
+                }
+                else
+                {
+                    avg += data[ ( x-halfSide+DATA_SIZE ) %DATA_SIZE][y];
+                }
+
+                if ( x + halfSide > size - 1 && edges[1] )
+                {
+                    avg += edges[1][y*size + x + halfSide - size ];
+                }
+                else
+                {
+                    avg += data[ ( x+halfSide ) %DATA_SIZE][y];
+                }
+
+                if ( y + halfSide > size - 1 && edges[2] )
+                {
+                    avg += edges[2][x + size* ( y + halfSide - size ) ];
+                }
+                else
+                {
+                    avg += data[x][ ( y+halfSide ) %DATA_SIZE];
+                }
+
+                if ( y - halfSide < 0 && edges[0] )
+                {
+                    avg += edges[0][x + size* ( size + y - halfSide )];
+                }
+                else
+                {
+                    avg += data[x][ ( y-halfSide+DATA_SIZE ) %DATA_SIZE];
+                }
+
                 avg /= 4.0;
 
                 //new value = average plus random offset
                 //We calculate random value in range of 2h
                 //and then subtract h so the end value is
                 //in the range (-h, +h)
-                avg = avg + ( getRnd() *2*h ) - h;
+                avg += getRnd() *2*h - h;
                 //update value for center of diamond
                 if ( x == size - 1 && edges[1] )
                 {
@@ -375,55 +406,34 @@ HeightMap HeightMap::genRandom ( unsigned int size, float ** edges )
 
     diamondSquare ( data, width, edges );
 
-    heightmap.blur();
-    if ( edges[0] )
-        for ( unsigned int i = 0 ; i < size ; ++i )
-        {
-            heightmap.data[i] = edges[0][i];
-        }
+    for ( int i = 0 ; i < 2 ; ++i )
+    {
+        heightmap.blur();
+        if ( edges[0] )
+            for ( unsigned int i = 0 ; i < size ; ++i )
+            {
+                heightmap.data[i] = edges[0][size* ( size - 1 ) +i];
+            }
 
-    if ( edges[1] )
-        for ( unsigned int i = 0 ; i < size ; ++i )
-        {
-            heightmap.data[i*width + size - 1] = edges[1][i];
-        }
+        if ( edges[1] )
+            for ( unsigned int i = 0 ; i < size ; ++i )
+            {
+                heightmap.data[i*width + size - 1] = edges[1][size*i];
+            }
 
-    if ( edges[2] )
-        for ( unsigned int i = 0 ; i < size ; ++i )
-        {
-            heightmap.data[ ( size - 1 ) *width + i] = edges[2][i];
-        }
+        if ( edges[2] )
+            for ( unsigned int i = 0 ; i < size ; ++i )
+            {
+                heightmap.data[ ( size - 1 ) *width + i] = edges[2][i];
+            }
 
-    if ( edges[3] )
-        for ( unsigned int i = 0 ; i < size ; ++i )
-        {
-            heightmap.data[i] = edges[3][i];
-        }
+        if ( edges[3] )
+            for ( unsigned int i = 0 ; i < size ; ++i )
+            {
+                heightmap.data[i] = edges[3][size - 1 + size*i];
+            }
+    }
 
-    heightmap.blur();
-    if ( edges[0] )
-        for ( unsigned int i = 0 ; i < size ; ++i )
-        {
-            heightmap.data[i] = edges[0][i];
-        }
-
-    if ( edges[1] )
-        for ( unsigned int i = 0 ; i < size ; ++i )
-        {
-            heightmap.data[i*width + size - 1] = edges[1][i];
-        }
-
-    if ( edges[2] )
-        for ( unsigned int i = 0 ; i < size ; ++i )
-        {
-            heightmap.data[ ( size - 1 ) *width + i] = edges[2][i];
-        }
-
-    if ( edges[3] )
-        for ( unsigned int i = 0 ; i < size ; ++i )
-        {
-            heightmap.data[i] = edges[3][i];
-        }
 
     delete[] data;
 

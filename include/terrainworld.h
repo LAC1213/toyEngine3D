@@ -38,7 +38,7 @@ public:
 
     virtual void render();
 
-    void setCenter ( int32_t x, int32_t y );
+    void setCenter ( int32_t x, int32_t y, bool forceUpdate = false );
 
 protected:
     Texture * _groundTexture;

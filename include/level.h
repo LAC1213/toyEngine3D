@@ -28,7 +28,9 @@ public:
 
     virtual void onResize ( int w, int h );
     virtual void onKeyAction ( int key, int scancode, int action, int mods );
+    virtual void onMouseAction ( int button, int action, int mods );
     virtual void onMouseMove ( double x, double y );
+    virtual void onMouseScroll ( double x, double y );
 
 protected:
     GLFWwindow * _window;

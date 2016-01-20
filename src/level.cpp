@@ -75,7 +75,17 @@ void Level::onResize ( int w, int h )
     _gBuffer->resize ( _width, _height );
 }
 
+void Level::onMouseAction ( int button, int action, int mods )
+{
+
+}
+
 void Level::onMouseMove ( double x, double y )
+{
+
+}
+
+void Level::onMouseScroll ( double x, double y )
 {
 
 }

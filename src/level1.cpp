@@ -11,6 +11,7 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     , _swapBuffer ( Framebuffer::genScreenBuffer() )
     , _lighting ( _gBuffer )
     , _shock ( _gBuffer, _canvas )
+    , _rayPickBillboard ( Engine::TextureManager->request ( "res/textures/blob.png" ) )
     , _boxes ( 2 )
     , _spinnies ( 1 )
 {
@@ -26,11 +27,15 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     _lighting.setAmbient ( glm::vec3 ( 0.4, 0.4, 0.4 ) );
     _lighting.addPointLight ( _player.light() );
     _lighting.setSunDiffuse ( glm::vec3 ( 1, 1, 1 ) );
+    _lighting.setSunDir ( glm::vec3 ( 0, -1, 1.5 ) );
 
     _shock.setCenter ( glm::vec3 ( 0, 1, 0 ) );
     _shock.setColor ( glm::vec3 ( 8, 8, 5 ) );
     _shock.setAcceleration ( 80 );
     _shock.setDuration ( 1.5 );
+
+    _rayPickBillboard.setSize ( glm::vec2 ( 0.5 ) );
+    _rayPickBillboard.setColor ( glm::vec4 ( 0, 1, 0, 0.3 ) );
 
     static YAML::Node snowConf = YAML::LoadFile ( "res/particles/snow.yaml" );
     _snow.loadFromYAML ( snowConf );
@@ -50,6 +55,7 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     _lighting.addShadowCaster ( _spinnies[0] );
 
     _lighting.addShadowCaster ( &_player );
+    _lighting.addShadowCaster ( _terrainWorld );
 
     vec_for_each ( i, _boxes )
     _physics->dynamicsWorld->addRigidBody ( _boxes[i]->body() );
@@ -64,6 +70,7 @@ Level1::~Level1()
     delete _terrainWorld;
 
     Engine::TextureManager->release ( "res/textures/ground.jpg" );
+    Engine::TextureManager->release ( "res/textures/blob.png" );
 
     vec_for_each ( i, _spinnies )
     delete _spinnies[i];
@@ -162,11 +169,32 @@ void Level1::reset()
     }
 }
 
+void Level1::onMouseAction ( int button, int action, int mods )
+{
+    Level::onMouseAction ( button, action, mods );
+    if ( button == GLFW_MOUSE_BUTTON_2 )
+    {
+        if ( action == GLFW_RELEASE )
+        {
+            glfwSetInputMode ( _window, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
+        }
+        else
+        {
+            glfwSetInputMode ( _window, GLFW_CURSOR, GLFW_CURSOR_DISABLED );
+        }
+    }
+}
+
 void Level1::onMouseMove ( double x, double y )
 {
     Level::onMouseMove ( x, y );
     _cam.onMouseMove ( x, y );
-    glfwSetCursorPos ( _window, 0, 0 );
+}
+
+void Level1::onMouseScroll ( double x, double y )
+{
+    Level::onMouseScroll ( x, y );
+    _cam.onMouseScroll ( x, y );
 }
 
 void Level1::onResize ( int w, int h )
@@ -174,6 +202,7 @@ void Level1::onResize ( int w, int h )
     Level::onResize ( w, h );
     _cam.onResize ( w, h );
     _bloomed->resize ( w, h );
+    _swapBuffer->resize ( w, h );
 }
 
 void Level1::onKeyAction ( int key, int scancode, int action, int mods )
@@ -214,7 +243,9 @@ void Level1::update ( double dt )
 {
     Engine::Physics = _physics;
     _player.step ( dt );
-    _terrainWorld->setCenter ( _player.getPos().x/50, _player.getPos().z/50 );
+    float chunkSize = 50;
+    glm::vec3 c = _player.getPos() /chunkSize;
+    _terrainWorld->setCenter ( c.x > 0 ? c.x + 0.5 : c.x - 0.5, c.z > 0 ? c.z + 0.5 : c.z - 0.5 );
     _snow.setInitialPosition ( _player.getPos() + glm::vec3 ( 0, 50, 0 ), 50 );
     _lighting.setSunPos ( _player.getPos() - 20.f*_lighting.getSunDir() );
     _cam.step ( dt );
@@ -288,9 +319,29 @@ void Level1::update ( double dt )
         _spinnies[i]->step ( dt );
     }
 
-//   std::cout << _spinnies[0]._up << std::endl;
-
     Level::update ( dt );
+
+    // raypicking
+    {
+        btVector3 start = glm2bt ( _cam.getPosition() );
+        double x, y;
+        glfwGetCursorPos ( _window, &x, &y );
+        x = 2*x/_width - 1;
+        y = 1 - 2*y/_height;
+
+        glm::vec4 q = glm::inverse ( _cam.getProj() ) * glm::vec4 ( x, y, -1, 1 );
+        q.z = -1;
+        q.w = 0;
+        glm::vec3 p = glm::vec3 ( glm::inverse ( _cam.getView() ) * q );
+        btVector3 end = start + 100* ( glm2bt ( p ) );
+        btCollisionWorld::ClosestRayResultCallback cb ( start, end );
+        _physics->dynamicsWorld->rayTest ( start, end, cb );
+
+        if ( cb.hasHit() )
+        {
+            _rayPickBillboard.setPosition ( bt2glm ( cb.m_hitPointWorld ) );
+        }
+    }
 
     std::stringstream ss;
     ss.setf ( std::ios::fixed );
@@ -298,6 +349,8 @@ void Level1::update ( double dt )
     ss << "Time: " << _time;
     ss.precision ( -1 -log ( dt ) /log ( 10 ) );
     ss << " FPS: " << 1/dt;
+    ss.precision ( 4 );
+    ss << " P: " << _player.getPos();
     _dbgString = ss.str();
 }
 
@@ -345,6 +398,14 @@ void Level1::render()
     vec_for_each ( i, _spinnies )
     _spinnies[i]->renderFX();
     _shock.renderFX();
+
+    glDisable ( GL_DEPTH_TEST );
+    if ( glfwGetMouseButton ( _window, GLFW_MOUSE_BUTTON_2 ) != GLFW_PRESS )
+    {
+        _rayPickBillboard.render();
+    }
+    glEnable ( GL_DEPTH_TEST );
+
     for ( auto it : _shocks )
     {
         it->renderFX();

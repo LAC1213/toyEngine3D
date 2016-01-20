@@ -5,7 +5,7 @@ TerrainWorld::TerrainWorld ( Texture * groundTexture )
     : _groundTexture ( groundTexture )
     , _chunkSize ( 50 )
     , _maxHeight ( 30 )
-    , _loadRange ( 2 )
+    , _loadRange ( 1 )
     , _heightmapSize ( 257 )
 {
     _activeTerrains.resize ( ( 2*_loadRange + 1 ) * ( 2*_loadRange + 1 ) );
@@ -14,13 +14,18 @@ TerrainWorld::TerrainWorld ( Texture * groundTexture )
         _activeTerrains[i].setSize ( _chunkSize, _chunkSize );
         _activeTerrains[i].setMaxHeight ( _maxHeight );
         _activeTerrains[i].setTexture ( _groundTexture );
-//        _activeTerrains[i].toggleWireframe();
+        _activeTerrains[i].toggleWireframe();
     }
-    setCenter ( 0, 0 );
+    setCenter ( 0, 0, true );
 }
 
-void TerrainWorld::setCenter ( int32_t x, int32_t y )
+void TerrainWorld::setCenter ( int32_t x, int32_t y, bool forceUpdate )
 {
+    if ( _centerChunk.x == x && _centerChunk.y == y && !forceUpdate )
+    {
+        return;
+    }
+
     _centerChunk.x = x;
     _centerChunk.y = y;
 
@@ -39,22 +44,18 @@ void TerrainWorld::setCenter ( int32_t x, int32_t y )
             }
             else
             {
+                std::cerr << log_info << "Generating Terrain Chunk [" << current.x
+                          << ", " << current.y << "]" << log_endl;
+
                 float* edges[] = {nullptr, nullptr, nullptr, nullptr};
-                float ne[_heightmapSize];
-                float se[_heightmapSize];
-                float ee[_heightmapSize];
-                float we[_heightmapSize];
 
                 ChunkCoord north = current;
                 ++north.y;
                 auto north_it = _heights.find ( north );
                 if ( north_it != _heights.end() )
                 {
-                    for ( int i = 0 ; i < _heightmapSize ; ++i )
-                    {
-                        ne[i] = north_it->second.data[i];
-                    }
-                    edges[2] = ne;
+                    std::cerr << log_info << "Found generated terrain chunk at north edge" << log_endl;
+                    edges[2] = north_it->second.data;
                 }
 
                 ChunkCoord south = current;
@@ -62,42 +63,33 @@ void TerrainWorld::setCenter ( int32_t x, int32_t y )
                 auto south_it = _heights.find ( south );
                 if ( south_it != _heights.end() )
                 {
-                    for ( int i = 0 ; i < _heightmapSize ; ++i )
-                    {
-                        se[i] = south_it->second.data[ _heightmapSize* ( _heightmapSize - 1 ) + i];
-                    }
-                    edges[0] = se;
+                    std::cerr << log_info << "Found generated terrain chunk at south edge" << log_endl;
+                    edges[0] = south_it->second.data;
                 }
 
                 ChunkCoord east = current;
-                ++east.x;
+                --east.x;
                 auto east_it = _heights.find ( east );
                 if ( east_it != _heights.end() )
                 {
-                    for ( int i = 0 ; i < _heightmapSize ; ++i )
-                    {
-                        ee[i] = east_it->second.data[ _heightmapSize - 1 + _heightmapSize*i ];
-                    }
-                    edges[3] = ee;
+                    std::cerr << log_info << "Found generated terrain chunk at east edge" << log_endl;
+                    edges[1] = east_it->second.data;
                 }
 
                 ChunkCoord west = current;
-                --west.x;
+                ++west.x;
                 auto west_it = _heights.find ( west );
                 if ( west_it != _heights.end() )
                 {
-                    for ( int i = 0 ; i < _heightmapSize ; ++i )
-                    {
-                        we[i] = west_it->second.data[ _heightmapSize*i];
-                    }
-                    edges[1] = we;
+                    std::cerr << log_info << "Found generated terrain chunk at west edge" << log_endl;
+                    edges[3] = west_it->second.data;
                 }
 
                 std::pair<ChunkCoord, HeightMap> entry ( current, HeightMap::genRandom ( _heightmapSize, edges ) );
                 _heights.insert ( entry );
                 _activeTerrains[ idx ].setHeightMap ( &_heights.find ( current )->second );
             }
-            _activeTerrains[ idx ].setPosition ( glm::vec3 ( ( ( float ) current.x - 0.5 ) *_chunkSize, 0.f, ( ( float ) current.y - 0.5 ) *_chunkSize ) );
+            _activeTerrains[ idx ].setPosition ( glm::vec3 ( ( ( float ) current.x ) *_chunkSize, 0.f, ( ( float ) current.y ) *_chunkSize ) );
         }
 }
 

@@ -93,6 +93,10 @@ public:
         return _view;
     }
 
+    glm::mat4 getProj() const {
+        return _proj;
+    }
+
 protected:
     glm::vec3   _eye;
     float       _angleX; //!< angle around X axis
@@ -127,6 +131,7 @@ public:
     }
 
     void onMouseMove ( double dx, double dy );
+    void onMouseScroll ( double dx, double dy );
 
     virtual void step ( double dt );
 

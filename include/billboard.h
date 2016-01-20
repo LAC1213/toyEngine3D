@@ -12,16 +12,20 @@ public:
     ~Billboard();
 
     virtual void render();
-    void setPosition ( glm::vec3 pos );
+    void setPosition ( const glm::vec3& pos );
     glm::vec3 getPosition() const {
         return _pos;
     }
 
-    void setSize ( glm::vec2 size ) {
+    void setSize ( const glm::vec2& size ) {
         _scale = size;
     }
     glm::vec2 getSize() const {
         return _scale;
+    }
+
+    void setColor ( const glm::vec4& color ) {
+        _color = color;
     }
 
     static void init();
@@ -37,6 +41,7 @@ protected:
 
     glm::vec3 _pos;
     glm::vec2 _scale;
+    glm::vec4 _color;
 };
 
 #endif //BILLBOARD_H

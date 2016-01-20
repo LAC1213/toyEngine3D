@@ -41,9 +41,19 @@ void onKey ( __attribute__ ( ( unused ) ) GLFWwindow * window, int key, int scan
     currentLevel->onKeyAction ( key, scancode, action, mods );
 }
 
+void onMouse ( __attribute__ ( ( unused ) ) GLFWwindow * window, int button, int action, int mods )
+{
+    currentLevel->onMouseAction ( button, action, mods );
+}
+
 void onMouseMove ( __attribute__ ( ( unused ) ) GLFWwindow * window, double x, double y )
 {
     currentLevel->onMouseMove ( x, y );
+}
+
+void onMouseScroll ( __attribute__ ( ( unused ) ) GLFWwindow * window, double x, double y )
+{
+    currentLevel->onMouseScroll ( x, y );
 }
 
 void onResize ( __attribute__ ( ( unused ) ) GLFWwindow * window, int width, int height )
@@ -95,9 +105,6 @@ GLFWwindow * initContext()
         errorExit ( "Couldn't create glfw window." );
     }
     glfwSetWindowPos ( window, x, y );
-
-    glfwSetInputMode ( window, GLFW_CURSOR, GLFW_CURSOR_DISABLED );
-    glfwSetCursorPos ( window, 0, 0 );
 
     /* Make the window's context current */
     glfwMakeContextCurrent ( window );
@@ -162,7 +169,9 @@ int main()
     level->init();
 
     glfwSetKeyCallback ( window, onKey );
+    glfwSetMouseButtonCallback ( window, onMouse );
     glfwSetCursorPosCallback ( window, onMouseMove );
+    glfwSetScrollCallback ( window, onMouseScroll );
     glfwSetFramebufferSizeCallback ( window, onResize );
 
     glfwSetCursorPos ( window, 0, 0 );

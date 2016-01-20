@@ -72,6 +72,9 @@ unsigned int Bloom::getBlursteps() const
 void Bloom::render()
 {
     const Framebuffer * out = Framebuffer::getActiveDraw();
+    _first->resize ( out->getWidth(), out->getHeight() );
+    _second->resize ( out->getWidth(), out->getHeight() );
+
     _first->clearColor();
     _filter.setType ( BLOOM_FILTER );
     _filter.render();
