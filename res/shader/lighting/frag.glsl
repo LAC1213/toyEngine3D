@@ -35,7 +35,7 @@ vec3 lightingFactor( vec3 position, vec3 normal, vec3 light, vec3 diffuse, vec3 
     vec3 lightDir = normalize( light - position );
     float l = distance( light, position );
     float df = max(dot(lightDir, normal), 0.0);
-    
+
     //specular
     vec3 viewDir = normalize( -position );
     vec3 halfDir = normalize( lightDir + viewDir );
@@ -51,9 +51,9 @@ float getShadowFactor( vec3 position )
     vec4 lp = shadowProj * shadowView * vec4(position, 1);
     vec3 depthCoord = lp.xyz/lp.w;
     depthCoord = depthCoord * 0.5 + vec3( 0.5 );
-    
+
     vec2 texelSize = 1.0 / textureSize( shadowMap, 0 );
-    
+
     float shadow = 0.0;
     for( int x = -1 ; x < 2 ; ++x )
         for( int y = -1 ; y < 2 ; ++y )
@@ -61,7 +61,7 @@ float getShadowFactor( vec3 position )
             float depth = texture( shadowMap, depthCoord.xy + vec2(x, y) * texelSize ).r;
             shadow += depthCoord.z - shadowBias < depth ? 1.0 : 0.0;
         }
-    
+
     return shadow/9;
 }
 
@@ -86,7 +86,7 @@ void main()
     result /= attenuation.x * l*l + attenuation.y * l + attenuation.z;
     result += (sf * sunDiffuse * color + ds * sunSpecular * color) * getShadowFactor( vec3(inverse(view) * vec4(position, 1)) );
     result += ambient * color;
-    
+
     fragColor = vec4( result, 1 );
     fragColor.a = 1;
 }

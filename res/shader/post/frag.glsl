@@ -176,7 +176,7 @@ void main()
         fragColor.rgb = pow( fragColor.rgb, vec3(1.0/2.2) );
         fragColor.a = 1;
     }
-    
+
     if( effect == DITHER )
     {
         fragColor = texture( tex, vUV ) * (0.4 + rand( gl_FragCoord.xy + seed ));

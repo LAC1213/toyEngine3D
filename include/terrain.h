@@ -31,7 +31,7 @@ public:
     size_t width;
     size_t height;
 
-    static HeightMap genRandom ( unsigned int size, float ** edges = nullptr );
+    static HeightMap genRandom ( unsigned int size, int x, int y, float ** edges );
 };
 
 class Terrain : public Mesh, public Entity

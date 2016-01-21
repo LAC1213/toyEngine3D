@@ -14,10 +14,10 @@ Terrain::Terrain() : Terrain ( nullptr, nullptr )
 Terrain::Terrain ( HeightMap * heightmap = nullptr, Texture * texture = nullptr )
     :   _heightmap ( nullptr )
 {
-    _width = 50;
-    _depth = 50;
+    _width = 20;
+    _depth = 20;
     _maxHeight = 30;
-    _quadCount = 10;
+    _quadCount = 2;
 
     _shape = nullptr;
     _motionState = new btDefaultMotionState;
@@ -109,7 +109,7 @@ void Terrain::render()
     _heightmap->texture->bind();
 
     // alpha is shininess
-    _diffuseColor.a = 0.1;
+    _diffuseColor.a = 0;
 
     Mesh::render();
 }
@@ -371,19 +371,52 @@ static void diamondSquare ( float ** data, unsigned int size, float ** edges )
     }
 }
 
+static float lerp ( float a, float b, float w )
+{
+    return a* ( 1 - w ) + w*b;
+}
+
+static glm::vec2 randVec ( int seedx, int seedy, int seed = 0 )
+{
+    constexpr float r_max = 32767;
+    unsigned int q = seed ^ 47*seedx ^ ( 47*seedy << 1 );
+    unsigned int r = ( ( q * 1103515245 + 12345 ) >> 16 ) % 32768;
+    float k = 2*M_PI* ( float ) r/r_max;
+    return glm::vec2 ( cos ( k ), sin ( k ) );
+}
+
+static void perlinNoise2D ( float ** data, size_t width, int seedx, int seedy )
+{
+    glm::vec2 tl = randVec ( seedx, seedy );
+    glm::vec2 tr = randVec ( seedx + 1, seedy );
+    glm::vec2 bl = randVec ( seedx, seedy + 1 );
+    glm::vec2 br = randVec ( seedx + 1, seedy + 1 );
+
+    for ( unsigned int i = 0 ; i < width ; ++i )
+        for ( unsigned int j = 0 ; j < width ; ++j )
+        {
+            float y = ( float ) i/width;
+            float x = ( float ) j/width;
+
+            float n0 = lerp ( glm::dot ( tl, glm::vec2 ( x, y ) ), glm::dot ( tr, glm::vec2 ( x - 1, y ) ), x );
+            float n1 = lerp ( glm::dot ( bl, glm::vec2 ( x, y - 1 ) ), glm::dot ( br, glm::vec2 ( x - 1, y - 1 ) ), x );
+            data[i][j] = lerp ( n0, n1, y ) /2;
+        }
+}
+
 void HeightMap::loadFromFile ( const std::__cxx11::string& path )
 {
     //TODO implement this
     INVALID_CODE_PATH
 }
 
-/* using diamond square algorithm */
-HeightMap HeightMap::genRandom ( unsigned int size, float ** edges )
+HeightMap HeightMap::genRandom ( unsigned int size, int x, int y, float ** edges )
 {
     assert ( ( ( size - 1 ) & ( size - 2 ) ) == 0 );
     unsigned int width = size;
 
-    float* nulls[] = { nullptr, nullptr, nullptr, nullptr };
+    static float * nulls[] = { nullptr, nullptr, nullptr, nullptr };
+
     if ( !edges )
     {
         edges = nulls;
@@ -404,36 +437,63 @@ HeightMap HeightMap::genRandom ( unsigned int size, float ** edges )
     data[width - 1][0] = 0;
     data[width - 1][width - 1] = 0;
 
-    diamondSquare ( data, width, edges );
+    perlinNoise2D ( data, width, x, y );
 
-    for ( int i = 0 ; i < 2 ; ++i )
+    if ( edges[0] )
+        for ( unsigned int i = 0 ; i < size ; ++i )
+        {
+            data[0][i] = edges[0][ size* ( size - 1 ) + i];
+        }
+
+    if ( edges[1] )
+        for ( unsigned int i = 0 ; i < size ; ++i )
+        {
+            data[i][size - 1] = edges[1][size*i];
+        }
+
+    if ( edges[2] )
+        for ( unsigned int i = 0 ; i < size ; ++i )
+        {
+            data[size - 1][i] = edges[2][i];
+        }
+
+    if ( edges[3] )
+        for ( unsigned int i = 0 ; i < size ; ++i )
+        {
+            data[i][0] = edges[3][size - 1 + size*i];
+        }
+
+    for ( int i = 0 ; i < 0 ; ++i )
     {
         heightmap.blur();
+        for ( size_t i = 0 ; i < width ; ++i )
+        {
+            data[ i ] = &heightmap.data[i*width];
+        }
         if ( edges[0] )
             for ( unsigned int i = 0 ; i < size ; ++i )
             {
-                heightmap.data[i] = edges[0][size* ( size - 1 ) +i];
+                data[0][i] = edges[0][ size* ( size - 1 ) + i];
             }
 
         if ( edges[1] )
             for ( unsigned int i = 0 ; i < size ; ++i )
             {
-                heightmap.data[i*width + size - 1] = edges[1][size*i];
+                data[i][size - 1] = edges[1][size*i];
             }
 
         if ( edges[2] )
             for ( unsigned int i = 0 ; i < size ; ++i )
             {
-                heightmap.data[ ( size - 1 ) *width + i] = edges[2][i];
+                data[size - 1][i] = edges[2][i];
             }
 
         if ( edges[3] )
             for ( unsigned int i = 0 ; i < size ; ++i )
             {
-                heightmap.data[i] = edges[3][size - 1 + size*i];
+                data[i][0] = edges[3][size - 1 + size*i];
             }
     }
-
 
     delete[] data;
 
@@ -449,9 +509,9 @@ HeightMap::HeightMap ( const HeightMap& copy )
 }
 
 HeightMap::HeightMap ( HeightMap&& src )
-    : width ( src.width )
+    : data ( src.data )
+    , width ( src.width )
     , height ( src.height )
-    , data ( src.data )
 {
     src.data = nullptr;
 }

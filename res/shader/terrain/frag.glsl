@@ -9,7 +9,7 @@ in vec4 gPatchDistance;
 in vec3 gPosition;
 in vec3 gNormal;
 
-uniform vec4 DiffuseMaterial = {0, 0.7, 0.7, 1};
+uniform vec4 DiffuseMaterial = {1, 1, 1, 1};
 
 uniform sampler2D tex;
 
@@ -32,7 +32,7 @@ void main()
 {
     vec3 N = normalize(gNormal);
 
-    vec4 color = DiffuseMaterial* texture( tex, vec2( 4*gPatchDistance ) );
+    vec4 color = texture( tex, vec2( 4*gPatchDistance ) );
 
     if(wireframe)
     {
@@ -42,7 +42,9 @@ void main()
         color.a = 1;
     }
 
-    FragColor = color;
+    // reverse texture gamma correction
+    float gamma = 2.2;
+    FragColor = DiffuseMaterial * pow(color, vec4(gamma));
     position = vec4(view * vec4(gPosition, 1));
     normal.xyz = mat3(view) * N;
     normal.a = 1;

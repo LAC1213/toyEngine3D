@@ -25,7 +25,7 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     p.attenuation = glm::vec3 ( 0.1, 0.1, 1 );
     _lighting.addPointLight ( &p );
     _lighting.setAmbient ( glm::vec3 ( 0.4, 0.4, 0.4 ) );
-    _lighting.addPointLight ( _player.light() );
+    //  _lighting.addPointLight ( _player.light() );
     _lighting.setSunDiffuse ( glm::vec3 ( 1, 1, 1 ) );
     _lighting.setSunDir ( glm::vec3 ( 0, -1, 1.5 ) );
 
@@ -40,7 +40,7 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     static YAML::Node snowConf = YAML::LoadFile ( "res/particles/snow.yaml" );
     _snow.loadFromYAML ( snowConf );
 
-    Texture * groundTex = Engine::TextureManager->request ( "res/textures/ground.jpg" );
+    Texture * groundTex = Engine::TextureManager->request ( "res/textures/dirt.png" );
     groundTex->setParameter ( GL_TEXTURE_WRAP_S, GL_REPEAT );
     groundTex->setParameter ( GL_TEXTURE_WRAP_T, GL_REPEAT );
     _terrainWorld = new TerrainWorld ( groundTex );
@@ -69,7 +69,7 @@ Level1::~Level1()
     delete _swapBuffer;
     delete _terrainWorld;
 
-    Engine::TextureManager->release ( "res/textures/ground.jpg" );
+    Engine::TextureManager->release ( "res/textures/dirt.png" );
     Engine::TextureManager->release ( "res/textures/blob.png" );
 
     vec_for_each ( i, _spinnies )
@@ -243,7 +243,7 @@ void Level1::update ( double dt )
 {
     Engine::Physics = _physics;
     _player.step ( dt );
-    float chunkSize = 50;
+    float chunkSize = 24;
     glm::vec3 c = _player.getPos() /chunkSize;
     _terrainWorld->setCenter ( c.x > 0 ? c.x + 0.5 : c.x - 0.5, c.z > 0 ? c.z + 0.5 : c.z - 0.5 );
     _snow.setInitialPosition ( _player.getPos() + glm::vec3 ( 0, 50, 0 ), 50 );
@@ -321,6 +321,15 @@ void Level1::update ( double dt )
 
     Level::update ( dt );
 
+    std::stringstream ss;
+    ss.setf ( std::ios::fixed );
+    ss.precision ( 2 + log ( _time ) /log ( 10 ) );
+    ss << "Time: " << _time;
+    ss.precision ( -1 -log ( dt ) /log ( 10 ) );
+    ss << " FPS: " << 1/dt;
+    ss.precision ( 4 );
+    ss << " P: " << _player.getPos();
+
     // raypicking
     {
         btVector3 start = glm2bt ( _cam.getPosition() );
@@ -340,17 +349,11 @@ void Level1::update ( double dt )
         if ( cb.hasHit() )
         {
             _rayPickBillboard.setPosition ( bt2glm ( cb.m_hitPointWorld ) );
+            ss.precision ( 4 );
+            ss << " Q: " << bt2glm ( cb.m_hitPointWorld );
         }
     }
 
-    std::stringstream ss;
-    ss.setf ( std::ios::fixed );
-    ss.precision ( 2 + log ( _time ) /log ( 10 ) );
-    ss << "Time: " << _time;
-    ss.precision ( -1 -log ( dt ) /log ( 10 ) );
-    ss << " FPS: " << 1/dt;
-    ss.precision ( 4 );
-    ss << " P: " << _player.getPos();
     _dbgString = ss.str();
 }
 
@@ -437,7 +440,9 @@ void Level1::render()
 //   static PostEffect dither( PostEffect::DITHER, _swapBuffer );
     static PostEffect dither ( PostEffect::NONE, _swapBuffer->getAttachments() [0] );
 
+    glEnable ( GL_FRAMEBUFFER_SRGB );
     dither.render();
+    glDisable ( GL_FRAMEBUFFER_SRGB );
 
     static Font font ( "/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf", 14 );
     Text txt ( &font, _dbgString, glm::vec2 ( _width, _height ) );

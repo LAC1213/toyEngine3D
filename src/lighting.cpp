@@ -9,9 +9,9 @@ Shader * Lighting::_shader = nullptr;
 
 Lighting::Lighting ( Framebuffer * gBuffer )
     :   _gBuffer ( gBuffer ),
-        _sunShadowWidth ( 40 ),
-        _sunShadowHeight ( 40 ),
-        _shadowRange ( 1000 ),
+        _sunShadowWidth ( 20 ),
+        _sunShadowHeight ( 20 ),
+        _shadowRange ( 300 ),
         _ambient ( 0.01, 0.01, 0.01 ),
         _sunPos ( -10, 20, 0 ),
         _sunDir ( 0.5, -1, 0 ),

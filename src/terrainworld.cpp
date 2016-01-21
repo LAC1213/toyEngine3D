@@ -3,10 +3,10 @@
 
 TerrainWorld::TerrainWorld ( Texture * groundTexture )
     : _groundTexture ( groundTexture )
-    , _chunkSize ( 50 )
-    , _maxHeight ( 30 )
-    , _loadRange ( 1 )
-    , _heightmapSize ( 257 )
+    , _chunkSize ( 24 )
+    , _maxHeight ( 100 )
+    , _loadRange ( 4 )
+    , _heightmapSize ( 65 )
 {
     _activeTerrains.resize ( ( 2*_loadRange + 1 ) * ( 2*_loadRange + 1 ) );
     vec_for_each ( i, _activeTerrains )
@@ -14,7 +14,7 @@ TerrainWorld::TerrainWorld ( Texture * groundTexture )
         _activeTerrains[i].setSize ( _chunkSize, _chunkSize );
         _activeTerrains[i].setMaxHeight ( _maxHeight );
         _activeTerrains[i].setTexture ( _groundTexture );
-        _activeTerrains[i].toggleWireframe();
+        //     _activeTerrains[i].toggleWireframe();
     }
     setCenter ( 0, 0, true );
 }
@@ -68,7 +68,7 @@ void TerrainWorld::setCenter ( int32_t x, int32_t y, bool forceUpdate )
                 }
 
                 ChunkCoord east = current;
-                --east.x;
+                ++east.x;
                 auto east_it = _heights.find ( east );
                 if ( east_it != _heights.end() )
                 {
@@ -77,7 +77,7 @@ void TerrainWorld::setCenter ( int32_t x, int32_t y, bool forceUpdate )
                 }
 
                 ChunkCoord west = current;
-                ++west.x;
+                --west.x;
                 auto west_it = _heights.find ( west );
                 if ( west_it != _heights.end() )
                 {
@@ -85,7 +85,7 @@ void TerrainWorld::setCenter ( int32_t x, int32_t y, bool forceUpdate )
                     edges[3] = west_it->second.data;
                 }
 
-                std::pair<ChunkCoord, HeightMap> entry ( current, HeightMap::genRandom ( _heightmapSize, edges ) );
+                std::pair<ChunkCoord, HeightMap> entry ( current, HeightMap::genRandom ( _heightmapSize, current.x, current.y, edges ) );
                 _heights.insert ( entry );
                 _activeTerrains[ idx ].setHeightMap ( &_heights.find ( current )->second );
             }
