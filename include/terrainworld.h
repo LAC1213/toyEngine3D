@@ -40,6 +40,8 @@ public:
 
     void setCenter ( int32_t x, int32_t y, bool forceUpdate = false );
 
+    void toggleWireframe();
+
 protected:
     Texture * _groundTexture;
 

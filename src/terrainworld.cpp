@@ -3,10 +3,10 @@
 
 TerrainWorld::TerrainWorld ( Texture * groundTexture )
     : _groundTexture ( groundTexture )
-    , _chunkSize ( 24 )
+    , _chunkSize ( 48 )
     , _maxHeight ( 100 )
     , _loadRange ( 4 )
-    , _heightmapSize ( 65 )
+    , _heightmapSize ( 129 )
 {
     _activeTerrains.resize ( ( 2*_loadRange + 1 ) * ( 2*_loadRange + 1 ) );
     vec_for_each ( i, _activeTerrains )
@@ -14,9 +14,16 @@ TerrainWorld::TerrainWorld ( Texture * groundTexture )
         _activeTerrains[i].setSize ( _chunkSize, _chunkSize );
         _activeTerrains[i].setMaxHeight ( _maxHeight );
         _activeTerrains[i].setTexture ( _groundTexture );
-        //     _activeTerrains[i].toggleWireframe();
     }
     setCenter ( 0, 0, true );
+}
+
+void TerrainWorld::toggleWireframe()
+{
+    vec_for_each( i, _activeTerrains )
+    {
+        _activeTerrains[i].toggleWireframe();
+    }
 }
 
 void TerrainWorld::setCenter ( int32_t x, int32_t y, bool forceUpdate )

@@ -1,6 +1,5 @@
 #include <text.h>
 #include <internal/util.h>
-#include <vector>
 
 #include <engine.h>
 
@@ -27,6 +26,13 @@ Text::Text ( Font * font, std::string str, glm::vec2 screen )
     Font::CharInfo * info = _font->getCharInfo();
     for ( const char * p = str.c_str() ; *p ; ++p )
     {
+        if( *p == '\n' )
+        {
+            y -= 2*_font->getSize() / _screen.y;
+            x = -1;
+            continue;
+        }
+
         unsigned int idx = *p;
         float x2 =  x + info[idx].bl * sx;
         float y2 =  -y - info[idx].bt * sy;

@@ -1,8 +1,4 @@
 #include <level1.h>
-#include <spinny.h>
-#include <bomb.h>
-#include <sstream>
-#include <internal/util.h>
 
 Level1::Level1 ( GLFWwindow* window, int width, int height )
     : Level ( window, width, height )
@@ -25,7 +21,7 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     p.attenuation = glm::vec3 ( 0.1, 0.1, 1 );
     _lighting.addPointLight ( &p );
     _lighting.setAmbient ( glm::vec3 ( 0.4, 0.4, 0.4 ) );
-    //  _lighting.addPointLight ( _player.light() );
+    _lighting.addPointLight ( _player.light() );
     _lighting.setSunDiffuse ( glm::vec3 ( 1, 1, 1 ) );
     _lighting.setSunDir ( glm::vec3 ( 0, -1, 1.5 ) );
 
@@ -44,6 +40,7 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     groundTex->setParameter ( GL_TEXTURE_WRAP_S, GL_REPEAT );
     groundTex->setParameter ( GL_TEXTURE_WRAP_T, GL_REPEAT );
     _terrainWorld = new TerrainWorld ( groundTex );
+//    _terrainWorld->toggleWireframe();
 
     _spinnies[0] = new Spinny;
 
@@ -239,11 +236,13 @@ void Level1::onKeyAction ( int key, int scancode, int action, int mods )
     }
 }
 
+extern char etext;
+
 void Level1::update ( double dt )
 {
     Engine::Physics = _physics;
     _player.step ( dt );
-    float chunkSize = 24;
+    float chunkSize = 48;
     glm::vec3 c = _player.getPos() /chunkSize;
     _terrainWorld->setCenter ( c.x > 0 ? c.x + 0.5 : c.x - 0.5, c.z > 0 ? c.z + 0.5 : c.z - 0.5 );
     _snow.setInitialPosition ( _player.getPos() + glm::vec3 ( 0, 50, 0 ), 50 );
@@ -328,7 +327,7 @@ void Level1::update ( double dt )
     ss.precision ( -1 -log ( dt ) /log ( 10 ) );
     ss << " FPS: " << 1/dt;
     ss.precision ( 4 );
-    ss << " P: " << _player.getPos();
+    ss << "\nPlayer Positon: " << _player.getPos() << "\n";
 
     // raypicking
     {
@@ -342,7 +341,7 @@ void Level1::update ( double dt )
         q.z = -1;
         q.w = 0;
         glm::vec3 p = glm::vec3 ( glm::inverse ( _cam.getView() ) * q );
-        btVector3 end = start + 100* ( glm2bt ( p ) );
+        btVector3 end = start + 1000* ( glm2bt ( p ) );
         btCollisionWorld::ClosestRayResultCallback cb ( start, end );
         _physics->dynamicsWorld->rayTest ( start, end, cb );
 
@@ -350,9 +349,21 @@ void Level1::update ( double dt )
         {
             _rayPickBillboard.setPosition ( bt2glm ( cb.m_hitPointWorld ) );
             ss.precision ( 4 );
-            ss << " Q: " << bt2glm ( cb.m_hitPointWorld );
+            ss << "Mouse Picking Intersection: " << bt2glm ( cb.m_hitPointWorld );
         }
     }
+
+// Not portable memory information
+
+#define GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX    0x9048
+#define GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX  0x9049
+
+    ss << "\nCPU Memory: " << ((ptrdiff_t)(sbrk(0)) - (ptrdiff_t)&etext)/ (1 << 10) << "KiB";
+    GLint totalMemKB = 0, availMemKB = 0;
+    glGetIntegerv( GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &totalMemKB );
+    glGetIntegerv( GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &availMemKB );
+    int p = 100*(totalMemKB - availMemKB)/totalMemKB;
+    ss << "\nGPU Memory: " << totalMemKB - availMemKB << "/" << totalMemKB << "KB (" << p << "%)" ;
 
     _dbgString = ss.str();
 }

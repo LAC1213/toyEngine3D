@@ -3,28 +3,14 @@
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 
 #include <internal/util.h>
 
-#include <time.h>
-
-#include <unistd.h>
 #include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 
-#include <stdbool.h>
-#include <memory.h>
-
-#include <iostream>
-#include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
 
 #include <text.h>
-#include <billboard.h>
-#include <posteffect.h>
-#include <lighting.h>
 #include <engine.h>
 #include <level.h>
 #include <level1.h>
@@ -61,82 +47,6 @@ void onResize ( __attribute__ ( ( unused ) ) GLFWwindow * window, int width, int
     currentLevel->onResize ( width, height );
 }
 
-//TODO maybe move to Engine::init()
-GLFWwindow * initContext()
-{
-    /* Initialize the library */
-    if ( !glfwInit() )
-    {
-        errorExit ( "GLFW Initialization failed" );
-    }
-
-    glfwSetErrorCallback ( glfwErrorCallback );
-
-    //TODO get actual path
-    YAML::Node conf = YAML::LoadFile ( "../config.yaml" );
-
-    int w = 1000;
-    int h = 800;
-    int x = 200;
-    int y = 200;
-    if ( conf["window"] )
-    {
-        if ( conf["window"]["width"] )
-        {
-            w = conf["window"]["width"].as<int>();
-        }
-        if ( conf["window"]["height"] )
-        {
-            h = conf["window"]["height"].as<int>();
-        }
-        if ( conf["window"]["x"] )
-        {
-            x = conf["window"]["x"].as<int>();
-        }
-        if ( conf["window"]["y"] )
-        {
-            y = conf["window"]["y"].as<int>();
-        }
-    }
-
-    GLFWwindow * window = glfwCreateWindow ( w, h, "Engine Demo", NULL, NULL );
-    if ( !window )
-    {
-        errorExit ( "Couldn't create glfw window." );
-    }
-    glfwSetWindowPos ( window, x, y );
-
-    /* Make the window's context current */
-    glfwMakeContextCurrent ( window );
-    if ( conf["graphics"] && conf["graphics"]["vsync"] && conf["graphics"]["vsync"].as<bool>() )
-    {
-        glfwSwapInterval ( 1 );
-    }
-    else
-    {
-        glfwSwapInterval ( 0 );
-    }
-
-    GLenum err = glewInit();
-    if ( err != GLEW_OK )
-    {
-        errorExit ( "GLEW Initalization failed [%i]", err );
-    }
-
-    glEnable ( GL_DEPTH_TEST );
-
-    glEnable ( GL_BLEND );
-    glBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-
-    glEnable ( GL_CULL_FACE );
-
-    glPixelStorei ( GL_UNPACK_ALIGNMENT, 1 );
-
-    glClearColor ( 0, 0, 0, 0 );
-
-    return window;
-}
-
 int main()
 {
     int errFd = -1;
@@ -155,11 +65,9 @@ int main()
         fprintf ( stderr, "\x1b[1;32mBuilt %s %s \x1b[0;39m: \n", __TIME__, __DATE__ );
     }
 
-    GLFWwindow * window = initContext();
+    GLFWwindow * window = Engine::init();
 
     srand ( time ( 0 ) );
-
-    Engine::init();
 
     int width = 0, height = 0;
     glfwGetFramebufferSize ( window, &width, &height );
@@ -173,8 +81,6 @@ int main()
     glfwSetCursorPosCallback ( window, onMouseMove );
     glfwSetScrollCallback ( window, onMouseScroll );
     glfwSetFramebufferSizeCallback ( window, onResize );
-
-    glfwSetCursorPos ( window, 0, 0 );
 
     double t0 = 0, dt;
 

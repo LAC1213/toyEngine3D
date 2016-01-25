@@ -1,15 +1,16 @@
-particles_per_second: 500
-max_age: 20
+particles_per_second: 5000
+max_age: 15
 
-size: 0.1
+size: 0.2
 color: [1, 1, 1, 1]
 
 position: [0, 30, 0]
 position_randomness: 30
 
 velocity: [0, -1, 0]
-velocity_randomness: 0.2
+velocity_randomness: 0.5
 
 acceleration: [0, -0.3, 0]
 
-texture: "res/textures/blob.png"
+texture: "res/textures/snow.jpg"
+animation_layout: [2, 2]

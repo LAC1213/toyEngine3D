@@ -33,6 +33,11 @@ public:
     };
 
     Shader ( const std::string& shaderDir, LoadFlag loadFlags );
+    Shader ( const std::string * vertPath,
+             const std::string * contPath,
+             const std::string * evalPath,
+             const std::string * geomPath,
+             const std::string * fragPath );
     ~Shader();
 
     void use();

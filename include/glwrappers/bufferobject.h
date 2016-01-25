@@ -27,8 +27,8 @@ public:
 
 protected:
     GLuint _id;
-    GLenum _hint;
-    GLenum _target;
+    GLenum _hint = GL_STATIC_DRAW;
+    GLenum _target = GL_ARRAY_BUFFER;
 
 private:
     BufferObject ( const BufferObject& bo ) = delete;

@@ -8,7 +8,8 @@ My Homemade engine that I develop whenever I do something further with opengl.
 2. [freetype](http://www.freetype.org/)
 3. [SOIL](http://www.lonesock.net/soil.html)
 4. OpenGL (GL GLU GLEW)
-5. glibc
+5. bullet
+6. yaml-cpp
 
 ## Use
 
@@ -57,10 +58,8 @@ Hello Cube example:
 
 1. pointlight shadows
 2. bad guys, level1
-3. mesh importer
-
-## Ideas
-
-Game Concept: 
-
-Flying over a world and drop bombs. dodge bad stuff, destroy things on the ground.
+3. mesh importer (assimp)
+4. avoid RAII so we can allocate efficiently
+5. avoid inheritence
+6. nicer Terrain generation
+7. GPU particle simulation (use Textures with positions or CUDA)

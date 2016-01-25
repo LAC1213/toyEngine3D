@@ -3,7 +3,6 @@
 #include <random>
 
 #include <engine.h>
-#include <internal/util.h>
 
 Shader * Terrain::SHADER = 0;
 
@@ -395,8 +394,8 @@ static void perlinNoise2D ( float ** data, size_t width, int seedx, int seedy )
     for ( unsigned int i = 0 ; i < width ; ++i )
         for ( unsigned int j = 0 ; j < width ; ++j )
         {
-            float y = ( float ) i/width;
-            float x = ( float ) j/width;
+            float y = ( float ) i/(width - 1);
+            float x = ( float ) j/(width - 1);
 
             float n0 = lerp ( glm::dot ( tl, glm::vec2 ( x, y ) ), glm::dot ( tr, glm::vec2 ( x - 1, y ) ), x );
             float n1 = lerp ( glm::dot ( bl, glm::vec2 ( x, y - 1 ) ), glm::dot ( br, glm::vec2 ( x - 1, y - 1 ) ), x );
@@ -623,13 +622,15 @@ void HeightMap::uploadToGPU()
 
     unsigned short * heights = new unsigned short[ width*width ];
 
-    for ( size_t i = 0 ; i < width ; ++i )
+    for ( size_t i = 0 ; i < height ; ++i )
         for ( size_t j = 0 ; j < width ; ++j )
         {
             heights[ i*width +j ] = 0xffff * ( data[i*width + j] + 0.5 );
         }
 
+    glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
     texture->loadData ( heights );
+    glPixelStorei( GL_UNPACK_ALIGNMENT, 16 );
 
     delete[] heights;
 }

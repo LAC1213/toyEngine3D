@@ -33,6 +33,9 @@ void main()
     vec3 N = normalize(gNormal);
 
     vec4 color = texture( tex, vec2( 4*gPatchDistance ) );
+    // reverse texture gamma correction
+    float gamma = 2.2;
+    color = DiffuseMaterial * pow(color, vec4(gamma));
 
     if(wireframe)
     {
@@ -42,9 +45,7 @@ void main()
         color.a = 1;
     }
 
-    // reverse texture gamma correction
-    float gamma = 2.2;
-    FragColor = DiffuseMaterial * pow(color, vec4(gamma));
+    FragColor = color;
     position = vec4(view * vec4(gPosition, 1));
     normal.xyz = mat3(view) * N;
     normal.a = 1;

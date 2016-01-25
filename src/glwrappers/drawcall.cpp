@@ -98,6 +98,7 @@ void DrawCall::setIndexBuffer ( const BufferObject * indexBuffer )
         glBindBuffer ( GL_ELEMENT_ARRAY_BUFFER, 0 );
         glBindVertexArray ( 0 );
         _indexBuffer = nullptr;
+        return;
     }
 
     if ( indexBuffer->getTarget() != GL_ELEMENT_ARRAY_BUFFER )

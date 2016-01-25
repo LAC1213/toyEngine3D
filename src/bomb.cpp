@@ -14,9 +14,8 @@ Bomb::Bomb ( double timeToExplode )
     _shape->calculateLocalInertia ( _mass, inertia );
     btRigidBody::btRigidBodyConstructionInfo bodyCI ( _mass, _motionState, _shape, inertia );
     bodyCI.m_restitution = 0.7f;
-    bodyCI.m_friction = 0.2f;
+    bodyCI.m_friction = 1.f;
     _body = new btRigidBody ( bodyCI );
-//    _body->setActivationState( DISABLE_DEACTIVATION );
 
     setModel ( glm::vec3 ( 0 ), glm::vec3 ( 2*M_PI, 0, 0 ), glm::vec3 ( 1 ) );
 

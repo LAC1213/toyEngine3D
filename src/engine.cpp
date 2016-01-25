@@ -1,15 +1,5 @@
 #include <engine.h>
 #include <lighting.h>
-#include <posteffect.h>
-#include <billboard.h>
-#include <particle.h>
-#include <text.h>
-#include <terrain.h>
-#include <mesh.h>
-
-#include <unistd.h>
-#include <internal/util.h>
-#include <yaml-cpp/yaml.h>
 
 PhysicsVars::PhysicsVars()
 {
@@ -33,7 +23,6 @@ PhysicsVars::~PhysicsVars()
 namespace Engine
 {
 
-std::string Root = ".";
 PhysicsVars * Physics = nullptr;
 
 BufferObject * QuadBuffer = nullptr;
@@ -47,46 +36,112 @@ SphereShapeManagerT * SphereShapeManager = nullptr;
 
 static bool initialized = false;
 
-void init()
+static void glfwErrorCallback ( int error, const char* description )
+{
+    errorExit ( "GLFW [%i]: %s\n", error, description );
+}
+
+GLFWwindow * init()
 {
     if ( initialized )
     {
-        return;
+        std::cerr << log_warn << "Engine already initialized." << log_endl;
+        return nullptr;
     }
-
-    /* init graphics */
-    QuadBuffer = new BufferObject();
-    GLfloat quadVerts[] =
-    {
-        -1, -1,
-        1, -1,
-        1, 1,
-        -1, -1,
-        1, 1,
-        -1, 1
-    };
-    QuadBuffer->loadData ( quadVerts, sizeof quadVerts );
-
-    DrawScreenQuad = new DrawCall();
-    DrawScreenQuad->setElements ( 6 );
-    DrawScreenQuad->addAttribute ( VertexAttribute ( QuadBuffer, GL_FLOAT, 2 ) );
 
     char * resPath = getenv ( "ENGINE_ROOT" );
     if ( resPath )
     {
         chdir ( resPath );
         std::cerr << log_info << "engine root at " << std::string ( resPath ) << log_endl;
-        Root = std::string ( resPath );
     }
     else
     {
         char wd[4096];
         getcwd ( wd, sizeof wd );
         std::cerr << log_info << "engine root at " << std::string ( wd ) << log_endl;
-        Root = std::string ( wd );
     }
 
-    YAML::Node config = YAML::LoadFile ( "config.yaml" );
+    glfwSetErrorCallback ( glfwErrorCallback );
+    if( !glfwInit() )
+    {
+        errorExit( "GLFW Initialization failed" );
+    }
+
+    YAML::Node conf = YAML::LoadFile ( "config.yaml" );
+
+    int w = 1000;
+    int h = 800;
+    int x = 200;
+    int y = 200;
+    if ( conf["window"] )
+    {
+        if ( conf["window"]["width"] )
+        {
+            w = conf["window"]["width"].as<int>();
+        }
+        if ( conf["window"]["height"] )
+        {
+            h = conf["window"]["height"].as<int>();
+        }
+        if ( conf["window"]["x"] )
+        {
+            x = conf["window"]["x"].as<int>();
+        }
+        if ( conf["window"]["y"] )
+        {
+            y = conf["window"]["y"].as<int>();
+        }
+    }
+
+    GLFWwindow * window = glfwCreateWindow ( w, h, "Engine Demo", NULL, NULL );
+    if ( !window )
+    {
+        errorExit ( "Couldn't create glfw window." );
+    }
+    glfwSetWindowPos ( window, x, y );
+
+    /* Make the window's context current */
+    glfwMakeContextCurrent ( window );
+    if ( conf["graphics"] && conf["graphics"]["vsync"] && conf["graphics"]["vsync"].as<bool>() )
+    {
+        glfwSwapInterval ( 1 );
+    }
+    else
+    {
+        glfwSwapInterval ( 0 );
+    }
+
+    GLenum err = glewInit();
+    if ( err != GLEW_OK )
+    {
+        errorExit ( "GLEW Initalization failed [%i]", err );
+    }
+
+    glEnable ( GL_DEPTH_TEST );
+
+    glEnable ( GL_BLEND );
+    glBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+
+    glEnable ( GL_CULL_FACE );
+
+    glClearColor ( 0, 0, 0, 0 );
+
+    QuadBuffer = new BufferObject();
+    GLfloat quadVerts[] =
+            {
+                    -1, -1,
+                    1, -1,
+                    1, 1,
+                    -1, -1,
+                    1, 1,
+                    -1, 1
+            };
+    QuadBuffer->loadData ( quadVerts, sizeof quadVerts );
+
+    DrawScreenQuad = new DrawCall();
+    DrawScreenQuad->setElements ( 6 );
+    DrawScreenQuad->addAttribute ( VertexAttribute ( QuadBuffer, GL_FLOAT, 2 ) );
 
     ShaderManager = new Shader::Manager;
     TextureManager = new Texture::Manager;
@@ -100,7 +155,7 @@ void init()
     ParticleEmitter::init();
     Text::init();
 
-    if ( config["enableTerrain"] && config["enableTerrain"].as<bool>() )
+    if ( conf["enableTerrain"] && conf["enableTerrain"].as<bool>() )
     {
         Terrain::init();
     }
@@ -108,6 +163,7 @@ void init()
     MeshObject::init();
 
     initialized = true;
+    return window;
 }
 
 void destroy()

@@ -35,8 +35,6 @@ public:
 
 namespace Engine
 {
-extern std::string Root;
-
 extern Shader::Manager * ShaderManager;
 extern Texture::Manager * TextureManager;
 extern PrimitiveManagerT * PrimitiveManager;
@@ -45,7 +43,7 @@ extern SphereShapeManagerT * SphereShapeManager;
 
 extern PhysicsVars * Physics;
 
-void init();
+GLFWwindow * init();
 void destroy();
 
 extern BufferObject * QuadBuffer;

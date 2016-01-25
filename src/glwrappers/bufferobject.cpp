@@ -4,20 +4,16 @@
  *  sets hint to GL_STATIC_DRAW and target to GL_ARRAY_BUFFER
  */
 BufferObject::BufferObject()
-    :   _hint ( GL_STATIC_DRAW ),
-        _target ( GL_ARRAY_BUFFER )
 {
-    glGenBuffers ( 1, &_id );
+    glGenBuffers( 1, &_id );
 }
 
 /** Contructor
  * \param target initial target
  */
 BufferObject::BufferObject ( GLenum target )
-    :   _hint ( GL_STATIC_DRAW ),
-        _target ( target )
+    : _target ( target )
 {
-    glGenBuffers ( 1, &_id );
 }
 
 /** Destructor which deletes the openGL buffer object
