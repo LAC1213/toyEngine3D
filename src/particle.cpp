@@ -169,21 +169,42 @@ void ParticleEmitter::loadFromYAML ( YAML::Node node )
     _drawCall.setElements(GLuint(_spawnFrequency * _lifeTime));
 }
 
-void ParticleEmitter::initParticle(Particle &p)
+static glm::vec3 randomSphereVec(void)
 {
-    auto rnd = [] ()
-    {
-        return ( float ) 2*rand() / RAND_MAX - 1;
+    auto rnd = []() {
+        return (float) rand() / RAND_MAX;
+    };
+    float theta = 2 * M_PI * rnd();
+    float phi = M_PI * rnd();
+    float r = rnd();
+    return r * glm::vec3(cos(theta), cos(phi) * sin(theta), sin(phi) * sin(theta));
+}
+
+static glm::vec3 randomBoxVec(void) {
+    auto rnd = []() {
+        return (float) 2 * rand() / RAND_MAX - 1;
+    };
+    return glm::vec3(rnd(), rnd(), rnd());
+}
+
+void ParticleEmitter::initParticle(Particle &p) {
+    auto rnd = []() {
+        return (float) 2 * rand() / RAND_MAX - 1;
     };
 
-    //TODO Spherical distribution instead of box
-    p.p[0] = _p.x + _pRadius * rnd();
-    p.p[1] = _p.y + _pRadius * rnd();
-    p.p[2] = _p.z + _pRadius * rnd();
+    {
+        glm::vec3 r = _pRadius * randomSphereVec();
+        p.p[0] = _p.x + r.x;
+        p.p[1] = _p.y + r.y;
+        p.p[2] = _p.z + r.z;
+    }
 
-    p.dp[0] = _dp.x + _dpRadius * rnd();
-    p.dp[1] = _dp.y + _dpRadius * rnd();
-    p.dp[2] = _dp.z + _dpRadius * rnd();
+    {
+        glm::vec3 r = _dpRadius * randomSphereVec();
+        p.dp[0] = _dp.x + r.x;
+        p.dp[1] = _dp.y + r.y;
+        p.dp[2] = _dp.z + r.z;
+    }
 
     p.s = _s + _sRadius * rnd();
 
@@ -350,6 +371,7 @@ void ParticleEmitter::step ( double dt )
         {
             initParticle(_periodicParticles[(insertIndex + i) % _periodicParticles.size()]);
         }
+        //TODO spawn on GPU (maybe store an array of random numbers in a vbo or texture to allow random numbers on GPU)
         _buffer.loadSubData( &_periodicParticles[insertIndex], insertIndex * sizeof(Particle), n * sizeof(Particle));
         timer -= n /_spawnFrequency;
     }
