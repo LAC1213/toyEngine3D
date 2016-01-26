@@ -14,3 +14,4 @@ acceleration: [0, -0.3, 0]
 
 texture: "res/textures/snow.jpg"
 animation_layout: [2, 2]
+animation_speed: 10

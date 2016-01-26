@@ -11,9 +11,10 @@ BufferObject::BufferObject()
 /** Contructor
  * \param target initial target
  */
-BufferObject::BufferObject ( GLenum target )
-    : _target ( target )
+BufferObject::BufferObject ( GLenum target, GLenum hint )
+    : _target ( target ), _hint( hint )
 {
+    glGenBuffers( 1, &_id );
 }
 
 /** Destructor which deletes the openGL buffer object
@@ -52,8 +53,9 @@ void BufferObject::setHint ( GLenum hint )
  * \param data pointer to data
  * \param n size of data in bytes
  */
-void BufferObject::loadData ( const void * data, size_t n ) const
+void BufferObject::loadData ( const void * data, size_t n )
 {
+    _size = n;
     bind();
     glBufferData ( _target, n, data, _hint );
 }
@@ -67,6 +69,18 @@ void BufferObject::loadSubData ( const void* data, size_t offset, size_t n ) con
 {
     bind();
     glBufferSubData ( _target, offset, n, data );
+}
+
+/** resizes buffer store if necessary with glBufferData( target, size, nullptr, hint ),
+ * resizing leaves all the data in undefined state.
+ */
+void BufferObject::reserve ( size_t size )
+{
+    if( _size == size )
+        return;
+    _size = size;
+    bind();
+    glBufferData ( _target, size, nullptr, _hint );
 }
 
 GLuint BufferObject::getID() const

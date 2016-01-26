@@ -4,15 +4,19 @@
 #include <engine.h>
 
 Shader * ParticleEmitter::_shader = nullptr;
+Shader ParticleEmitter::_updateShader( 0 );
 
 ParticleEmitter::ParticleEmitter ( Texture * texture )
     :   _animSize ( 1, 1 ),
+        _animSpeed ( 1 ),
         _spawnFrequency ( 60 ),
         _c ( 1, 1, 1, 1 ),
         _s ( 0.1 ),
         _lifeTime ( 4 ),
         _time ( 0 ),
+        _swapBuffer ( GL_ARRAY_BUFFER, GL_STATIC_READ ),
         _drawCall ( GL_POINTS ),
+        _updateCall ( GL_POINTS ),
         _texture ( texture )
 {
     if ( _texture )
@@ -25,24 +29,35 @@ ParticleEmitter::ParticleEmitter ( Texture * texture )
     pAttr.offset_ = ( const GLvoid* ) ( ( ptrdiff_t ) & ( test.p ) - ( ptrdiff_t ) &test );
     pAttr.stride_ = sizeof ( test );
     _drawCall.addAttribute ( pAttr );
+    _updateCall.addAttribute ( pAttr );
 
-    VertexAttribute cAttr ( &_buffer, GL_FLOAT, 4 );
-    cAttr.offset_ = ( const GLvoid* ) ( ( ptrdiff_t ) & ( test.c ) - ( ptrdiff_t ) &test );
-    cAttr.stride_ = sizeof ( test );
-    _drawCall.addAttribute ( cAttr );
+    VertexAttribute dpAttr ( &_buffer, GL_FLOAT, 3 );
+    dpAttr.offset_ = ( const GLvoid* ) ( ( ptrdiff_t ) &test.dp - ( ptrdiff_t ) & test );
+    dpAttr.stride_ = sizeof ( test );
+    _updateCall.addAttribute ( dpAttr );
 
     VertexAttribute uvAttr ( &_buffer, GL_FLOAT, 2 );
     uvAttr.offset_ = ( const GLvoid* ) ( ( ptrdiff_t ) & ( test.uv ) - ( ptrdiff_t ) &test );
     uvAttr.stride_ = sizeof ( test );
     _drawCall.addAttribute ( uvAttr );
+    _updateCall.addAttribute ( uvAttr );
+
+    VertexAttribute cAttr ( &_buffer, GL_FLOAT, 4 );
+    cAttr.offset_ = ( const GLvoid* ) ( ( ptrdiff_t ) & ( test.c ) - ( ptrdiff_t ) &test );
+    cAttr.stride_ = sizeof ( test );
+    _drawCall.addAttribute ( cAttr );
+    _updateCall.addAttribute ( cAttr );
 
     VertexAttribute sAttr ( &_buffer, GL_FLOAT, 1 );
     sAttr.offset_ = ( const GLvoid* ) ( ( ptrdiff_t ) & ( test.s ) - ( ptrdiff_t ) &test );
     sAttr.stride_ = sizeof ( test );
     _drawCall.addAttribute ( sAttr );
+    _updateCall.addAttribute ( sAttr );
 
     _periodicParticles.resize(size_t(_spawnFrequency * _lifeTime));
     _drawCall.setElements(GLuint(_spawnFrequency * _lifeTime));
+
+    _swapBuffer.setHint( GL_STATIC_READ );
 }
 
 ParticleEmitter::~ParticleEmitter()
@@ -78,6 +93,11 @@ void ParticleEmitter::loadFromYAML ( YAML::Node node )
     {
         _animSize.x = node["animation_layout"][0].as<int>();
         _animSize.y = node["animation_layout"][1].as<int>();
+    }
+
+    if ( node["animation_speed"] )
+    {
+        _animSpeed = node["animation_speed"].as<float>();
     }
 
     if ( node["position"] )
@@ -225,6 +245,11 @@ void ParticleEmitter::setAnimSize ( const glm::vec2& s )
     _animSize = s;
 }
 
+void ParticleEmitter::setAnimSpeed( float s )
+{
+    _animSpeed = s;
+}
+
 void ParticleEmitter::setTexture ( Texture* tex )
 {
     _texture = tex;
@@ -290,42 +315,6 @@ void ParticleEmitter::step ( double dt )
     static double timer = 0;
     timer += dt;
 
-    /* update perodic particles */
-    size_t insertIndex = 0;
-    if ( _periodicParticles.size() )
-    {
-        insertIndex = ( ( size_t ) ( _time * _spawnFrequency ) ) % _periodicParticles.size();
-    }
-
-    if ( timer * _spawnFrequency > 1 )
-    {
-        for ( size_t i = 0 ; i < timer * _spawnFrequency ; ++i )
-        {
-            initParticle(_periodicParticles[(insertIndex + i) % _periodicParticles.size()]);
-        }
-        timer -= floor ( timer * _spawnFrequency ) /_spawnFrequency;
-    }
-
-    for ( size_t i = 0 ; i < _periodicParticles.size() && i < _time * _spawnFrequency ; ++i )
-    {
-        stepParticle(_periodicParticles[i], float(dt));
-        if ( _animSize.x != 0 && _animSize.y != 0 && glm::dot ( _animSize, _animSize ) > 3 )
-        {
-            size_t n = _periodicParticles.size();
-            double age = ( ( n + i - insertIndex ) % n ) / _spawnFrequency;
-            int pos = int(age / _lifeTime * _animSize.x * _animSize.y);
-            int x = pos % ( int ) _animSize.x;
-            int y = pos / ( int ) _animSize.x;
-            _periodicParticles[i].uv[0] = ( float ) x/_animSize.x;
-            _periodicParticles[i].uv[1] = ( float ) y/_animSize.y;
-        }
-        else
-        {
-            _periodicParticles[i].uv[0] = 0;
-            _periodicParticles[i].uv[1] = 0;
-        }
-    }
-
     size_t elements = _periodicParticles.size();
 
     auto it = _arbitraryParticles.begin();
@@ -343,26 +332,82 @@ void ParticleEmitter::step ( double dt )
         }
     }
 
-    _drawCall.setElements(GLuint(elements));
+    _updateCall.setElements(GLuint(elements));
+    _buffer.reserve ( elements * sizeof(Particle) );
+    _swapBuffer.reserve ( elements * sizeof(Particle) );
+
+    /* update perodic particles */
+    size_t insertIndex = 0;
+    if ( _periodicParticles.size() )
+    {
+        insertIndex = ( ( size_t ) ( _time * _spawnFrequency ) ) % _periodicParticles.size();
+    }
+
+    if ( timer * _spawnFrequency > 1 )
+    {
+        size_t n = floor(timer * _spawnFrequency);
+        for ( size_t i = 0 ; i < n ; ++i )
+        {
+            initParticle(_periodicParticles[(insertIndex + i) % _periodicParticles.size()]);
+        }
+        _buffer.loadSubData( &_periodicParticles[insertIndex], insertIndex * sizeof(Particle), n * sizeof(Particle));
+        timer -= n /_spawnFrequency;
+    }
+
+    glEnable( GL_RASTERIZER_DISCARD );
+
+    glBindBufferBase( GL_TRANSFORM_FEEDBACK_BUFFER, 0, _swapBuffer );
+
+    Camera * old = Camera::Active;
+    Camera::Active = &Camera::Null;
+    _updateShader.use();
+    _updateShader.setUniform( "dt", float( dt ) );
+    _updateShader.setUniform( "time", float( _time ) );
+    _updateShader.setUniform( "insertIndex", (int)insertIndex );
+    _updateShader.setUniform( "spawnFrequency", _spawnFrequency );
+    _updateShader.setUniform( "animSpeed", _animSpeed );
+    _updateShader.setUniform( "animSize" , _animSize );
+    _updateShader.setUniform( "lifeTime", _lifeTime );
+    _updateShader.setUniform( "ddp", _ddp );
+    _updateShader.setUniform( "dc" , _dc );
+    _updateShader.setUniform( "ddc" , _ddc );
+    _updateShader.setUniform( "ds" , _ds );
+    _updateShader.setUniform( "dds" , _dds );
+    Camera::Active = old;
+
+    glBeginTransformFeedback( GL_POINTS );
+    _updateCall();
+    glEndTransformFeedback();
+
+    glDisable( GL_RASTERIZER_DISCARD );
+
+    glFlush();
+
+    glBindBuffer( GL_COPY_READ_BUFFER, _swapBuffer );
+    glBindBuffer( GL_COPY_WRITE_BUFFER, _buffer );
+    glCopyBufferSubData( GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, elements * sizeof( Particle ) );
+
+    Particle p;
+    _swapBuffer.bind();
+    glGetBufferSubData( GL_ARRAY_BUFFER, insertIndex * sizeof( Particle ), sizeof(Particle), &p );
+
+    Particle p1;
+    _buffer.bind();
+    glGetBufferSubData( GL_ARRAY_BUFFER, insertIndex * sizeof( Particle ), sizeof(Particle), &p1 );
+
+    _drawCall.setElements( GLuint(elements) );
+
     if ( !elements )
     {
         return;
-    }
-    if ( elements == _periodicParticles.size() )
-    {
-        _buffer.loadData(_periodicParticles.data(), _periodicParticles.size() * sizeof(Particle));
-        return;
-    }
-    else
-    {
-        _buffer.loadData(nullptr, elements * sizeof(Particle));
-        _buffer.loadSubData(_periodicParticles.data(), 0, _periodicParticles.size() * sizeof(Particle));
     }
 
     //reuse to calculate offsets
     elements = size_t(_spawnFrequency * _lifeTime);
 
-    /* update arbitrary particles */
+    /* update arbitrary particles
+     * TODO update on GPU
+     */
     it = _arbitraryParticles.begin();
     while ( it != _arbitraryParticles.end() )
     {
@@ -371,7 +416,7 @@ void ParticleEmitter::step ( double dt )
         vec_for_each ( i, ps )
         {
             stepParticle(ps[i], float(dt));
-            if ( _animSize.x != 0 && _animSize.y != 0 && glm::dot ( _animSize, _animSize ) > 3 )
+            if ( _animSize.x != 0 && _animSize.y != 0 && glm::dot ( _animSize, _animSize ) > 3.f )
             {
                 int pos = int(it->first / _lifeTime * _animSize.x * _animSize.y);
                 int x = pos % ( int ) _animSize.x;
@@ -420,6 +465,27 @@ void ParticleEmitter::render()
 void ParticleEmitter::init()
 {
     _shader = Engine::ShaderManager->request("res/shader/particle", Shader::LOAD_GEOM | Shader::LOAD_BASIC);
+
+    GLuint updateShaderID = glCreateProgram();
+    GLuint vertID = addShader( updateShaderID, "res/shader/particle/update.glsl", GL_VERTEX_SHADER );
+
+    const GLchar * feedbackVars[] = { "p_out", "dp_out", "uv_out", "color_out", "scale_out" };
+    glTransformFeedbackVaryings( updateShaderID, 5, feedbackVars, GL_INTERLEAVED_ATTRIBS );
+
+    glLinkProgram( updateShaderID );
+
+    int logSize;
+    // Check the program
+    glGetProgramiv( updateShaderID, GL_INFO_LOG_LENGTH, &logSize);
+    char errMsg[std::max(logSize, 1)];
+    glGetProgramInfoLog( updateShaderID, logSize, NULL, errMsg);
+    if (logSize)
+    {
+        std::cerr << log_warn << errMsg << log_endl;
+    }
+
+    _updateShader.clone( updateShaderID );
+    glDeleteShader( vertID );
 }
 
 void ParticleEmitter::destroy()

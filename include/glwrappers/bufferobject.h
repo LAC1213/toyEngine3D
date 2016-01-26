@@ -7,7 +7,7 @@ class BufferObject
 {
 public:
     BufferObject();
-    BufferObject ( GLenum target );
+    BufferObject ( GLenum target, GLenum hint = GL_STATIC_DRAW );
     ~BufferObject();
 
     void bind() const;
@@ -15,8 +15,10 @@ public:
     void setTarget ( GLenum target );
     void setHint ( GLenum hint );
 
-    void loadData ( const void * data, size_t n ) const;
+    void loadData ( const void * data, size_t n );
     void loadSubData ( const void * data, size_t offset, size_t n ) const;
+
+    void reserve ( size_t size );
 
     GLuint getID() const;
     GLenum getTarget() const;
@@ -31,6 +33,8 @@ protected:
     GLenum _target = GL_ARRAY_BUFFER;
 
 private:
+    size_t _size;
+
     BufferObject ( const BufferObject& bo ) = delete;
     BufferObject& operator= ( const BufferObject& bo ) = delete;
 };

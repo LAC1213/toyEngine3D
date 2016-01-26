@@ -242,7 +242,7 @@ void Level1::update ( double dt )
 {
     Engine::Physics = _physics;
     _player.step ( dt );
-    float chunkSize = 48;
+    float chunkSize = 100;
     glm::vec3 c = _player.getPos() /chunkSize;
     _terrainWorld->setCenter ( c.x > 0 ? c.x + 0.5 : c.x - 0.5, c.z > 0 ? c.z + 0.5 : c.z - 0.5 );
     _snow.setInitialPosition ( _player.getPos() + glm::vec3 ( 0, 50, 0 ), 50 );

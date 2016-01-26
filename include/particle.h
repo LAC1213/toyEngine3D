@@ -28,6 +28,7 @@ public:
     void setSpawnFrequency ( float f );
     void setLifeTime ( float t );
     void setAnimSize ( const glm::vec2& s );
+    void setAnimSpeed ( float s );
     void setTexture ( Texture * tex );
 
     void setInitialPosition ( const glm::vec3& p, float radius = 0 );
@@ -55,6 +56,7 @@ protected:
 
     static Shader * _shader;
     glm::vec2 _animSize;
+    float _animSpeed;
 
     float _spawnFrequency;
 
@@ -85,8 +87,11 @@ protected:
     std::list<std::pair<double, std::vector<Particle>*>> _arbitraryParticles;
 
 private:
+    static Shader _updateShader;
     BufferObject _buffer;
+    BufferObject _swapBuffer;
     DrawCall _drawCall;
+    DrawCall _updateCall;
     Texture * _texture;
 };
 

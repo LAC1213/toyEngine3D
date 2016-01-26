@@ -13,6 +13,8 @@ constexpr const char * EVAL_PATH = "eval.glsl";
 constexpr const char * GEOM_PATH = "geom.glsl";
 constexpr const char * FRAG_PATH = "frag.glsl";
 
+GLuint addShader( GLuint prog, const std::string &path, GLenum shaderType );
+
 class Shader
 {
 public:
@@ -34,6 +36,7 @@ public:
         Shader * request ( const std::string& shaderDir, int flags );
     };
 
+    Shader ( GLuint prog );
     Shader ( const std::string& shaderDir, int loadFlags );
     Shader ( const std::string * vertPath,
              const std::string * contPath,
@@ -41,6 +44,8 @@ public:
              const std::string * geomPath,
              const std::string * fragPath );
     ~Shader();
+
+    void clone( GLuint prog );
 
     void use();
 

@@ -1,8 +1,8 @@
 #version 450
 
 in vec3 pos;
-in vec4 color;
 in vec2 uv;
+in vec4 color;
 in float size;
 
 out vec4 vColor;

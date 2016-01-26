@@ -16,6 +16,11 @@ Shader::~Shader()
     glDeleteProgram ( _program );
 }
 
+void Shader::clone( GLuint p )
+{
+    _program = p;
+}
+
 /** glUseProgram() wrapper, also sets uniforms of Camera::Active
  */
 void Shader::use()
@@ -42,7 +47,7 @@ GLint Shader::getUniformLocation ( const std::string& name )
         id = glGetUniformLocation ( _program, name.c_str() );
         if ( id == -1 )
         {
-            std::cerr << log_warn << "Can't find Uniform " << name << "[" << _program << ": " << gluErrorString ( glGetError() ) << "]" << log_endl;
+            std::cerr << log_warn << "Can't find Uniform " << name << " [" << _program << ": " << gluErrorString ( glGetError() ) << "]" << log_endl;
         }
         else
         {
@@ -192,7 +197,7 @@ static char *readShaderSrc(const char *path) {
     return src;
 }
 
-static GLuint addShader(GLuint program, const std::string &path, GLenum shaderType) {
+GLuint addShader(GLuint program, const std::string &path, GLenum shaderType) {
     GLuint shaderID = glCreateShader(shaderType);
     char *src = readShaderSrc(path.c_str());
     compileShader(shaderID, src);
@@ -208,24 +213,41 @@ static GLuint createProgram(const std::__cxx11::string *vertPath,
                             const std::__cxx11::string *fragPath) {
     GLuint prog = glCreateProgram();
 
+    std::cerr << log_info << "creating Program, ID: " << prog << log_endl;
+
     GLuint vertID, fragID, contID, evalID, geomID;
 
     if (vertPath)
+    {
         vertID = addShader(prog, *vertPath, GL_VERTEX_SHADER);
+        std::cerr << log_info << "adding Vertex Shader from source: " << *vertPath << log_endl;
+    }
 
     if (contPath)
+    {
         contID = addShader(prog, *contPath, GL_TESS_CONTROL_SHADER);
+        std::cerr << log_info << "adding Tessellation Control Shader from source: " << *contPath << log_endl;
+    }
 
     if (evalPath)
+    {
         evalID = addShader(prog, *evalPath, GL_TESS_EVALUATION_SHADER);
+        std::cerr << log_info << "adding Tessellation Evaluation Shader from source: " << *evalPath << log_endl;
+    }
 
     if (geomPath)
+    {
         geomID = addShader(prog, *geomPath, GL_GEOMETRY_SHADER);
+        std::cerr << log_info << "adding Geometry Shader from source: " << *geomPath << log_endl;
+    }
 
     if (fragPath)
+    {
         fragID = addShader(prog, *fragPath, GL_FRAGMENT_SHADER);
+        std::cerr << log_info << "adding Fragment Shader from source: " << *fragPath << log_endl;
+    }
 
-    std::cerr << log_info << "Linking Program, ID: " << prog << log_endl;
+    std::cerr << log_info << "Linking Program..." << log_endl;
 
     glLinkProgram(prog);
 
@@ -255,6 +277,11 @@ static GLuint createProgram(const std::__cxx11::string *vertPath,
         glDeleteShader(fragID);
 
     return prog;
+}
+
+Shader::Shader( GLuint prog )
+{
+    _program = prog;
 }
 
 /** Load a Shader from directory with the necessary files.

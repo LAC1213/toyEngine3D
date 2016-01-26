@@ -3,10 +3,10 @@
 
 TerrainWorld::TerrainWorld ( Texture * groundTexture )
     : _groundTexture ( groundTexture )
-    , _chunkSize ( 48 )
+    , _chunkSize ( 100 )
     , _maxHeight ( 100 )
-    , _loadRange ( 4 )
-    , _heightmapSize ( 129 )
+    , _loadRange ( 0 )
+    , _heightmapSize ( 257 )
 {
     _activeTerrains.resize ( ( 2*_loadRange + 1 ) * ( 2*_loadRange + 1 ) );
     vec_for_each ( i, _activeTerrains )
