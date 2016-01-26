@@ -1,7 +1,5 @@
 #include <particle.h>
 #include <iostream>
-#include <random>
-#include <algorithm>
 
 #include <engine.h>
 
@@ -22,7 +20,7 @@ ParticleEmitter::ParticleEmitter ( Texture * texture )
         Engine::TextureManager->take ( _texture );
     }
 
-    ParticleData test;
+    Particle test;
     VertexAttribute pAttr ( &_buffer, GL_FLOAT, 3 );
     pAttr.offset_ = ( const GLvoid* ) ( ( ptrdiff_t ) & ( test.p ) - ( ptrdiff_t ) &test );
     pAttr.stride_ = sizeof ( test );
@@ -43,8 +41,8 @@ ParticleEmitter::ParticleEmitter ( Texture * texture )
     sAttr.stride_ = sizeof ( test );
     _drawCall.addAttribute ( sAttr );
 
-    _periodicParticles.resize ( _spawnFrequency*_lifeTime );
-    _drawCall.setElements ( _spawnFrequency*_lifeTime );
+    _periodicParticles.resize(size_t(_spawnFrequency * _lifeTime));
+    _drawCall.setElements(GLuint(_spawnFrequency * _lifeTime));
 }
 
 ParticleEmitter::~ParticleEmitter()
@@ -59,7 +57,7 @@ void ParticleEmitter::loadFromYAML ( YAML::Node node )
 {
     if ( node["particles_per_second"] )
     {
-        _spawnFrequency = node["particles_per_second"].as<double>();
+        _spawnFrequency = node["particles_per_second"].as<float>();
     }
 
     if ( node["texture"] )
@@ -73,7 +71,7 @@ void ParticleEmitter::loadFromYAML ( YAML::Node node )
 
     if ( node["max_age"] )
     {
-        _lifeTime = node["max_age"].as<double>();
+        _lifeTime = node["max_age"].as<float>();
     }
 
     if ( node["animation_layout"] && node["animation_layout"].IsSequence() )
@@ -147,18 +145,17 @@ void ParticleEmitter::loadFromYAML ( YAML::Node node )
         _sRadius = node["size_randomness"].as<float>();
     }
 
-    _periodicParticles.resize ( _spawnFrequency*_lifeTime );
-    _drawCall.setElements ( _spawnFrequency*_lifeTime );
+    _periodicParticles.resize(size_t(_spawnFrequency * _lifeTime));
+    _drawCall.setElements(GLuint(_spawnFrequency * _lifeTime));
 }
 
-ParticleData ParticleEmitter::genParticle()
+void ParticleEmitter::initParticle(Particle &p)
 {
     auto rnd = [] ()
     {
         return ( float ) 2*rand() / RAND_MAX - 1;
     };
 
-    ParticleData p;
     //TODO Spherical distribution instead of box
     p.p[0] = _p.x + _pRadius * rnd();
     p.p[1] = _p.y + _pRadius * rnd();
@@ -177,11 +174,9 @@ ParticleData ParticleEmitter::genParticle()
     p.c[1] = _c.y + _cRadius * rnd();
     p.c[2] = _c.z + _cRadius * rnd();
     p.c[3] = _c.w + _cRadius * rnd();
-
-    return p;
 }
 
-void ParticleEmitter::stepParticle ( ParticleData& p, float dt )
+void ParticleEmitter::stepParticle(Particle &p, float dt)
 {
     p.c[0] += ( _dc.x + dt*_ddc.x ) * dt;
     p.c[1] += ( _dc.y + dt*_ddc.y ) * dt;
@@ -201,28 +196,28 @@ void ParticleEmitter::stepParticle ( ParticleData& p, float dt )
 
 void ParticleEmitter::addParticles ( size_t n )
 {
-    std::pair<double, std::vector<ParticleData>*> entry;
+    std::pair<double, std::vector<Particle> *> entry;
     entry.first = 0;
-    entry.second = new std::vector<ParticleData> ( n );
+    entry.second = new std::vector<Particle>(n);
 
     vec_for_each ( i, *entry.second )
-    ( *entry.second ) [i] = genParticle();
+        initParticle((*entry.second)[i]);
 
     _arbitraryParticles.push_back ( entry );
 }
 
-void ParticleEmitter::setLifeTime ( double t )
+void ParticleEmitter::setLifeTime(float t)
 {
     _lifeTime = t;
-    _periodicParticles.resize ( _spawnFrequency*_lifeTime );
-    _drawCall.setElements ( _spawnFrequency*_lifeTime );
+    _periodicParticles.resize(size_t(_spawnFrequency * _lifeTime));
+    _drawCall.setElements(GLuint(_spawnFrequency * _lifeTime));
 }
 
-void ParticleEmitter::setSpawnFrequency ( double f )
+void ParticleEmitter::setSpawnFrequency(float f)
 {
     _spawnFrequency = f;
-    _periodicParticles.resize ( _spawnFrequency*_lifeTime );
-    _drawCall.setElements ( _spawnFrequency*_lifeTime );
+    _periodicParticles.resize(size_t(_spawnFrequency * _lifeTime));
+    _drawCall.setElements(GLuint(_spawnFrequency * _lifeTime));
 }
 
 void ParticleEmitter::setAnimSize ( const glm::vec2& s )
@@ -306,19 +301,19 @@ void ParticleEmitter::step ( double dt )
     {
         for ( size_t i = 0 ; i < timer * _spawnFrequency ; ++i )
         {
-            _periodicParticles[ ( insertIndex + i ) % _periodicParticles.size() ] = genParticle();
+            initParticle(_periodicParticles[(insertIndex + i) % _periodicParticles.size()]);
         }
         timer -= floor ( timer * _spawnFrequency ) /_spawnFrequency;
     }
 
     for ( size_t i = 0 ; i < _periodicParticles.size() && i < _time * _spawnFrequency ; ++i )
     {
-        stepParticle ( _periodicParticles[i], dt );
+        stepParticle(_periodicParticles[i], float(dt));
         if ( _animSize.x != 0 && _animSize.y != 0 && glm::dot ( _animSize, _animSize ) > 3 )
         {
             size_t n = _periodicParticles.size();
             double age = ( ( n + i - insertIndex ) % n ) / _spawnFrequency;
-            int pos = age/_lifeTime*_animSize.x*_animSize.y;
+            int pos = int(age / _lifeTime * _animSize.x * _animSize.y);
             int x = pos % ( int ) _animSize.x;
             int y = pos / ( int ) _animSize.x;
             _periodicParticles[i].uv[0] = ( float ) x/_animSize.x;
@@ -348,37 +343,37 @@ void ParticleEmitter::step ( double dt )
         }
     }
 
-    _drawCall.setElements ( elements );
+    _drawCall.setElements(GLuint(elements));
     if ( !elements )
     {
         return;
     }
     if ( elements == _periodicParticles.size() )
     {
-        _buffer.loadData ( _periodicParticles.data(), _periodicParticles.size() * sizeof ( ParticleData ) );
+        _buffer.loadData(_periodicParticles.data(), _periodicParticles.size() * sizeof(Particle));
         return;
     }
     else
     {
-        _buffer.loadData ( nullptr, elements * sizeof ( ParticleData ) );
-        _buffer.loadSubData ( _periodicParticles.data(), 0, _periodicParticles.size() *sizeof ( ParticleData ) );
+        _buffer.loadData(nullptr, elements * sizeof(Particle));
+        _buffer.loadSubData(_periodicParticles.data(), 0, _periodicParticles.size() * sizeof(Particle));
     }
 
     //reuse to calculate offsets
-    elements = _spawnFrequency * _lifeTime;
+    elements = size_t(_spawnFrequency * _lifeTime);
 
     /* update arbitrary particles */
     it = _arbitraryParticles.begin();
     while ( it != _arbitraryParticles.end() )
     {
-        std::vector<ParticleData> &ps = *it->second;
+        std::vector<Particle> &ps = *it->second;
         it->first += dt;
         vec_for_each ( i, ps )
         {
-            stepParticle ( ps[i], dt );
+            stepParticle(ps[i], float(dt));
             if ( _animSize.x != 0 && _animSize.y != 0 && glm::dot ( _animSize, _animSize ) > 3 )
             {
-                int pos = it->first/_lifeTime*_animSize.x*_animSize.y;
+                int pos = int(it->first / _lifeTime * _animSize.x * _animSize.y);
                 int x = pos % ( int ) _animSize.x;
                 int y = pos / ( int ) _animSize.y;
                 ps[i].uv[0] = ( float ) x/_animSize.x;
@@ -391,8 +386,8 @@ void ParticleEmitter::step ( double dt )
             }
         }
 
-        size_t off = elements * sizeof ( ParticleData );
-        size_t n = ps.size() * sizeof ( ParticleData );
+        size_t off = elements * sizeof(Particle);
+        size_t n = ps.size() * sizeof(Particle);
         _buffer.loadSubData ( ps.data(), off, n );
 
         elements += ps.size();
@@ -410,8 +405,6 @@ void ParticleEmitter::render()
         _shader->setUniform ( "tex", 0 );
     }
 
-    glm::mat4 model ( 1 );
-    _shader->setUniform ( "model", model );
     _shader->setUniform ( "animSize", _animSize );
 
     glBlendFunc ( GL_SRC_ALPHA, GL_ONE );
@@ -426,7 +419,7 @@ void ParticleEmitter::render()
 
 void ParticleEmitter::init()
 {
-    _shader =  Engine::ShaderManager->request ( "./res/shader/particle/", Shader::LOAD_GEOM );
+    _shader = Engine::ShaderManager->request("res/shader/particle", Shader::LOAD_GEOM | Shader::LOAD_BASIC);
 }
 
 void ParticleEmitter::destroy()
@@ -434,14 +427,14 @@ void ParticleEmitter::destroy()
     Engine::ShaderManager->release ( _shader );
 }
 
-ParticleData Explosion::genParticle()
+void Explosion::initParticle(Particle &p)
 {
     auto rnd = [this] ()
     {
         return 2* ( float ) rand() / RAND_MAX - 1;
     };
 
-    ParticleData p = ParticleEmitter::genParticle();
+    ParticleEmitter::initParticle(p);
 
     glm::vec3 r1 ( rnd(), rnd(), rnd() );
     glm::vec3 v = _dp + glm::normalize ( r1 ) *_expandSpeed;
@@ -449,8 +442,6 @@ ParticleData Explosion::genParticle()
     p.dp[0] += v.x;
     p.dp[1] += v.y;
     p.dp[2] += v.z;
-
-    return p;
 }
 
 void Explosion::setExpandSpeed ( float v )

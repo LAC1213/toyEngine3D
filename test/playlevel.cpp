@@ -1,5 +1,5 @@
 #define GLFW_INCLUDE_GLU
-#include <GL/glew.h>
+
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -61,7 +61,6 @@ int main()
         //close(STDERR_FILENO);
         dup ( errFd );
         close ( errFd );
-        write ( STDERR_FILENO, " ", 1 );
         fprintf ( stderr, "\x1b[1;32mBuilt %s %s \x1b[0;39m: \n", __TIME__, __DATE__ );
     }
 

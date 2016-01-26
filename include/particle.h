@@ -5,7 +5,7 @@
 #include <camera.h>
 #include <yaml-cpp/yaml.h>
 
-struct ParticleData {
+struct Particle {
     float p[3]; //!^ position
     float dp[3]; //!^ velocity
     float uv[2]; //!^ uv texture coordinate
@@ -25,8 +25,8 @@ public:
 
     virtual void loadFromYAML ( YAML::Node node );
 
-    void setSpawnFrequency ( double f );
-    void setLifeTime ( double t );
+    void setSpawnFrequency ( float f );
+    void setLifeTime ( float t );
     void setAnimSize ( const glm::vec2& s );
     void setTexture ( Texture * tex );
 
@@ -50,13 +50,13 @@ public:
     void addParticles ( size_t n );
 
 protected:
-    virtual ParticleData genParticle();
-    virtual void stepParticle ( ParticleData& p, float dt );
+    virtual void initParticle( Particle& p );
+    virtual void stepParticle ( Particle& p, float dt );
 
     static Shader * _shader;
     glm::vec2 _animSize;
 
-    double _spawnFrequency;
+    float _spawnFrequency;
 
     glm::vec3 _p;
     float _pRadius = 0;
@@ -74,15 +74,15 @@ protected:
     float _ds = 0;
     float _dds = 0;
 
-    double _lifeTime;
+    float _lifeTime;
     double _time;
 
     /** particles which get spawned with _spawnFrequency, always completely filled
      *  expect for 0 < _time < _lifeTime
      */
-    std::vector<ParticleData> _periodicParticles;
+    std::vector<Particle> _periodicParticles;
     //! groups of particles with the same age
-    std::list<std::pair<double, std::vector<ParticleData>*>> _arbitraryParticles;
+    std::list<std::pair<double, std::vector<Particle>*>> _arbitraryParticles;
 
 private:
     BufferObject _buffer;
@@ -96,7 +96,7 @@ public:
     void setMaxRadius ( float r );
     void setExpandSpeed ( float v );
 
-    virtual ParticleData genParticle();
+    virtual void initParticle( Particle& p );
 protected:
     float _expandSpeed = 1;
     float _maxRadius = 1;

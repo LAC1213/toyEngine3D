@@ -21,7 +21,7 @@ void main()
 {
     vec4 p = gl_in[0].gl_Position;
     vec2 animPos = vUV[0];
-    
+
     float particle_size = vSize[0];
     if( vSize[0] < 0 )
         particle_size = 0;

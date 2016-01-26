@@ -256,7 +256,7 @@ MeshObject * MeshObject::genTetrahedron()
 
 void MeshObject::init()
 {
-    SHADER = Engine::ShaderManager->request ( "./res/shader/mesh/", Shader::LOAD_GEOM );
+    SHADER = Engine::ShaderManager->request("./res/shader/mesh/", Shader::LOAD_GEOM | Shader::LOAD_BASIC);
 }
 
 void MeshObject::destroy()

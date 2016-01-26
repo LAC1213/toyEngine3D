@@ -7,32 +7,34 @@
 #include <glm/glm.hpp>
 #include <resourcemanager.hpp>
 
-#define VERT_PATH "vert.glsl"
-#define CONT_PATH "cont.glsl"
-#define EVAL_PATH "eval.glsl"
-#define GEOM_PATH "geom.glsl"
-#define FRAG_PATH "frag.glsl"
+constexpr const char * VERT_PATH = "vert.glsl";
+constexpr const char * CONT_PATH = "cont.glsl";
+constexpr const char * EVAL_PATH = "eval.glsl";
+constexpr const char * GEOM_PATH = "geom.glsl";
+constexpr const char * FRAG_PATH = "frag.glsl";
 
 class Shader
 {
 public:
     enum LoadFlag {
-        LOAD_BASIC = 0,
-        LOAD_GEOM = 0x01,
-        LOAD_TESS = 0x02,
-        LOAD_FULL = 0x03
+        LOAD_VERT = 1 << 0,
+        LOAD_FRAG = 1 << 1,
+        LOAD_GEOM = 1 << 2,
+        LOAD_TESS = 1 << 3,
+        LOAD_BASIC = LOAD_VERT | LOAD_FRAG,
+        LOAD_FULL = LOAD_BASIC | LOAD_GEOM | LOAD_TESS
     };
 
-    class Manager : public ResourceManager<std::pair<std::string, LoadFlag>, Shader>
+    class Manager : public ResourceManager<std::pair<std::string, int>, Shader>
     {
     protected:
-        virtual Shader * loadResource ( const std::pair<std::string, LoadFlag>& ci );
+        virtual Shader * loadResource ( const std::pair<std::string, int>& ci );
     public:
-        virtual Shader * request ( const std::pair<std::string, LoadFlag>& ci );
-        Shader * request ( const std::string& shaderDir, LoadFlag flags );
+        virtual Shader * request ( const std::pair<std::string, int>& ci );
+        Shader * request ( const std::string& shaderDir, int flags );
     };
 
-    Shader ( const std::string& shaderDir, LoadFlag loadFlags );
+    Shader ( const std::string& shaderDir, int loadFlags );
     Shader ( const std::string * vertPath,
              const std::string * contPath,
              const std::string * evalPath,

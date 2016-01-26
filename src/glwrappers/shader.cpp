@@ -145,6 +145,118 @@ bool Shader::setUniform ( const std::string& name, const glm::mat4& val )
     return true;
 }
 
+static void compileShader(GLuint id, const char *src)
+{
+    GLint logSize;
+
+    // Compile Vertex Shader
+    const GLchar *srcs[] = {src};
+    glShaderSource(id, 1, srcs, nullptr);
+    glCompileShader(id);
+
+    // Check Vertex Shader
+    glGetShaderiv(id, GL_INFO_LOG_LENGTH, &logSize);
+    char errMsg[logSize];
+    glGetShaderInfoLog(id, logSize, NULL, errMsg);
+
+    if (logSize)
+    {
+        std::cerr << log_warn << errMsg << log_endl;
+    }
+}
+
+// caller has to free memory
+static char *readShaderSrc(const char *path) {
+    FILE *file = fopen(path, "r");
+    if ( !file )
+    {
+        errorExit ("Couldn't open shader source file %s", path);
+    }
+
+    if (fseek(file, 0, SEEK_END))
+        errorExit("Error in fseek()");
+    ssize_t size = ftell(file);
+    if (size == -1)
+        errorExit("Error in ftell()");
+    if (fseek(file, 0, SEEK_SET))
+        errorExit("Error in fseek()");
+    char *src = new char[size + 1];
+    if (size != fread(src, 1, size, file))
+        errorExit("Error in fread()");
+
+    src[size] = '\0';
+
+    if (fclose(file))
+        errorExit("Error in fclose()");
+
+    return src;
+}
+
+static GLuint addShader(GLuint program, const std::string &path, GLenum shaderType) {
+    GLuint shaderID = glCreateShader(shaderType);
+    char *src = readShaderSrc(path.c_str());
+    compileShader(shaderID, src);
+    glAttachShader(program, shaderID);
+    delete[] src;
+    return shaderID;
+}
+
+static GLuint createProgram(const std::__cxx11::string *vertPath,
+                            const std::__cxx11::string *contPath,
+                            const std::__cxx11::string *evalPath,
+                            const std::__cxx11::string *geomPath,
+                            const std::__cxx11::string *fragPath) {
+    GLuint prog = glCreateProgram();
+
+    GLuint vertID, fragID, contID, evalID, geomID;
+
+    if (vertPath)
+        vertID = addShader(prog, *vertPath, GL_VERTEX_SHADER);
+
+    if (contPath)
+        contID = addShader(prog, *contPath, GL_TESS_CONTROL_SHADER);
+
+    if (evalPath)
+        evalID = addShader(prog, *evalPath, GL_TESS_EVALUATION_SHADER);
+
+    if (geomPath)
+        geomID = addShader(prog, *geomPath, GL_GEOMETRY_SHADER);
+
+    if (fragPath)
+        fragID = addShader(prog, *fragPath, GL_FRAGMENT_SHADER);
+
+    std::cerr << log_info << "Linking Program, ID: " << prog << log_endl;
+
+    glLinkProgram(prog);
+
+    int logSize;
+    // Check the program
+    glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &logSize);
+    char errMsg[max(logSize, 1)];
+    glGetProgramInfoLog(prog, logSize, NULL, errMsg);
+    if (logSize)
+    {
+        std::cerr << log_warn << errMsg << log_endl;
+    }
+
+    if (vertPath)
+        glDeleteShader(vertID);
+
+    if (contPath)
+        glDeleteShader(contID);
+
+    if (evalPath)
+        glDeleteShader(evalID);
+
+    if (geomPath)
+        glDeleteShader(geomID);
+
+    if (fragPath)
+        glDeleteShader(fragID);
+
+    return prog;
+}
+
 /** Load a Shader from directory with the necessary files.
  *  The following naming convention is assumed:
  *  vertex shader: vert.glsl
@@ -154,7 +266,7 @@ bool Shader::setUniform ( const std::string& name, const glm::mat4& val )
  *  tesscontrol shader: cont.glsl
  *
  *  These flags are used to specify the shader type:
- *  LOAD_BASIC : load fragment + vertex shader (always the case)
+ *  LOAD_BASIC : load fragment + vertex shader
  *  LOAD_GEOM : load geometry shader
  *  LOAD_TESS : load tesselation shader
  *  LOAD_FULL = LOAD_GEOM | LOAD_TESS : load tesselation and geometry shader
@@ -162,251 +274,42 @@ bool Shader::setUniform ( const std::string& name, const glm::mat4& val )
  *  \param shaderDir directory where the shader files are located
  *  \param loadFlags specifies what kind of shaders should be loaded
  */
-Shader::Shader ( const std::string& shaderDir, LoadFlag loadFlags )
-{
-    // Create the shaders
-    GLuint VertexShaderID = glCreateShader ( GL_VERTEX_SHADER );
-    GLuint FragmentShaderID = glCreateShader ( GL_FRAGMENT_SHADER );
-    GLuint TessControlShaderID;
-    GLuint TessEvalShaderID;
-    GLuint GeometryShaderID;
-
-    char * geomSrc;
-    char * tesscontrolSrc;
-    char * tessevalSrc;
-
-    if ( loadFlags & LOAD_TESS )
-    {
-        TessControlShaderID = glCreateShader ( GL_TESS_CONTROL_SHADER );
-        TessEvalShaderID = glCreateShader ( GL_TESS_EVALUATION_SHADER );
-    }
-    if ( loadFlags & LOAD_GEOM )
-    {
-        GeometryShaderID = glCreateShader ( GL_GEOMETRY_SHADER );
-    }
-
-    char wd[4096];
-    getcwd ( wd, sizeof wd );
+Shader::Shader(const std::string &shaderDir, int loadFlags) {
+    char oldDir[4096];
+    getcwd(oldDir, sizeof oldDir);
     std::cerr << log_info << "Loading shader dir " << shaderDir << log_endl;
-    chdir ( shaderDir.c_str() );
+    chdir(shaderDir.c_str());
 
-    // Read the Vertex Shader code from the file
-    FILE * file = fopen ( VERT_PATH, "r" );
-    if ( !file )
+    std::string vertPath, contPath, evalPath, geomPath, fragPath;
+    vertPath = VERT_PATH;
+    fragPath = FRAG_PATH;
+    contPath = CONT_PATH;
+    evalPath = EVAL_PATH;
+    geomPath = GEOM_PATH;
+
+    std::string *a = nullptr;
+    std::string *b = nullptr;
+    std::string *c = nullptr;
+    std::string *d = nullptr;
+    std::string *e = nullptr;
+
+    if (loadFlags & LOAD_VERT)
+        a = &vertPath;
+    if (loadFlags & LOAD_FRAG)
+        e = &fragPath;
+    if (loadFlags & LOAD_TESS)
     {
-        errorExit ( "Couldn't open vertex shader %s", VERT_PATH );
+        b = &contPath;
+        c = &evalPath;
     }
+    if (loadFlags & LOAD_GEOM)
+        d = &geomPath;
 
-    fseek ( file, 0, SEEK_END );
-    size_t size = ftell ( file ) + 1;
-    rewind ( file );
-    char * vertSrc = new char[size];
-    fread ( vertSrc, size, 1, file );
-    vertSrc[size - 1] = '\0';
-    fclose ( file );
+    _program = createProgram(a, b, c, d, e);
 
-    if ( loadFlags & LOAD_TESS )
-    {
-        // Read the TesselationControl Shader code from the file
-        file = fopen ( CONT_PATH, "r" );
-        if ( !file )
-        {
-            errorExit ( "Couldn't open tesselation control shader %s", CONT_PATH );
-        }
-
-        fseek ( file, 0, SEEK_END );
-        size = ftell ( file ) + 1;
-        rewind ( file );
-        tesscontrolSrc = new char[size];
-        fread ( tesscontrolSrc, size, 1, file );
-        tesscontrolSrc[size - 1] = '\0';
-        fclose ( file );
-
-        // Read the TesselationEvaluation Shader code from the file
-        file = fopen ( EVAL_PATH, "r" );
-        if ( !file )
-        {
-            errorExit ( "Couldn't open tesselation evaluation shader %s", EVAL_PATH );
-        }
-
-        fseek ( file, 0, SEEK_END );
-        size = ftell ( file ) + 1;
-        rewind ( file );
-        tessevalSrc = new char[size];
-        fread ( tessevalSrc, size, 1, file );
-        tessevalSrc[size - 1] = '\0';
-        fclose ( file );
-    }
-
-    // Read the Fragment Shader code from the file
-    file = fopen ( FRAG_PATH, "r" );
-    if ( !file )
-    {
-        errorExit ( "Couldn't open fragment shader %s", FRAG_PATH );
-    }
-
-    fseek ( file, 0, SEEK_END );
-    size = ftell ( file ) + 1;
-    rewind ( file );
-    char * fragSrc = new char[size];
-    fread ( fragSrc, size, 1, file );
-    fragSrc[size - 1] = '\0';
-    fclose ( file );
-
-    if ( loadFlags & LOAD_GEOM )
-    {
-        // Read the Geometry Shader code from the file
-        file = fopen ( GEOM_PATH, "r" );
-        if ( !file )
-        {
-            errorExit ( "Couldn't open geometry shader %s", GEOM_PATH );
-        }
-
-        fseek ( file, 0, SEEK_END );
-        size = ftell ( file ) + 1;
-        rewind ( file );
-        geomSrc = new char[size];
-        fread ( geomSrc, size, 1, file );
-        geomSrc[size - 1] = '\0';
-        fclose ( file );
-    }
-
-    GLint Result = GL_FALSE;
-    int InfoLogLength;
-
-    // Compile Vertex Shader
-    std::cerr << log_info << "Compiling shader: " << VERT_PATH << log_endl;
-    glShaderSource ( VertexShaderID, 1, ( const char * const * ) &vertSrc , NULL );
-    glCompileShader ( VertexShaderID );
-
-    // Check Vertex Shader
-    glGetShaderiv ( VertexShaderID, GL_COMPILE_STATUS, &Result );
-    glGetShaderiv ( VertexShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength );
-    char VertexShaderErrorMessage[InfoLogLength];
-    glGetShaderInfoLog ( VertexShaderID, InfoLogLength, NULL, VertexShaderErrorMessage );
-    if ( InfoLogLength )
-    {
-        std::cerr << log_warn << VertexShaderErrorMessage << log_endl;
-    }
-
-    if ( loadFlags & LOAD_TESS )
-    {
-        // Compile TessControl Shader
-        std::cerr << log_info << "Compiling shader: " << CONT_PATH << log_endl;
-        glShaderSource ( TessControlShaderID, 1, ( const char * const * ) &tesscontrolSrc , NULL );
-        glCompileShader ( TessControlShaderID );
-
-        // Check TessControl Shader
-        glGetShaderiv ( TessControlShaderID, GL_COMPILE_STATUS, &Result );
-        glGetShaderiv ( TessControlShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength );
-        char TCShaderErrorMessage[InfoLogLength];
-        glGetShaderInfoLog ( TessControlShaderID, InfoLogLength, NULL, TCShaderErrorMessage );
-        if ( InfoLogLength )
-        {
-            std::cerr << log_warn << TCShaderErrorMessage << log_endl;
-        }
-
-        // Compile TessEval Shader
-        std::cerr << log_info << "Compiling shader: " << EVAL_PATH << log_endl;
-        glShaderSource ( TessEvalShaderID, 1, ( const char * const * ) &tessevalSrc , NULL );
-        glCompileShader ( TessEvalShaderID );
-
-        // Check TessEval Shader
-        glGetShaderiv ( TessEvalShaderID, GL_COMPILE_STATUS, &Result );
-        glGetShaderiv ( TessEvalShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength );
-        char TEShaderErrorMessage[InfoLogLength];
-        glGetShaderInfoLog ( TessEvalShaderID, InfoLogLength, NULL, TEShaderErrorMessage );
-        if ( InfoLogLength )
-        {
-            std::cerr << log_warn << TEShaderErrorMessage << log_endl;
-        }
-    }
-    if ( loadFlags & LOAD_GEOM )
-    {
-        // Compile Geometry Shader
-        std::cerr << log_info << "Compiling shader: " << GEOM_PATH << log_endl;
-        glShaderSource ( GeometryShaderID, 1, ( const char * const * ) &geomSrc , NULL );
-        glCompileShader ( GeometryShaderID );
-
-        // Check Geometry Shader
-        glGetShaderiv ( GeometryShaderID, GL_COMPILE_STATUS, &Result );
-        glGetShaderiv ( GeometryShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength );
-        char GeometryShaderErrorMessage[InfoLogLength];
-        glGetShaderInfoLog ( GeometryShaderID, InfoLogLength, NULL, GeometryShaderErrorMessage );
-        if ( InfoLogLength )
-        {
-            std::cerr << log_warn << GeometryShaderErrorMessage << log_endl;
-        }
-    }
-
-    // Compile Fragment Shader
-    std::cerr << log_info << "Compiling shader: " << FRAG_PATH << log_endl;
-    glShaderSource ( FragmentShaderID, 1, ( const char * const * ) &fragSrc , NULL );
-    glCompileShader ( FragmentShaderID );
-
-    // Check Fragment Shader
-    glGetShaderiv ( FragmentShaderID, GL_COMPILE_STATUS, &Result );
-    glGetShaderiv ( FragmentShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength );
-    char FragmentShaderErrorMessage[InfoLogLength];
-    glGetShaderInfoLog ( FragmentShaderID, InfoLogLength, NULL, FragmentShaderErrorMessage );
-    if ( InfoLogLength )
-    {
-        std::cerr << log_warn << FragmentShaderErrorMessage << log_endl;
-    }
-
-    // Link the program
-    _program = glCreateProgram();
-    std::cerr << log_info << "Linking Program, ID: " << _program << log_endl;
-    GLuint ProgramID = _program;
-    glAttachShader ( ProgramID, VertexShaderID );
-    if ( loadFlags & LOAD_TESS )
-    {
-        glAttachShader ( ProgramID, TessControlShaderID );
-        glAttachShader ( ProgramID, TessEvalShaderID );
-    }
-    if ( loadFlags & LOAD_GEOM )
-    {
-        glAttachShader ( ProgramID, GeometryShaderID );
-    }
-    glAttachShader ( ProgramID, FragmentShaderID );
-    glLinkProgram ( ProgramID );
-
-    // Check the program
-    glGetProgramiv ( ProgramID, GL_LINK_STATUS, &Result );
-    glGetProgramiv ( ProgramID, GL_INFO_LOG_LENGTH, &InfoLogLength );
-    char ProgramErrorMessage[ max ( InfoLogLength, 1 )];
-    glGetProgramInfoLog ( ProgramID, InfoLogLength, NULL, ProgramErrorMessage );
-    if ( InfoLogLength )
-    {
-        std::cerr << log_warn << ProgramErrorMessage << log_endl;
-    }
-
-    chdir ( wd );
-
-    glDeleteShader ( VertexShaderID );
-    glDeleteShader ( FragmentShaderID );
-    if ( loadFlags & LOAD_TESS )
-    {
-        glDeleteShader ( TessEvalShaderID );
-        glDeleteShader ( TessControlShaderID );
-    }
-    if ( loadFlags & LOAD_GEOM )
-    {
-        glDeleteShader ( GeometryShaderID );
-    }
-
-    delete[] vertSrc;
-    delete[] fragSrc;
-    if ( loadFlags & LOAD_GEOM )
-    {
-        delete[] geomSrc;
-    }
-    if ( loadFlags & LOAD_TESS )
-    {
-        delete[] tessevalSrc;
-        delete[] tesscontrolSrc;
-    }
+    chdir(oldDir);
 }
+
 
 /** Load a Shader from arbitrary GLSL source files.
  *  Set a path to nullptr to use the default shader.
@@ -417,269 +320,15 @@ Shader::Shader ( const std::__cxx11::string* vertPath,
                  const std::__cxx11::string* geomPath,
                  const std::__cxx11::string* fragPath )
 {
-    if ( !vertPath || !fragPath )
-    {
-        errorExit ( "A Shader needs at least a vertex and fragment stage!" );
-    }
-
-    int loadFlags = LOAD_BASIC;
-    if ( contPath && evalPath )
-    {
-        loadFlags |= LOAD_TESS;
-    }
-    if ( geomPath )
-    {
-        loadFlags |= LOAD_GEOM;
-    }
-
-    // Create the shaders
-    GLuint VertexShaderID = glCreateShader ( GL_VERTEX_SHADER );
-    GLuint FragmentShaderID = glCreateShader ( GL_FRAGMENT_SHADER );
-    GLuint TessControlShaderID;
-    GLuint TessEvalShaderID;
-    GLuint GeometryShaderID;
-
-    char * geomSrc;
-    char * tesscontrolSrc;
-    char * tessevalSrc;
-
-    if ( loadFlags & LOAD_TESS )
-    {
-        TessControlShaderID = glCreateShader ( GL_TESS_CONTROL_SHADER );
-        TessEvalShaderID = glCreateShader ( GL_TESS_EVALUATION_SHADER );
-    }
-    if ( loadFlags & LOAD_GEOM )
-    {
-        GeometryShaderID = glCreateShader ( GL_GEOMETRY_SHADER );
-    }
-
-    std::cerr << log_info << "Loading shader from source files" << log_endl;
-
-    // Read the Vertex Shader code from the file
-    FILE * file = fopen ( vertPath->c_str(), "r" );
-    if ( !file )
-    {
-        errorExit ( "Couldn't open vertex shader %s", vertPath->c_str() );
-    }
-
-    fseek ( file, 0, SEEK_END );
-    size_t size = ftell ( file ) + 1;
-    rewind ( file );
-    char * vertSrc = new char[size];
-    fread ( vertSrc, size, 1, file );
-    vertSrc[size - 1] = '\0';
-    fclose ( file );
-
-    if ( loadFlags & LOAD_TESS )
-    {
-        // Read the TesselationControl Shader code from the file
-        file = fopen ( contPath->c_str(), "r" );
-        if ( !file )
-        {
-            errorExit ( "Couldn't open tesselation control shader %s", contPath->c_str() );
-        }
-
-        fseek ( file, 0, SEEK_END );
-        size = ftell ( file ) + 1;
-        rewind ( file );
-        tesscontrolSrc = new char[size];
-        fread ( tesscontrolSrc, size, 1, file );
-        tesscontrolSrc[size - 1] = '\0';
-        fclose ( file );
-
-        // Read the TesselationEvaluation Shader code from the file
-        file = fopen ( evalPath->c_str(), "r" );
-        if ( !file )
-        {
-            errorExit ( "Couldn't open tesselation evaluation shader %s", evalPath->c_str() );
-        }
-
-        fseek ( file, 0, SEEK_END );
-        size = ftell ( file ) + 1;
-        rewind ( file );
-        tessevalSrc = new char[size];
-        fread ( tessevalSrc, size, 1, file );
-        tessevalSrc[size - 1] = '\0';
-        fclose ( file );
-    }
-
-    // Read the Fragment Shader code from the file
-    file = fopen ( fragPath->c_str(), "r" );
-    if ( !file )
-    {
-        errorExit ( "Couldn't open fragment shader %s", fragPath->c_str() );
-    }
-
-    fseek ( file, 0, SEEK_END );
-    size = ftell ( file ) + 1;
-    rewind ( file );
-    char * fragSrc = new char[size];
-    fread ( fragSrc, size, 1, file );
-    fragSrc[size - 1] = '\0';
-    fclose ( file );
-
-    if ( loadFlags & LOAD_GEOM )
-    {
-        // Read the Geometry Shader code from the file
-        file = fopen ( geomPath->c_str(), "r" );
-        if ( !file )
-        {
-            errorExit ( "Couldn't open geometry shader %s", geomPath->c_str() );
-        }
-
-        fseek ( file, 0, SEEK_END );
-        size = ftell ( file ) + 1;
-        rewind ( file );
-        geomSrc = new char[size];
-        fread ( geomSrc, size, 1, file );
-        geomSrc[size - 1] = '\0';
-        fclose ( file );
-    }
-
-    GLint Result = GL_FALSE;
-    int InfoLogLength;
-
-    // Compile Vertex Shader
-    std::cerr << log_info << "Compiling shader: " << *vertPath << log_endl;
-    glShaderSource ( VertexShaderID, 1, ( const char * const * ) &vertSrc , NULL );
-    glCompileShader ( VertexShaderID );
-
-    // Check Vertex Shader
-    glGetShaderiv ( VertexShaderID, GL_COMPILE_STATUS, &Result );
-    glGetShaderiv ( VertexShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength );
-    char VertexShaderErrorMessage[InfoLogLength];
-    glGetShaderInfoLog ( VertexShaderID, InfoLogLength, NULL, VertexShaderErrorMessage );
-    if ( InfoLogLength )
-    {
-        std::cerr << log_warn << VertexShaderErrorMessage << log_endl;
-    }
-
-    if ( loadFlags & LOAD_TESS )
-    {
-        // Compile TessControl Shader
-        std::cerr << log_info << "Compiling shader: " << *contPath << log_endl;
-        glShaderSource ( TessControlShaderID, 1, ( const char * const * ) &tesscontrolSrc , NULL );
-        glCompileShader ( TessControlShaderID );
-
-        // Check TessControl Shader
-        glGetShaderiv ( TessControlShaderID, GL_COMPILE_STATUS, &Result );
-        glGetShaderiv ( TessControlShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength );
-        char TCShaderErrorMessage[InfoLogLength];
-        glGetShaderInfoLog ( TessControlShaderID, InfoLogLength, NULL, TCShaderErrorMessage );
-        if ( InfoLogLength )
-        {
-            std::cerr << log_warn << TCShaderErrorMessage << log_endl;
-        }
-
-        // Compile TessEval Shader
-        std::cerr << log_info << "Compiling shader: " << *evalPath << log_endl;
-        glShaderSource ( TessEvalShaderID, 1, ( const char * const * ) &tessevalSrc , NULL );
-        glCompileShader ( TessEvalShaderID );
-
-        // Check TessEval Shader
-        glGetShaderiv ( TessEvalShaderID, GL_COMPILE_STATUS, &Result );
-        glGetShaderiv ( TessEvalShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength );
-        char TEShaderErrorMessage[InfoLogLength];
-        glGetShaderInfoLog ( TessEvalShaderID, InfoLogLength, NULL, TEShaderErrorMessage );
-        if ( InfoLogLength )
-        {
-            std::cerr << log_warn << TEShaderErrorMessage << log_endl;
-        }
-    }
-    if ( loadFlags & LOAD_GEOM )
-    {
-        // Compile Geometry Shader
-        std::cerr << log_info << "Compiling shader: " << *geomPath << log_endl;
-        glShaderSource ( GeometryShaderID, 1, ( const char * const * ) &geomSrc , NULL );
-        glCompileShader ( GeometryShaderID );
-
-        // Check Geometry Shader
-        glGetShaderiv ( GeometryShaderID, GL_COMPILE_STATUS, &Result );
-        glGetShaderiv ( GeometryShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength );
-        char GeometryShaderErrorMessage[InfoLogLength];
-        glGetShaderInfoLog ( GeometryShaderID, InfoLogLength, NULL, GeometryShaderErrorMessage );
-        if ( InfoLogLength )
-        {
-            std::cerr << log_warn << GeometryShaderErrorMessage << log_endl;
-        }
-    }
-
-    // Compile Fragment Shader
-    std::cerr << log_info << "Compiling shader: " << *fragPath << log_endl;
-    glShaderSource ( FragmentShaderID, 1, ( const char * const * ) &fragSrc , NULL );
-    glCompileShader ( FragmentShaderID );
-
-    // Check Fragment Shader
-    glGetShaderiv ( FragmentShaderID, GL_COMPILE_STATUS, &Result );
-    glGetShaderiv ( FragmentShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength );
-    char FragmentShaderErrorMessage[InfoLogLength];
-    glGetShaderInfoLog ( FragmentShaderID, InfoLogLength, NULL, FragmentShaderErrorMessage );
-    if ( InfoLogLength )
-    {
-        std::cerr << log_warn << FragmentShaderErrorMessage << log_endl;
-    }
-
-    // Link the program
-    _program = glCreateProgram();
-    std::cerr << log_info << "Linking Program, ID: " << _program << log_endl;
-    GLuint ProgramID = _program;
-    glAttachShader ( ProgramID, VertexShaderID );
-    if ( loadFlags & LOAD_TESS )
-    {
-        glAttachShader ( ProgramID, TessControlShaderID );
-        glAttachShader ( ProgramID, TessEvalShaderID );
-    }
-    if ( loadFlags & LOAD_GEOM )
-    {
-        glAttachShader ( ProgramID, GeometryShaderID );
-    }
-    glAttachShader ( ProgramID, FragmentShaderID );
-    glLinkProgram ( ProgramID );
-
-    // Check the program
-    glGetProgramiv ( ProgramID, GL_LINK_STATUS, &Result );
-    glGetProgramiv ( ProgramID, GL_INFO_LOG_LENGTH, &InfoLogLength );
-    char ProgramErrorMessage[ max ( InfoLogLength, 1 )];
-    glGetProgramInfoLog ( ProgramID, InfoLogLength, NULL, ProgramErrorMessage );
-    if ( InfoLogLength )
-    {
-        std::cerr << log_warn << ProgramErrorMessage << log_endl;
-    }
-
-    glDeleteShader ( VertexShaderID );
-    glDeleteShader ( FragmentShaderID );
-    if ( loadFlags & LOAD_TESS )
-    {
-        glDeleteShader ( TessEvalShaderID );
-        glDeleteShader ( TessControlShaderID );
-    }
-    if ( loadFlags & LOAD_GEOM )
-    {
-        glDeleteShader ( GeometryShaderID );
-    }
-
-    delete[] vertSrc;
-    delete[] fragSrc;
-    if ( loadFlags & LOAD_GEOM )
-    {
-        delete[] geomSrc;
-    }
-    if ( loadFlags & LOAD_TESS )
-    {
-        delete[] tessevalSrc;
-        delete[] tesscontrolSrc;
-    }
-
+    _program = createProgram(vertPath, contPath, evalPath, geomPath, fragPath);
 }
 
-
-
-Shader* Shader::Manager::loadResource ( const std::pair< std::__cxx11::string, Shader::LoadFlag >& ci )
+Shader *Shader::Manager::loadResource(const std::pair<std::__cxx11::string, int> &ci)
 {
     return new Shader ( ci.first, ci.second );
 }
 
-Shader* Shader::Manager::request ( const std::pair< std::__cxx11::string, Shader::LoadFlag >& ci )
+Shader *Shader::Manager::request(const std::pair<std::__cxx11::string, int> &ci)
 {
     std::string dir;
     if ( ci.first[ci.first.size() - 1] == '/' )
@@ -690,10 +339,10 @@ Shader* Shader::Manager::request ( const std::pair< std::__cxx11::string, Shader
     {
         dir = ci.first + '/';
     }
-    return ResourceManager::request ( std::pair<std::string, LoadFlag> ( dir, ci.second ) );
+    return ResourceManager::request(std::pair<std::string, int>(dir, ci.second));
 }
 
-Shader* Shader::Manager::request ( const std::string& shaderDir, Shader::LoadFlag flags )
+Shader *Shader::Manager::request(const std::string &shaderDir, int flags)
 {
-    return request ( std::pair<std::string, LoadFlag> ( shaderDir, flags ) );
+    return request(std::pair<std::string, int>(shaderDir, flags));
 }

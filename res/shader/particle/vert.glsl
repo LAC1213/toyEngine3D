@@ -9,12 +9,11 @@ out vec4 vColor;
 out vec2 vUV;
 out float vSize;
 
-uniform mat4 model;
 uniform mat4 view;
 
 void main()
 {
-   gl_Position = view * model * vec4(pos, 1);
+   gl_Position = view * vec4(pos, 1);
    vColor = color;
    vUV = uv;
    vSize = size;

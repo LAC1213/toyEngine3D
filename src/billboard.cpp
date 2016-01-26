@@ -38,7 +38,7 @@ void Billboard::render()
 
 void Billboard::init()
 {
-    _shader = Engine::ShaderManager->request ( "./res/shader/billboard/", Shader::LOAD_GEOM );
+    _shader = Engine::ShaderManager->request("./res/shader/billboard/", Shader::LOAD_GEOM | Shader::LOAD_BASIC);
 }
 
 void Billboard::destroy()
