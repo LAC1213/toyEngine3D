@@ -1,12 +1,13 @@
 texture: "res/textures/particle4.png"
 animation_layout: [4, 4]
 
-size: 0.4
+size: 0.2
 
-max_age: 4
-particles_per_second: 150
+max_age: 2
+particles_per_second: 1000
 
 color: [1, 1, 1, 1]
+linear_color_change: [1.5, 1.5, 1.5, 1.5]
 color_randomness: 0.05
 
-velocity_randomness: 0.15
+velocity_randomness: 0.2

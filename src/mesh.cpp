@@ -5,8 +5,8 @@
 
 Shader * MeshObject::SHADER = 0;
 
-MeshObject::MeshObject ( const MeshData& data, const Texture * tex )
-    : texture ( tex ), buffers ( 4 )
+MeshObject::MeshObject ( const MeshData& data )
+    : buffers ( 4 )
 {
     buffers[0].loadData ( data.verts, 3*data.vertCount*sizeof ( GLfloat ) );
     buffers[1].loadData ( data.normals, 3*data.vertCount*sizeof ( GLfloat ) );
@@ -168,7 +168,6 @@ MeshObject * MeshObject::genCube()
     cube->drawCall.addAttribute ( VertexAttribute ( &cube->buffers[2], GL_FLOAT, 2 ) );
     cube->drawCall.setElements ( 36 );
     cube->shader = SHADER;
-    cube->texture = 0;
 
     return cube;
 }
@@ -249,7 +248,6 @@ MeshObject * MeshObject::genTetrahedron()
     tetra->drawCall.addAttribute ( VertexAttribute ( &tetra->buffers[2], GL_FLOAT, 2 ) );
     tetra->drawCall.setElements ( 36 );
     tetra->shader = SHADER;
-    tetra->texture = 0;
 
     return tetra;
 }
@@ -313,7 +311,6 @@ IcoSphere::IcoSphere()
         9, 8, 1
     };
 
-    texture = 0;
     buffers = std::vector<BufferObject> ( 2 );
     shader = Engine::ShaderManager->request ( "./res/shader/icosphere/", Shader::LOAD_FULL );
 
@@ -339,20 +336,13 @@ IcoSphere::~IcoSphere()
 
 void MeshObject::render()
 {
-    if ( texture )
-    {
-        glActiveTexture ( GL_TEXTURE0 );
-        texture->bind();
-        shader->setUniform ( "tex", 0 );
-    }
-
     shader->use();
-
     drawCall.execute();
 }
 
 Mesh::Mesh ( MeshObject * data )
     :   _meshObject ( data ),
+        _texture ( nullptr ),
         _wireframe ( true ),
         _diffuseColor ( 1, 0.5, 0.2, 1 ),
         _model ( 1.0 )
@@ -374,6 +364,13 @@ void Mesh::render()
     _meshObject->shader->setUniform ( "model", _model );
     _meshObject->shader->setUniform ( "wireframe", _wireframe );
     _meshObject->shader->setUniform ( "DiffuseMaterial", _diffuseColor );
+
+    if ( _texture )
+    {
+        glActiveTexture ( GL_TEXTURE0 );
+        _texture->bind();
+        _meshObject->shader->setUniform ( "tex", 0 );
+    }
 
     _meshObject->render();
 }

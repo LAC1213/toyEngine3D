@@ -2,7 +2,7 @@
 #include <engine.h>
 #include <iostream>
 
-Shader * PostEffect::_shader = 0;
+Shader * PostEffect::_shaders[TYPE_COUNT];
 
 PostEffect::PostEffect ( Type type, const Texture * src )
     :   _type ( type ),
@@ -16,29 +16,37 @@ PostEffect::~PostEffect()
 
 void PostEffect::render()
 {
-    _shader->setUniform ( "effect", _type );
-
     if ( _type == DITHER )
     {
-        _shader->setUniform ( "seed", glm::vec2 ( rand() / ( float ) RAND_MAX, rand() / ( float ) RAND_MAX ) );
+        _shaders[_type]->setUniform ( "seed", glm::vec2 ( rand() / ( float ) RAND_MAX, rand() / ( float ) RAND_MAX ) );
     }
 
     glActiveTexture ( GL_TEXTURE0 );
     _src->bind();
-    _shader->setUniform ( "tex", 0 );
+    _shaders[_type]->setUniform ( "tex", 0 );
 
-    _shader->use();
+    _shaders[_type]->use();
     Engine::DrawScreenQuad->execute();
 }
 
 void PostEffect::init()
 {
-    _shader = Engine::ShaderManager->request ( "./res/shader/post/", Shader::LOAD_BASIC );
+    chdir("res/shader/post");
+    _shaders[NONE] = new Shader( "vert.glsl", "none.glsl" );
+    _shaders[PIXELATE] = new Shader( "vert.glsl", "pixelate.glsl" );
+    _shaders[VERTICAL_GAUSS_BLUR] = new Shader( "vert.glsl", "vertical_gauss_blur.glsl" );
+    _shaders[HORIZONTAL_GAUSS_BLUR] = new Shader( "vert.glsl", "horizontal_gauss_blur.glsl" );
+    _shaders[BLOOM_FILTER] = new Shader( "vert.glsl", "bloom_filter.glsl" );
+    _shaders[REDUCE_HDR] = new Shader( "vert.glsl", "reduce_hdr.glsl" );
+    _shaders[DITHER] = new Shader( "vert.glsl", "dither.glsl" );
+    _shaders[FXAA] = new Shader( "vert.glsl", "fxaa.glsl" );
+    chdir("../../..");
 }
 
 void PostEffect::destroy()
 {
-    Engine::ShaderManager->release ( _shader );
+    for( int i = 0 ; i > TYPE_COUNT ; ++i )
+        delete _shaders[i];
 }
 
 Bloom::Bloom ( const Texture * in )
@@ -47,8 +55,8 @@ Bloom::Bloom ( const Texture * in )
         _second ( Framebuffer::genScreenBuffer() ),
         _blurs ( 4 ),
         _filter ( BLOOM_FILTER, _src ),
-        _gaussv ( GAUSS_V, _first->getAttachments() [0] ),
-        _gaussh ( GAUSS_H, _second->getAttachments() [0] )
+        _gaussv ( VERTICAL_GAUSS_BLUR, _first->getAttachments() [0] ),
+        _gaussh ( HORIZONTAL_GAUSS_BLUR, _second->getAttachments() [0] )
 {
 }
 
@@ -76,7 +84,6 @@ void Bloom::render()
     _second->resize ( out->getWidth(), out->getHeight() );
 
     _first->clearColor();
-    _filter.setType ( BLOOM_FILTER );
     _filter.render();
 
     for ( unsigned int i = 0 ; i < _blurs; ++i )
@@ -84,30 +91,27 @@ void Bloom::render()
         _second->clearColor();
         _gaussv.render();
 
-        _first->clearColor();
+        if( i == _blurs - 1 )
+            out->clearColor();
+        else
+            _first->clearColor();
         _gaussh.render();
     }
-
-    out->bindDraw();
-    _filter.setCanvas ( _second->getAttachments() [0] );
-    _filter.setType ( NONE );
-    _filter.render();
-
-    _filter.setCanvas ( _src );
-    _filter.setType ( BLOOM_FILTER );
 }
 
 Blend::Blend ( const Texture * a, const Texture * b )
-    :   PostEffect ( BLEND, a ),
+    :   PostEffect ( NONE, a ),
         _blendTex ( b )
 {
 }
 
 void Blend::render()
 {
-    glActiveTexture ( GL_TEXTURE0 + 1 );
-    _blendTex->bind();
-    _shader->setUniform ( "blendTex", 1 );
-
+    glBlendFunc( GL_ONE, GL_ONE );
+    glDisable ( GL_DEPTH_TEST );
     PostEffect::render();
+    static PostEffect none( NONE, _blendTex );
+    none.render();
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+    glEnable ( GL_DEPTH_TEST );
 }

@@ -1,5 +1,4 @@
-#ifndef MESH_H
-#define MESH_H
+#pragma once
 
 #include <renderable.h>
 #include <drawcall.h>
@@ -7,14 +6,14 @@
 
 /** POD for mesh data on cpu ( without textures )
  */
-struct MeshData {
-public:
-    GLfloat * verts;
-    GLfloat * normals;
-    GLfloat * uvs;
+struct MeshData
+{
+    GLfloat verts[];
+    GLfloat normals[];
+    GLfloat uvs[];
     size_t vertCount;
 
-    unsigned short * indices;
+    unsigned short indices[];
     size_t elements;
 };
 
@@ -24,10 +23,9 @@ class MeshObject : public Renderable
 {
 public:
     MeshObject() {}
-    MeshObject ( const MeshData& data, const Texture * tex = nullptr );
+    MeshObject ( const MeshData& data );
     virtual ~MeshObject();
 
-    const Texture * texture;
     std::vector<BufferObject> buffers;
     DrawCall drawCall;
     Shader * shader;
@@ -80,13 +78,20 @@ public:
         _model = model;
     }
 
+    void setTexture ( Texture * tex ) {
+        _texture = tex;
+    }
+
+    Texture * getTexture () {
+        return _texture;
+    }
+
 protected:
     MeshObject * _meshObject;
+    Texture * _texture;
 
     /* uniforms */
     bool        _wireframe;
     glm::vec4   _diffuseColor;
     glm::mat4   _model;
 };
-
-#endif // MESH_H

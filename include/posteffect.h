@@ -11,30 +11,35 @@ public:
     enum Type {
         NONE,
         PIXELATE,
-        GAUSS_V,
-        GAUSS_H,
+        VERTICAL_GAUSS_BLUR,
+        HORIZONTAL_GAUSS_BLUR,
         BLOOM_FILTER,
-        BLEND,
-        DITHER
+        REDUCE_HDR,
+        DITHER,
+        FXAA,
+
+        TYPE_COUNT
     };
 
-    PostEffect ( Type type, const Texture * canvas );
+/*    const static std::string FragSources[TYPE_COUNT] =
+            { NONE : "none.glsl"
+            , PIXELATE : "pixelate.glsl"
+            }; */
+
+    PostEffect ( Type type, const Texture * sourceTex );
     virtual ~PostEffect();
 
     virtual void render();
 
-    void setType ( Type type ) {
-        _type = type;
-    }
-    void setCanvas ( const Texture * canvas ) {
-        _src = canvas;
+    void setSourceTexture(const Texture * tex) {
+        _src = tex;
     }
 
     static void init();
     static void destroy();
 
 protected:
-    static Shader * _shader;
+    static Shader * _shaders[TYPE_COUNT];
 
     Type    _type;
     const Texture * _src;

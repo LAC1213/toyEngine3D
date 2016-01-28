@@ -1,11 +1,11 @@
-particles_per_second: 5000
+particles_per_second: 2500
 max_age: 15
 
 size: 0.2
 color: [1, 1, 1, 1]
 
-position: [0, 30, 0]
-position_randomness: 30
+position: [0, 60, 0]
+position_randomness: 60
 
 velocity: [0, -1, 0]
 velocity_randomness: 0.5

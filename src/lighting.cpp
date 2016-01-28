@@ -43,7 +43,7 @@ void Lighting::removePointLight ( PointLight * light )
     {
         if ( *it == light )
         {
-            it = _lights.erase ( it );
+            _lights.erase ( it );
             break;
         }
         else

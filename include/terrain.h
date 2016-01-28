@@ -48,7 +48,6 @@ public:
 
     void setPosition ( const glm::vec3& p );
     void setHeightMap ( HeightMap * heightmap );
-    void setTexture ( Texture * texture );
     void setSize ( float width, float depth );
     void setMaxHeight ( float height );
 

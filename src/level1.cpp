@@ -15,10 +15,10 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     _player.setModel ( glm::vec3 ( 0, 3, 0 ), glm::vec3 ( 0 ), glm::vec3 ( 0.5 ) );
 
     static PointLight p;
-    p.position = glm::vec3 ( 0, 0, 0 );
+    p.position = glm::vec3 ( 0, -55, 0 );
     p.diffuse = glm::vec3 ( 1, 1, 1 );
     p.specular = glm::vec3 ( 1, 1, 1 );
-    p.attenuation = glm::vec3 ( 0.1, 0.1, 1 );
+    p.attenuation = glm::vec3 ( 0.01, 0.01, 0.01 );
     _lighting.addPointLight ( &p );
     _lighting.setAmbient ( glm::vec3 ( 0.4, 0.4, 0.4 ) );
     _lighting.addPointLight ( _player.light() );
@@ -40,7 +40,7 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     groundTex->setParameter ( GL_TEXTURE_WRAP_S, GL_REPEAT );
     groundTex->setParameter ( GL_TEXTURE_WRAP_T, GL_REPEAT );
     _terrainWorld = new TerrainWorld ( groundTex );
-//    _terrainWorld->toggleWireframe();
+    _terrainWorld->toggleWireframe();
 
     _spinnies[0] = new Spinny;
 
@@ -279,7 +279,6 @@ void Level1::update ( double dt )
     for ( auto it = _shocks.begin(); it != _shocks.end() ; )
     {
         Shockwave * s = *it;
-        // s->_particles->addParticles( 10 );
         s->step ( dt );
 
 //        if( glm::distance( _player.getPos(), s->getCenter() ) <= s->getRadius() )
@@ -383,7 +382,7 @@ void Level1::render()
     _gBuffer->clear();
 
     vec_for_each ( i, _spinnies )
-    _spinnies[i]->renderGeom();
+        _spinnies[i]->renderGeom();
 
     for ( auto it : _bombs )
     {
@@ -391,10 +390,10 @@ void Level1::render()
     }
 
     vec_for_each ( i, _walls )
-    _walls[i]->render();
+        _walls[i]->render();
 
     vec_for_each ( i, _boxes )
-    _boxes[i]->render();
+        _boxes[i]->render();
 
     _terrainWorld->render();
 
@@ -410,7 +409,7 @@ void Level1::render()
     _player.renderFX();
     _snow.render();
     vec_for_each ( i, _spinnies )
-    _spinnies[i]->renderFX();
+        _spinnies[i]->renderFX();
     _shock.renderFX();
 
     glDisable ( GL_DEPTH_TEST );
@@ -448,20 +447,22 @@ void Level1::render()
     bloom.render();
 
     _canvas->clear();
-//   static PostEffect dither( PostEffect::DITHER, _swapBuffer );
     static PostEffect dither ( PostEffect::NONE, _swapBuffer->getAttachments() [0] );
 
-    glEnable ( GL_FRAMEBUFFER_SRGB );
     dither.render();
-    glDisable ( GL_FRAMEBUFFER_SRGB );
 
     static Font font ( "/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf", 14 );
     Text txt ( &font, _dbgString, glm::vec2 ( _width, _height ) );
     txt.setColor ( glm::vec4 ( 1, 1, 0.3, 0.7 ) );
     txt.setPosition ( glm::vec2 ( 5, 2 ) );
 
-    Framebuffer::Screen.clear();
+    _swapBuffer->clear();
     effect.render();
+    Framebuffer::Screen.clear();
+    glEnable ( GL_FRAMEBUFFER_SRGB );
+    static PostEffect fin( PostEffect::REDUCE_HDR, _swapBuffer->getAttachments()[0] );
+    fin.render();
+    glDisable ( GL_FRAMEBUFFER_SRGB );
     txt.render();
 }
 

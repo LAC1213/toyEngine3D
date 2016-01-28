@@ -29,7 +29,7 @@ Terrain::Terrain ( HeightMap * heightmap = nullptr, Texture * texture = nullptr 
 
     _meshObject = new MeshObject;
 
-    _meshObject->texture = texture;
+    _texture = texture;
     _wireframe = false;
     _diffuseColor = glm::vec4 ( 0.6, 0.6, 0.6, 1 );
     if ( _heightmap )
@@ -164,11 +164,6 @@ void Terrain::setHeightMap ( HeightMap* heightmap )
     _body = new btRigidBody ( ci );
     _body->setRestitution ( 0.3 );
     Engine::Physics->dynamicsWorld->addRigidBody ( _body );
-}
-
-void Terrain::setTexture ( Texture* texture )
-{
-    _meshObject->texture = texture;
 }
 
 void Terrain::setMaxHeight ( float height )

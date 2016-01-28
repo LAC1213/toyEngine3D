@@ -279,6 +279,10 @@ static GLuint createProgram(const std::__cxx11::string *vertPath,
     return prog;
 }
 
+Shader::Shader()
+{
+}
+
 Shader::Shader( GLuint prog )
 {
     _program = prog;
@@ -338,8 +342,7 @@ Shader::Shader(const std::string &shaderDir, int loadFlags) {
 }
 
 
-/** Load a Shader from arbitrary GLSL source files.
- *  Set a path to nullptr to use the default shader.
+/** Loads Shaders from GLSL source files, compiles and links them to a shaderprogram.
  */
 Shader::Shader ( const std::__cxx11::string* vertPath,
                  const std::__cxx11::string* contPath,
@@ -348,6 +351,13 @@ Shader::Shader ( const std::__cxx11::string* vertPath,
                  const std::__cxx11::string* fragPath )
 {
     _program = createProgram(vertPath, contPath, evalPath, geomPath, fragPath);
+}
+
+/** Convenience constructor for the classic vertex/fragment case
+ */
+Shader::Shader ( const std::string& vertPath, const std::string& fragPath )
+{
+    _program = createProgram( &vertPath, nullptr, nullptr, nullptr, &fragPath );
 }
 
 Shader *Shader::Manager::loadResource(const std::pair<std::__cxx11::string, int> &ci)

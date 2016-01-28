@@ -36,6 +36,7 @@ public:
         Shader * request ( const std::string& shaderDir, int flags );
     };
 
+    Shader ();
     Shader ( GLuint prog );
     Shader ( const std::string& shaderDir, int loadFlags );
     Shader ( const std::string * vertPath,
@@ -43,6 +44,7 @@ public:
              const std::string * evalPath,
              const std::string * geomPath,
              const std::string * fragPath );
+    Shader ( const std::string& vertPath, const std::string& fragPath );
     ~Shader();
 
     void clone( GLuint prog );
@@ -77,7 +79,6 @@ private:
 
     Shader ( const Shader& shader ) = delete;
     Shader& operator= ( const Shader& shader ) = delete;
-    Shader() = delete;
 };
 
 #endif //SHADER_H
