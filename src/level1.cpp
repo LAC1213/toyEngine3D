@@ -451,18 +451,23 @@ void Level1::render()
 
     dither.render();
 
+    _swapBuffer->clear();
+    effect.render();
+
+    _canvas->clear();
+    static PostEffect fin( PostEffect::REDUCE_HDR, _swapBuffer->getAttachments()[0] );
+    fin.render();
+
+    Framebuffer::Screen.clear();
+    static PostEffect fxaa( PostEffect::FXAA, _canvas->getAttachments()[0] );
+    glEnable ( GL_FRAMEBUFFER_SRGB );
+    fxaa.render();
+    glDisable ( GL_FRAMEBUFFER_SRGB );
+
     static Font font ( "/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf", 14 );
     Text txt ( &font, _dbgString, glm::vec2 ( _width, _height ) );
     txt.setColor ( glm::vec4 ( 1, 1, 0.3, 0.7 ) );
     txt.setPosition ( glm::vec2 ( 5, 2 ) );
-
-    _swapBuffer->clear();
-    effect.render();
-    Framebuffer::Screen.clear();
-    glEnable ( GL_FRAMEBUFFER_SRGB );
-    static PostEffect fin( PostEffect::REDUCE_HDR, _swapBuffer->getAttachments()[0] );
-    fin.render();
-    glDisable ( GL_FRAMEBUFFER_SRGB );
     txt.render();
 }
 

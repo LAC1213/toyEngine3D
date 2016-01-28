@@ -3,6 +3,8 @@
 uniform sampler2D tex;
 out vec4 fragColor;
 
+uniform vec2 seed;
+
 float dither8x8(vec2 position, float brightness) {
   int x = int(mod(position.x, 8.0));
   int y = int(mod(position.y, 8.0));
