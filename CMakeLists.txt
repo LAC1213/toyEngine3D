@@ -4,18 +4,21 @@ set(CMAKE_BUILD_TYPE DEBUG)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -O2")
 
-file( GLOB SRC src/*.cpp src/glwrappers/*.cpp )
+file( GLOB SRC include/*.h include/*.hpp include/glwrappers/*.h src/*.cpp src/glwrappers/*.cpp )
 
 find_package( Bullet REQUIRED )
+
+find_package( assimp REQUIRED )
 
 include_directories( "src" "include" "src/glwrappers" "include/glwrappers"
     "/usr/include/freetype2"
     "/usr/include/glib-2.0"
     "/usr/lib/glib-2.0/include"
-    ${BULLET_INCLUDE_DIR})
+    ${BULLET_INCLUDE_DIR}
+        ${ASSIMP_INCLUDE_DIR})
 
 add_library( engine SHARED ${SRC} )
-target_link_libraries( engine m yaml-cpp freetype GL GLU GLEW SOIL ${BULLET_LIBRARIES} )
+target_link_libraries( engine m yaml-cpp freetype GL GLU GLEW SOIL ${BULLET_LIBRARIES} ${ASSIMP_LIBRARIES} )
 set_property( TARGET engine PROPERTY CXX_STANDARD 14 )
 
 # old testapp

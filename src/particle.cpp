@@ -332,9 +332,7 @@ double ParticleEmitter::getLifeTime() const
 
 void ParticleEmitter::step ( double dt )
 {
-    _time += dt;
     static double timer = 0;
-    timer += dt;
 
     size_t elements = _periodicParticles.size();
 
@@ -461,6 +459,9 @@ void ParticleEmitter::step ( double dt )
 
         ++it;
     }
+
+    timer += dt;
+    _time += dt;
 }
 
 void ParticleEmitter::render()

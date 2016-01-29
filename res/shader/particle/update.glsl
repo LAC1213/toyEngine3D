@@ -48,5 +48,5 @@ void main()
     scale_out = scale_in + dt * ( ds + dt * dds );
 
     if( gl_VertexID > time * spawnFrequency )
-        scale_out = 0;
+        color_out = vec4(0);
 }

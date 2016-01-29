@@ -3,18 +3,41 @@
 #include <renderable.h>
 #include <drawcall.h>
 #include <texture.h>
+#include <stdint.h>
+#include <internal/util.h>
+
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
+class MeshObject;
 
 /** POD for mesh data on cpu ( without textures )
  */
 struct MeshData
 {
-    GLfloat verts[];
-    GLfloat normals[];
-    GLfloat uvs[];
+    GLfloat * verts;
+    GLfloat * normals;
+    GLfloat * uvs;
     size_t vertCount;
 
-    unsigned short indices[];
+    uint32_t * indices;
     size_t elements;
+
+    void loadFromAMesh( aiMesh* mesh );
+    void allocate( size_t vertexCount, size_t indexCount );
+    void free();
+};
+
+struct ModelData
+{
+    std::vector<MeshData> meshes;
+    std::vector<glm::mat4> transforms;
+
+    void loadFromFile( const std::string& path );
+    void loadFromNode( aiNode * node, const aiScene * scene, glm::mat4 transform );
+    std::vector<MeshObject*> uploadToGPU();
+    void free();
 };
 
 /** represents mesh resources stored on GPU
@@ -94,4 +117,19 @@ protected:
     bool        _wireframe;
     glm::vec4   _diffuseColor;
     glm::mat4   _model;
+};
+
+class Model : public Renderable
+{
+public:
+    Model( const std::vector<MeshObject*>& data, const std::vector<glm::mat4>& transforms );
+    void toggleWireframe();
+    virtual void render();
+
+protected:
+    glm::mat4 _transform;
+    std::vector<glm::mat4> _transforms;
+    std::vector<MeshObject*> _meshes;
+    bool _wireframe;
+    glm::vec4 _diffuseColor;
 };

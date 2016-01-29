@@ -1,5 +1,4 @@
-#ifndef SHADER_H
-#define SHADER_H
+#pragma once
 
 #include <map>
 #include <string>
@@ -80,5 +79,3 @@ private:
     Shader ( const Shader& shader ) = delete;
     Shader& operator= ( const Shader& shader ) = delete;
 };
-
-#endif //SHADER_H

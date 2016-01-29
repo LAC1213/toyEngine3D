@@ -20,8 +20,8 @@ Lighting::Lighting ( Framebuffer * gBuffer )
 {
     _sunShadowMap.enableDepthTexture();
     _sunShadowMap.resize ( 4096, 4096 );
-    _sunShadowMap.getDepthTexture()->setParameter ( GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-    _sunShadowMap.getDepthTexture()->setParameter ( GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    _sunShadowMap.getDepthTexture()->setParameter ( GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+    _sunShadowMap.getDepthTexture()->setParameter ( GL_TEXTURE_MAG_FILTER, GL_NEAREST );
     _sunShadowMap.getDepthTexture()->setParameter ( GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
     _sunShadowMap.getDepthTexture()->setParameter ( GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
     static GLfloat borderColor[] = { 1.0, 1.0, 1.0, 1.0 };

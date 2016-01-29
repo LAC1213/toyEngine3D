@@ -1,5 +1,8 @@
 #include <level1.h>
 
+static std::vector<MeshObject*> testmeshes;
+static std::vector<glm::mat4> testmodels;
+
 Level1::Level1 ( GLFWwindow* window, int width, int height )
     : Level ( window, width, height )
     , _cam ( _window, &_player, ( float ) _width/ _height )
@@ -20,9 +23,9 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     p.specular = glm::vec3 ( 1, 1, 1 );
     p.attenuation = glm::vec3 ( 0.01, 0.01, 0.01 );
     _lighting.addPointLight ( &p );
-    _lighting.setAmbient ( glm::vec3 ( 0.4, 0.4, 0.4 ) );
+    _lighting.setAmbient ( glm::vec3 ( 0.2, 0.2, 0.2 ) );
     _lighting.addPointLight ( _player.light() );
-    _lighting.setSunDiffuse ( glm::vec3 ( 1, 1, 1 ) );
+    _lighting.setSunDiffuse ( glm::vec3 ( 10, 10, 10 ) );
     _lighting.setSunDir ( glm::vec3 ( 0, -1, 1.5 ) );
 
     _shock.setCenter ( glm::vec3 ( 0, 1, 0 ) );
@@ -56,6 +59,12 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
 
     vec_for_each ( i, _boxes )
     _physics->dynamicsWorld->addRigidBody ( _boxes[i]->body() );
+
+    ModelData data;
+    data.loadFromFile( "res/models/building.3ds" );
+    testmeshes = data.uploadToGPU();
+    testmodels = data.transforms;
+    data.free();
 
     onResize ( width, height );
 }
@@ -396,6 +405,8 @@ void Level1::render()
         _boxes[i]->render();
 
     _terrainWorld->render();
+    static Model m( testmeshes, testmodels );
+    m.render();
 
     _player.render();
 

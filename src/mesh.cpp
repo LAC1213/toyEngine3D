@@ -1,7 +1,114 @@
 #include <mesh.h>
-#include <iostream>
 
 #include <engine.h>
+
+void MeshData::loadFromAMesh( aiMesh * mesh )
+{
+    allocate( mesh->mNumVertices, 3 * mesh->mNumFaces );
+
+//    std::cout << log_info << vertCount << " Vertices found." << log_endl;
+//    std::cout << log_info << elements / 3 << " Triangles found." << log_endl;
+
+    for( size_t i = 0 ; i < vertCount ; ++i )
+    {
+        verts[3*i + 0] = mesh->mVertices[i].x;
+        verts[3*i + 1] = mesh->mVertices[i].y;
+        verts[3*i + 2] = mesh->mVertices[i].z;
+
+        normals[3*i + 0] = mesh->mNormals[i].x;
+        normals[3*i + 1] = mesh->mNormals[i].y;
+        normals[3*i + 2] = mesh->mNormals[i].z;
+
+        if( mesh->mTextureCoords[0] )
+        {
+            uvs[2 * i + 0] = mesh->mTextureCoords[0][i].x;
+            uvs[2 * i + 1] = mesh->mTextureCoords[0][i].y;
+        }
+    }
+
+    for( size_t i = 0 ; i < mesh->mNumFaces ; ++i )
+    {
+        const aiFace& face = mesh->mFaces[i];
+        if( face.mNumIndices != 3 )
+            errorExit( "Only Triangles allowed in meshes" );
+        for( size_t j = 0 ; j < face.mNumIndices ; ++j )
+        {
+//            if( face.mIndices[j] > 0xffff )
+//                errorExit( "vertex maximum is 65536" );
+
+            indices[3*i + j] = (uint16_t)face.mIndices[j];
+        }
+    }
+}
+
+void MeshData::allocate( size_t vertexCount, size_t indexCount )
+{
+    vertCount = vertexCount;
+    elements = indexCount;
+
+    char * data = new char[vertCount*sizeof(GLfloat)*8 + elements*sizeof(indices[0])];
+    verts = (GLfloat*)data;
+    normals = (GLfloat*)(data + 3*vertCount*sizeof(GLfloat));
+    uvs = (GLfloat*)(data + 6*vertCount*sizeof(GLfloat));
+    indices = (uint32_t*)(data + 8*vertCount*sizeof(GLfloat));
+}
+
+void MeshData::free()
+{
+    delete[] (char*)verts;
+}
+
+void ModelData::free()
+{
+    vec_for_each( i, meshes )
+        meshes[i].free();
+}
+
+void ModelData::loadFromFile( const std::string &path )
+{
+    Assimp::Importer importer;
+    const aiScene * scene = importer.ReadFile( path, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_GenUVCoords );
+
+    std::cout << log_info << "Loading Mesh from file: " << path << log_endl;
+
+    if( !scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode )
+        errorExit( "assimp mesh loading error" );
+
+    std::cerr << log_info << scene->mNumMeshes << " Meshes found." << log_endl;
+
+    loadFromNode( scene->mRootNode, scene, glm::mat4(1) );
+}
+
+void ModelData::loadFromNode( aiNode *node, const aiScene * scene, glm::mat4 parentTransform )
+{
+    aiMatrix4x4 M = node->mTransformation;
+    float a[] = {
+            M.a1, M.b1, M.c1, M.d1,
+            M.a2, M.b2, M.c2, M.d2,
+            M.a3, M.b3, M.c3, M.d3,
+            M.a4, M.b4, M.c4, M.d4,
+    };
+    glm::mat4 transform = parentTransform * glm::make_mat4(a);
+
+    for( size_t i = 0 ; i < node->mNumMeshes ; ++i )
+    {
+        MeshData data;
+        data.loadFromAMesh( scene->mMeshes[node->mMeshes[i]] );
+        transforms.push_back( transform );
+        meshes.push_back( data );
+    }
+
+    for( size_t i = 0 ; i < node->mNumChildren ; ++i )
+        loadFromNode(node->mChildren[i], scene, transform);
+}
+
+std::vector<MeshObject*> ModelData::uploadToGPU()
+{
+    std::vector<MeshObject*> res(meshes.size());
+    vec_for_each( i, res )
+        res[i] = new MeshObject( meshes[i] );
+    return res;
+}
 
 Shader * MeshObject::SHADER = 0;
 
@@ -11,8 +118,9 @@ MeshObject::MeshObject ( const MeshData& data )
     buffers[0].loadData ( data.verts, 3*data.vertCount*sizeof ( GLfloat ) );
     buffers[1].loadData ( data.normals, 3*data.vertCount*sizeof ( GLfloat ) );
     buffers[2].loadData ( data.uvs, 2*data.vertCount*sizeof ( GLfloat ) );
-    buffers[3].loadData ( data.indices, data.elements*sizeof ( unsigned short ) );
+    buffers[3].loadData ( data.indices, data.elements*sizeof data.indices[0] );
     buffers[3].setTarget ( GL_ELEMENT_ARRAY_BUFFER );
+    drawCall.setIndexType( GL_UNSIGNED_INT );
     drawCall.setIndexBuffer ( &buffers[3] );
 
     drawCall.setElements ( data.elements );
@@ -360,17 +468,50 @@ void Mesh::toggleWireframe()
 
 void Mesh::render()
 {
-    _meshObject->shader->use();
     _meshObject->shader->setUniform ( "model", _model );
     _meshObject->shader->setUniform ( "wireframe", _wireframe );
     _meshObject->shader->setUniform ( "DiffuseMaterial", _diffuseColor );
 
+    glActiveTexture ( GL_TEXTURE0 );
+
     if ( _texture )
     {
-        glActiveTexture ( GL_TEXTURE0 );
-        _texture->bind();
         _meshObject->shader->setUniform ( "tex", 0 );
+        _texture->bind();
+    }
+    else
+    {
+        Texture::Null.bind();
     }
 
     _meshObject->render();
+}
+
+Model::Model(const std::vector<MeshObject *> &data, const std::vector<glm::mat4> &transforms)
+{
+    _transforms = transforms;
+    _meshes = data;
+    _diffuseColor = glm::vec4(0.2, 0.2, 0.2, 1);
+    _wireframe = true;
+    _transform = makeModel( glm::vec3(0, -30, 200), glm::vec3(0), glm::vec3(0.05));
+}
+
+void Model::toggleWireframe()
+{
+    _wireframe ^= true;
+}
+
+void Model::render()
+{
+    vec_for_each(i, _meshes)
+    {
+        _meshes[i]->shader->setUniform( "wireframe", _wireframe );
+        _meshes[i]->shader->setUniform( "model", _transform * _transforms[i] );
+        _meshes[i]->shader->setUniform( "DiffuseMaterial", _diffuseColor );
+        glActiveTexture ( GL_TEXTURE0 );
+        _meshes[i]->shader->setUniform ( "tex", 0 );
+        Texture::Null.bind();
+
+        _meshes[i]->render();
+    }
 }

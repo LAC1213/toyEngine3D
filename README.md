@@ -19,5 +19,3 @@ My Homemade engine that I develop whenever I do something further with opengl.
 4. avoid RAII so we can allocate efficiently
 5. avoid inheritence
 6. nicer Terrain generation
-7. GPU particle simulation (use Textures with positions or CUDA)
-8. FXAA

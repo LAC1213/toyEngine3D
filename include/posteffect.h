@@ -1,5 +1,4 @@
-#ifndef POSTEFFECT_H
-#define POSTEFFECT_H
+#pragma once
 
 #include <renderable.h>
 #include <framebuffer.h>
@@ -20,11 +19,6 @@ public:
 
         TYPE_COUNT
     };
-
-/*    const static std::string FragSources[TYPE_COUNT] =
-            { NONE : "none.glsl"
-            , PIXELATE : "pixelate.glsl"
-            }; */
 
     PostEffect ( Type type, const Texture * sourceTex );
     virtual ~PostEffect();
@@ -76,5 +70,3 @@ private:
     PostEffect _gaussv;
     PostEffect _gaussh;
 };
-
-#endif // POSTEFFECT_H

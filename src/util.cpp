@@ -1,12 +1,4 @@
 #include <internal/util.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-
-#include <math.h>
-#include <memory.h>
-
-#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 void __errorExit ( const char * file, const char * func, unsigned int line, const char * format, ... )
