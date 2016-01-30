@@ -365,11 +365,6 @@ static void diamondSquare ( float ** data, unsigned int size, float ** edges )
     }
 }
 
-static float lerp ( float a, float b, float w )
-{
-    return a* ( 1 - w ) + w*b;
-}
-
 static glm::vec2 randVec ( int seedx, int seedy, int seed = 0 )
 {
     constexpr float r_max = 32767;

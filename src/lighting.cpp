@@ -4,6 +4,7 @@
 
 #include <engine.h>
 #include <posteffect.h>
+#include <camera.h>
 
 Shader * Lighting::_shader = nullptr;
 
@@ -26,6 +27,13 @@ Lighting::Lighting ( Framebuffer * gBuffer )
     _sunShadowMap.getDepthTexture()->setParameter ( GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
     static GLfloat borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
     glTexParameterfv ( GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor );
+
+    _ssaoFb.addAttachment();
+    _ssaoFb.getAttachments().back()->setFormat( GL_RED );
+    _ssaoFb.getAttachments().back()->setInternalFormat( GL_R16F );
+    _ssaoFb.resize( Framebuffer::Screen.getWidth(), Framebuffer::Screen.getHeight() );
+
+    _useSSAO = true;
 }
 
 Lighting::~Lighting()
@@ -77,9 +85,16 @@ void Lighting::removeShadowCaster ( Renderable* r )
 void Lighting::render()
 {
     Camera * old = Camera::Active;
-    glCullFace ( GL_FRONT );
-
     const Framebuffer * target = Framebuffer::getActiveDraw();
+
+    // render ssao texture
+    _ssaoFb.clear();
+    static AmbientOcclusion ssao( _gBuffer );
+    if ( _useSSAO )
+        ssao.render();
+
+    // render shadowmap
+    glCullFace ( GL_FRONT );
 
     OrthogonalCamera shadowCam ( _sunPos, _sunDir, 0, _shadowRange, _sunShadowWidth, _sunShadowHeight );
     shadowCam.use();
@@ -92,9 +107,9 @@ void Lighting::render()
     {
         it->render();
     }
-
     glCullFace ( GL_BACK );
 
+    //blend lights together
     glBlendFunc ( GL_ONE, GL_ONE );
     glDisable ( GL_DEPTH_TEST );
 
@@ -117,6 +132,10 @@ void Lighting::render()
     glActiveTexture ( GL_TEXTURE4 );
     _sunShadowMap.getDepthTexture()->bind();
     _shader->setUniform ( "shadowMap", 4 );
+
+    glActiveTexture ( GL_TEXTURE5 );
+    _ssaoFb.getAttachments()[0]->bind();
+    _shader->setUniform ( "ssaoTex", 5 );
 
     _shader->setUniform ( "shadowView", shadowCam.getView() );
     _shader->setUniform ( "shadowProj", shadowCam.getProj() );
@@ -150,6 +169,8 @@ void Lighting::render()
     _shader->setUniform ( "sunSpecular", _sunSpecular );
 
     Engine::DrawScreenQuad->execute();
+
+ //   target->copyColor( _ssaoFb );
 
     glEnable ( GL_DEPTH_TEST );
     glBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
@@ -229,4 +250,8 @@ void Lighting::init()
 void Lighting::destroy()
 {
     Engine::ShaderManager->release ( _shader );
+}
+
+bool &Lighting::useSSAO() {
+    return _useSSAO;
 }

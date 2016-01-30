@@ -1,24 +1,11 @@
 #pragma once
 
-#include <renderable.h>
-#include <bufferobject.h>
-#include <drawcall.h>
-#include <particle.h>
-#include <shader.h>
-#include <texture.h>
-#include <renderable.h>
-#include <terrain.h>
-#include <text.h>
-#include <posteffect.h>
-#include <framebuffer.h>
-#include <camera.h>
-#include <billboard.h>
-
 #include <string>
 
 #include <btBulletDynamicsCommon.h>
 #include <shapemanager.hpp>
 #include <primitivemanager.hpp>
+#include <GLFW/glfw3.h>
 
 struct PhysicsVars {
 public:

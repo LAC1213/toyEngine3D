@@ -16,9 +16,12 @@ public:
         REDUCE_HDR,
         DITHER,
         FXAA,
+        SSAO,
 
         TYPE_COUNT
     };
+
+    Shader * shader();
 
     PostEffect ( Type type, const Texture * sourceTex );
     virtual ~PostEffect();
@@ -72,4 +75,20 @@ private:
     PostEffect _filter;
     PostEffect _gaussv;
     PostEffect _gaussh;
+};
+
+class AmbientOcclusion : public PostEffect
+{
+public:
+    AmbientOcclusion(Framebuffer * gBuffer );
+    ~AmbientOcclusion();
+
+    virtual void render();
+
+private:
+    Framebuffer * _gBuffer;
+    Texture _noiseTexture;
+    glm::vec3 * _kernel;
+    size_t _kernelSize = 128;
+    float _radius = 60.f;
 };

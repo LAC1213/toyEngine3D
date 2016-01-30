@@ -4,6 +4,7 @@
 #include <internal/util.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <engine.h>
+#include <camera.h>
 
 using std::max;
 
@@ -23,9 +24,10 @@ void Shader::clone( GLuint p )
 
 /** glUseProgram() wrapper, also sets uniforms of Camera::Active
  */
-void Shader::use()
+void Shader::use( bool setCameraUniforms )
 {
-    Camera::Active->setUniforms ( this );
+    if( setCameraUniforms )
+        Camera::Active->setUniforms ( this );
     if ( this == Active )
     {
         return;
@@ -148,6 +150,26 @@ bool Shader::setUniform ( const std::string& name, const glm::mat4& val )
         glProgramUniformMatrix4fv ( _program, loc, 1, GL_FALSE, glm::value_ptr ( val ) );
     }
     return true;
+}
+
+bool Shader::setUniform( const std::string &name, size_t count, glm::vec3 * vecs )
+{
+    GLint loc = getUniformLocation( name );
+    if ( loc == -1 )
+    {
+        return false;
+    }
+    else
+    {
+        GLfloat data[3*count];
+        for( size_t i = 0 ; i < count ; ++i )
+        {
+            data[3*i] = vecs[i].x;
+            data[3*i + 1] = vecs[i].y;
+            data[3*i + 2] = vecs[i].z;
+        }
+        glProgramUniform3fv ( _program, loc, count, &data[0] );
+    }
 }
 
 static void compileShader(GLuint id, const char *src)

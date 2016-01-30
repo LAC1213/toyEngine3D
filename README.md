@@ -19,5 +19,5 @@ My Homemade engine that I develop whenever I do something further with opengl.
 4. import model textures
 5. avoid RAII so we can allocate efficiently
 6. avoid inheritence
-7. SSAO
+7. AmbientOcclusion
 8. console

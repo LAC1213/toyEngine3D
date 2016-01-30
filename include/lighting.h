@@ -46,6 +46,8 @@ public:
     const glm::vec3& getSunDiffuse() const;
     const glm::vec3& getSunSpecular() const;
 
+    bool& useSSAO();
+
     static void init();
     static void destroy();
 
@@ -54,6 +56,7 @@ protected:
 
     Framebuffer * _gBuffer;
     Framebuffer _sunShadowMap;
+    Framebuffer _ssaoFb;
 
     float _sunShadowWidth;
     float _sunShadowHeight;
@@ -67,6 +70,8 @@ protected:
     glm::vec3 _sunDir;
     glm::vec3 _sunDiffuse;
     glm::vec3 _sunSpecular;
+
+    bool _useSSAO;
 };
 
 #endif // LIGHTING_H

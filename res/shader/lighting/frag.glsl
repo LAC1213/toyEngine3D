@@ -19,13 +19,15 @@ uniform sampler2D specularTex;
 uniform sampler2D positionTex;
 uniform sampler2D normalTex;
 
+uniform sampler2D ssaoTex;
+
 uniform mat4 shadowView;
 uniform mat4 shadowProj;
 uniform sampler2D shadowMap;
 
 uniform mat4 view;
 
-uniform float shadowBias = 0.0;
+uniform float shadowBias = 0.01;
 
 #define M_PI 3.1415926535897932384626433832795
 
@@ -41,7 +43,7 @@ vec3 lightingFactor( vec3 position, vec3 normal, vec3 light, vec3 diffuse, vec3 
     vec3 viewDir = normalize( -position );
     vec3 halfDir = normalize( lightDir + viewDir );
     float ds = pow( max(dot(normal, halfDir), 0), shininess);
-    if( shininess < 0.0001 )
+    if( shininess < 0.0001 || df < 0.0001 )
         ds =  0;
 
     return df*diffuse + ds*specular;
@@ -74,13 +76,23 @@ void main()
     vec3 gPosition = texture( positionTex, gl_FragCoord.xy/textureSize(positionTex, 0) ).rgb;
     vec3 gNormal = texture( normalTex, gl_FragCoord.xy/textureSize(normalTex, 0) ).rgb;
 
+    float ambientFactor = 1 - texture( ssaoTex, gl_FragCoord.xy/textureSize(ssaoTex, 0)).r;
+
+    float ssao = 0.0;
+    for( int x = -1 ; x < 2 ; ++x )
+        for( int y = -1 ; y < 2 ; ++y )
+        {
+            ssao += 1 - texture( ssaoTex, (gl_FragCoord.xy + vec2(x, y))/textureSize(ssaoTex, 0)).r;
+        }
+    ssao /= 9;
+
     vec3 sdir = mat3(view) * sunDir;
     sdir = normalize( sdir );
     float sf = max( dot(gNormal, -sdir), 0 );
     vec3 viewDir = normalize( -gPosition );
     vec3 halfDir = normalize( -sdir + viewDir );
     float ds = pow( max(dot(gNormal, halfDir), 0), gShininess);
-    if( gShininess < 0.0001 )
+    if( gShininess < 0.0001 || sf < 0.0001 )
         ds =  0;
 
     vec3 p = vec3( view * vec4( lightPos, 1 ) );
@@ -88,7 +100,7 @@ void main()
     float l = distance( p, gPosition );
     result /= attenuation.x * l*l + attenuation.y * l + attenuation.z;
     result += (sf * sunDiffuse * gDiffuse + ds * sunSpecular * gSpecular) * getShadowFactor( vec3(inverse(view) * vec4(gPosition, 1)) );
-    result += ambient * gDiffuse;
+    result += ambient * ambientFactor * gDiffuse;
 
     fragColor = vec4( result, 1 );
 }

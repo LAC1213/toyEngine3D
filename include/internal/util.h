@@ -32,6 +32,16 @@ std::ostream& operator<< ( std::ostream& os, glm::vec2 v2 );
 std::ostream& operator<< ( std::ostream& os, glm::vec3 v3 );
 std::ostream& operator<< ( std::ostream& os, glm::vec4 v4 );
 
+inline float randomFloat()
+{
+    return ((float)rand())/RAND_MAX;
+}
+
+inline float lerp( float a, float b, float f )
+{
+    return a + f * (b - a);
+}
+
 glm::vec3 bt2glm ( const btVector3& vec );
 btVector3 glm2bt ( const glm::vec3& vec );
 

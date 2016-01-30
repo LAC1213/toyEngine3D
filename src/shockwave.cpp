@@ -1,4 +1,6 @@
 #include <shockwave.h>
+#include <particle.h>
+#include <framebuffer.h>
 
 Shockwave::Shockwave ( Framebuffer* gBuffer, Framebuffer * canvas )
     : _duration ( 2 )

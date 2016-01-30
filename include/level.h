@@ -5,6 +5,7 @@
 #include <internal/debugdrawer.h>
 
 #include <vector>
+#include <glwrappers/framebuffer.h>
 
 class Level : public Renderable
 {

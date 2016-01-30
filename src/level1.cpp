@@ -1,4 +1,7 @@
 #include <level1.h>
+#include <posteffect.h>
+#include <font.h>
+#include <text.h>
 
 static std::vector<MeshObject*> testmeshes;
 static ModelData::Properties testprops;
@@ -23,9 +26,9 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     p.specular = glm::vec3 ( 1, 1, 1 );
     p.attenuation = glm::vec3 ( 0.01, 0.01, 0.01 );
     _lighting.addPointLight ( &p );
-    _lighting.setAmbient ( glm::vec3 ( 0.2, 0.2, 0.2 ) );
+    _lighting.setAmbient ( glm::vec3 ( 0.2 ) );
     _lighting.addPointLight ( _player.light() );
-    _lighting.setSunDiffuse ( glm::vec3 ( 1, 1, 1 ) );
+    _lighting.setSunDiffuse ( glm::vec3 ( 1 ) );
     _lighting.setSunDir ( glm::vec3 ( 0, -1, 1.5 ) );
 
     _shock.setCenter ( glm::vec3 ( 0, 1, 0 ) );
@@ -243,6 +246,9 @@ void Level1::onKeyAction ( int key, int scancode, int action, int mods )
             break;
         case GLFW_KEY_F:
             _useFXAA ^= true;
+            break;
+        case GLFW_KEY_G:
+            _lighting.useSSAO() ^= true;
             break;
         }
     }

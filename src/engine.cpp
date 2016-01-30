@@ -1,5 +1,10 @@
 #include <engine.h>
 #include <lighting.h>
+#include <posteffect.h>
+#include <particle.h>
+#include <billboard.h>
+#include <terrain.h>
+#include <text.h>
 
 PhysicsVars::PhysicsVars()
 {

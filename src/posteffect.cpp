@@ -1,6 +1,6 @@
 #include <posteffect.h>
 #include <engine.h>
-#include <iostream>
+#include <camera.h>
 
 Shader * PostEffect::_shaders[TYPE_COUNT];
 
@@ -40,6 +40,7 @@ void PostEffect::init()
     _shaders[REDUCE_HDR] = new Shader( "vert.glsl", "reduce_hdr.glsl" );
     _shaders[DITHER] = new Shader( "vert.glsl", "dither.glsl" );
     _shaders[FXAA] = new Shader( "vert.glsl", "fxaa.glsl" );
+    _shaders[SSAO] = new Shader( "vert.glsl", "ssao.glsl" );
     chdir("../../..");
 }
 
@@ -48,6 +49,12 @@ void PostEffect::destroy()
     for( int i = 0 ; i > TYPE_COUNT ; ++i )
         delete _shaders[i];
 }
+
+Shader * PostEffect::shader()
+{
+    return _shaders[_type];
+}
+
 
 Bloom::Bloom ( const Texture * in )
     :   PostEffect ( NONE, in ),
@@ -124,4 +131,62 @@ void PostEffect::setType( PostEffect::Type type )
 PostEffect::Type PostEffect::getType() const
 {
     return _type;
+}
+
+AmbientOcclusion::AmbientOcclusion( Framebuffer * gBuffer )
+        : PostEffect( SSAO, nullptr )
+        , _gBuffer( gBuffer )
+{
+    _noiseTexture.resize( 4, 4 );
+    _noiseTexture.setParameter( GL_TEXTURE_WRAP_S, GL_REPEAT );
+    _noiseTexture.setParameter( GL_TEXTURE_WRAP_T, GL_REPEAT );
+    _noiseTexture.setFormat( GL_RGB );
+    _noiseTexture.setInternalFormat( GL_RGB16F );
+    GLfloat randomVecs[48];
+    for( int i = 0 ; i < 16 ; ++i )
+    {
+        randomVecs[3*i] = randomFloat() * 2 - 1;
+        randomVecs[3*i + 1] = randomFloat() * 2 - 1;
+        randomVecs[3*i + 2] = 0;
+    }
+    _noiseTexture.loadData( &randomVecs[0] );
+
+    _kernel = new glm::vec3[_kernelSize];
+    for ( size_t i = 0 ; i < _kernelSize ; ++i )
+    {
+        _kernel[i] = glm::vec3( 2* randomFloat() - 1, 2*randomFloat() - 1, randomFloat() );
+        _kernel[i] = glm::normalize( _kernel[i] );
+        _kernel[i] *= randomFloat();
+        float scale = float(i) / 64.f;
+        scale = lerp( 0, 1, scale * scale );
+        _kernel[i] *= scale;
+    }
+}
+
+AmbientOcclusion::~AmbientOcclusion()
+{
+    delete[] _kernel;
+}
+
+void AmbientOcclusion::render()
+{
+    _shaders[_type]->use( false );
+
+    glActiveTexture( GL_TEXTURE0 );
+    _shaders[_type]->setUniform( "positions", 0 );
+    _gBuffer->getAttachments()[2]->bind();
+
+    glActiveTexture( GL_TEXTURE1 );
+    _shaders[_type]->setUniform( "normals", 1 );
+    _gBuffer->getAttachments()[3]->bind();
+
+    glActiveTexture( GL_TEXTURE2 );
+    _shaders[_type]->setUniform( "noiseTex", 1 );
+    _noiseTexture.bind();
+
+    _shaders[_type]->setUniform( "kernel", _kernelSize, _kernel );
+    _shaders[_type]->setUniform( "radius", _radius );
+    _shaders[_type]->setUniform( "proj", ((PerspectiveCamera*)Camera::Active)->getProj() );
+
+    Engine::DrawScreenQuad->execute();
 }

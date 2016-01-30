@@ -48,7 +48,7 @@ public:
 
     void clone( GLuint prog );
 
-    void use();
+    void use( bool setCameraUniforms = true );
 
     GLint getUniformLocation ( const std::string& name );
 
@@ -58,6 +58,8 @@ public:
     bool setUniform ( const std::string& name, const glm::vec3& val );
     bool setUniform ( const std::string& name, const glm::vec4& val );
     bool setUniform ( const std::string& name, const glm::mat4& val );
+
+    bool setUniform ( const std::string &name, size_t count, glm::vec3 * vecs );
 
     static const Shader * getActive() {
         return Active;

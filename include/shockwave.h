@@ -2,6 +2,9 @@
 
 #include <engine.h>
 
+class Framebuffer;
+class Explosion;
+
 class Shockwave : public Renderable
 {
 public:
