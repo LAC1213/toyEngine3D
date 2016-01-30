@@ -1,5 +1,4 @@
-#ifndef ENGINE_H
-#define ENGINE_H
+#pragma once
 
 #include <renderable.h>
 #include <bufferobject.h>
@@ -43,11 +42,11 @@ extern SphereShapeManagerT * SphereShapeManager;
 
 extern PhysicsVars * Physics;
 
+extern uint32_t GPUMemAtInit;
+
 GLFWwindow * init();
 void destroy();
 
 extern BufferObject * QuadBuffer;
 extern DrawCall *     DrawScreenQuad;
 }
-
-#endif //ENGINE_H

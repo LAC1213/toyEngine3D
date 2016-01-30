@@ -42,6 +42,43 @@ glm::mat4 makeModel ( const glm::vec3& origin = __nullvec,
                       const glm::vec3& rotation = __rotvec,
                       const glm::vec3& scale = __scalevec );
 
+struct Transform
+{
+    const glm::vec3 &getOrigin() const {
+        return origin;
+    }
+
+    void setOrigin(const glm::vec3 &origin) {
+        Transform::origin = origin;
+        mat = makeModel( origin, rot, scale );
+    }
+
+    const glm::vec3 &getRot() const {
+        return rot;
+    }
+
+    void setRot(const glm::vec3 &rot) {
+        Transform::rot = rot;
+        mat = makeModel( origin, rot, scale );
+    }
+
+    const glm::vec3 &getScale() const {
+        return scale;
+    }
+
+    void setScale(const glm::vec3 &scale) {
+        Transform::scale = scale;
+        mat = makeModel( origin, rot, scale );
+    }
+
+    glm::mat4 mat = glm::mat4(1);
+
+private:
+    glm::vec3 origin;
+    glm::vec3 rot;
+    glm::vec3 scale = glm::vec3(1);
+};
+
 namespace YAML
 {
 

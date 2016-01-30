@@ -16,15 +16,19 @@ class MeshObject;
  */
 struct MeshData
 {
-    GLfloat * verts;
-    GLfloat * normals;
-    GLfloat * uvs;
+    void * data;
+    GLfloat * verts() const;
+    GLfloat * normals() const;
+    GLfloat * uvs() const;
     size_t vertCount;
 
-    uint32_t * indices;
+    GLenum indexType;
+    uint8_t indexSize() const;
+
+    void * indices() const;
     size_t elements;
 
-    void loadFromAMesh( aiMesh* mesh );
+    void loadFromAssimpMesh(aiMesh *mesh);
     void allocate( size_t vertexCount, size_t indexCount );
     void free();
 };
@@ -32,10 +36,17 @@ struct MeshData
 struct ModelData
 {
     std::vector<MeshData> meshes;
-    std::vector<glm::mat4> transforms;
+    struct Properties {
+        std::vector<glm::mat4> transforms;
+        std::vector<size_t> indices;
+        std::vector<std::string> diffuseMaps;
+        std::vector<std::string> specularMaps;
+    } props;
 
     void loadFromFile( const std::string& path );
+private:
     void loadFromNode( aiNode * node, const aiScene * scene, glm::mat4 transform );
+public:
     std::vector<MeshObject*> uploadToGPU();
     void free();
 };
@@ -122,14 +133,19 @@ protected:
 class Model : public Renderable
 {
 public:
-    Model( const std::vector<MeshObject*>& data, const std::vector<glm::mat4>& transforms );
+    Model( const std::vector<MeshObject*>& data, const ModelData::Properties& props );
     void toggleWireframe();
     virtual void render();
 
+    Transform trans;
+
 protected:
-    glm::mat4 _transform;
     std::vector<glm::mat4> _transforms;
+    std::vector<size_t> _indices;
     std::vector<MeshObject*> _meshes;
     bool _wireframe;
     glm::vec4 _diffuseColor;
+
+    std::vector<Texture*> _diffuseMaps;
+    std::vector<Texture*> _specularMaps;
 };

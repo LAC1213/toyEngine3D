@@ -105,17 +105,22 @@ void Framebuffer::enableDepthRenderbuffer ( GLenum internalFormat )
     glFramebufferRenderbuffer ( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRBO );
 }
 
-/** Generate a Framebuffer with 3 color attachments and depth renderbuffer
- *  attachment 0: RGBA16F, colors
- *  attachment 1: RGB32F, positions
- *  attachment 2: RGB32F, normals
+/** Generate a Framebuffer with 4 color attachments and depth renderbuffer
+ *  attachment 0: RGB16F diffuse
+ *  attachment 1: RGBA16F, specular + shininess
+ *  attachment 2: RGB32F, positions
+ *  attachment 3: RGB32F, normals
  * \return Pointer to GBuffer which you need to delete
  */
 Framebuffer * Framebuffer::genGeometryBuffer()
 {
     Framebuffer * fb = new Framebuffer();
     fb->enableDepthRenderbuffer();
-    // colors
+    // diffuse
+    fb->addAttachment();
+    fb->getAttachments().back()->setInternalFormat ( GL_RGB16F );
+    fb->getAttachments().back()->setFormat ( GL_RGB );
+    // specular + shininess
     fb->addAttachment();
     fb->getAttachments().back()->setInternalFormat ( GL_RGBA16F );
     fb->getAttachments().back()->setFormat ( GL_RGBA );

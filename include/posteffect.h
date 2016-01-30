@@ -25,6 +25,9 @@ public:
 
     virtual void render();
 
+    void setType( Type type );
+    Type getType() const;
+
     void setSourceTexture(const Texture * tex) {
         _src = tex;
     }

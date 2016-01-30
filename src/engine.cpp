@@ -36,6 +36,8 @@ SphereShapeManagerT * SphereShapeManager = nullptr;
 
 static bool initialized = false;
 
+uint32_t GPUMemAtInit = 0;
+
 static void glfwErrorCallback ( int error, const char* description )
 {
     errorExit ( "GLFW [%i]: %s\n", error, description );
@@ -111,6 +113,16 @@ GLFWwindow * init()
     {
         glfwSwapInterval ( 0 );
     }
+
+#define GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX    0x9048
+#define GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX  0x9049
+
+    GLint totalMemKB = 0, availMemKB = 0;
+    glGetIntegerv( GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &totalMemKB );
+    glGetIntegerv( GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &availMemKB );
+
+    GPUMemAtInit = totalMemKB - availMemKB;
+    std::cerr << log_info << "GPU Memory at init " << GPUMemAtInit << "KB" << log_endl;
 
     GLenum err = glewInit();
     if ( err != GLEW_OK )

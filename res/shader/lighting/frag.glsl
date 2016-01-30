@@ -14,7 +14,8 @@ uniform vec3 sunDiffuse;
 uniform vec3 sunSpecular;
 
 /* all in camera space ( view * model ) */
-uniform sampler2D colorTex;
+uniform sampler2D diffuseTex;
+uniform sampler2D specularTex;
 uniform sampler2D positionTex;
 uniform sampler2D normalTex;
 
@@ -29,7 +30,7 @@ uniform float shadowBias = 0.0;
 #define M_PI 3.1415926535897932384626433832795
 
 //blinn-phong lighting for a point light
-vec3 lightingFactor( vec3 position, vec3 normal, vec3 light, vec3 diffuse, vec3 specular )
+vec3 lightingFactor( vec3 position, vec3 normal, vec3 light, vec3 diffuse, vec3 specular, float shininess )
 {
     //diffuse
     vec3 lightDir = normalize( light - position );
@@ -39,8 +40,8 @@ vec3 lightingFactor( vec3 position, vec3 normal, vec3 light, vec3 diffuse, vec3 
     //specular
     vec3 viewDir = normalize( -position );
     vec3 halfDir = normalize( lightDir + viewDir );
-    float ds = pow( max(dot(normal, halfDir), 0), 8);
-    if( df < 0.01 )
+    float ds = pow( max(dot(normal, halfDir), 0), shininess);
+    if( shininess < 0.0001 )
         ds =  0;
 
     return df*diffuse + ds*specular;
@@ -67,26 +68,27 @@ float getShadowFactor( vec3 position )
 
 void main()
 {
-    vec3 color = texture( colorTex, gl_FragCoord.xy/textureSize(colorTex, 0) ).rgb;
-    float spec = texture( colorTex, gl_FragCoord.xy/textureSize(colorTex, 0) ).a;
-    vec3 position = texture( positionTex, gl_FragCoord.xy/textureSize(positionTex, 0) ).rgb;
-    vec3 normal = texture( normalTex, gl_FragCoord.xy/textureSize(normalTex, 0) ).rgb;
-    normal = normalize( normal );
+    vec3 gDiffuse = texture( diffuseTex, gl_FragCoord.xy/textureSize(diffuseTex, 0) ).rgb;
+    vec3 gSpecular = texture( specularTex, gl_FragCoord.xy/textureSize(specularTex, 0) ).rgb;
+    float gShininess = 32*texture( specularTex, gl_FragCoord.xy/textureSize(specularTex, 0) ).a;
+    vec3 gPosition = texture( positionTex, gl_FragCoord.xy/textureSize(positionTex, 0) ).rgb;
+    vec3 gNormal = texture( normalTex, gl_FragCoord.xy/textureSize(normalTex, 0) ).rgb;
 
     vec3 sdir = mat3(view) * sunDir;
     sdir = normalize( sdir );
-    float sf = max( dot(normal, -sdir), 0 );
-    vec3 viewDir = normalize( -position );
+    float sf = max( dot(gNormal, -sdir), 0 );
+    vec3 viewDir = normalize( -gPosition );
     vec3 halfDir = normalize( -sdir + viewDir );
-    float ds = pow( max(dot(normal, halfDir), 0), 32);
+    float ds = pow( max(dot(gNormal, halfDir), 0), gShininess);
+    if( gShininess < 0.0001 )
+        ds =  0;
 
     vec3 p = vec3( view * vec4( lightPos, 1 ) );
-    vec3 result = lightingFactor( position, normal, p, diffuse, spec * specular )*color;
-    float l = distance( p, position );
+    vec3 result = lightingFactor( gPosition, gNormal, p, diffuse * gDiffuse, specular * gSpecular, gShininess );
+    float l = distance( p, gPosition );
     result /= attenuation.x * l*l + attenuation.y * l + attenuation.z;
-    result += (sf * sunDiffuse * color + ds * sunSpecular * color) * getShadowFactor( vec3(inverse(view) * vec4(position, 1)) );
-    result += ambient * color;
+    result += (sf * sunDiffuse * gDiffuse + ds * sunSpecular * gSpecular) * getShadowFactor( vec3(inverse(view) * vec4(gPosition, 1)) );
+    result += ambient * gDiffuse;
 
     fragColor = vec4( result, 1 );
-    fragColor.a = 1;
 }

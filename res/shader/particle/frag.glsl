@@ -11,11 +11,6 @@ layout (location = 2) out vec4 normal;
 uniform float lambda = 2;
 uniform sampler2D tex;
 
-float sigmoid(float x)
-{
-    return 1/(1+exp(-lambda*x));
-}
-
 void main()
 {
     //reverse texture sRGB

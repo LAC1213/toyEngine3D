@@ -2,9 +2,10 @@
 
 #define M_PI 3.1415926535897932384626433832795
 
-layout (location = 0) out vec4 FragColor;
-layout (location = 1) out vec4 position; // in camera space
-layout (location = 2) out vec4 normal;   // in camera space
+layout (location = 0) out vec3 diffuseColor;
+layout (location = 1) out vec4 specColor;
+layout (location = 2) out vec3 position;
+layout (location = 3) out vec3 normal;
 
 in vec3 gTriDistance;
 in vec3 gPatchDistance;
@@ -56,9 +57,9 @@ void main()
         color *= amplify(d1, 40, -0.5) * amplify(d2, 60, -0.5);
     }
 
-    FragColor = color;
-    if( FragColor.a < 1 )
-        FragColor.a =1;
-    position = vec4(gPosition, 1);
-    normal = vec4(N, 1);
+    diffuseColor = color.rgb;
+    specColor = color;
+    specColor.a = 0.3;
+    position = gPosition;
+    normal = N;
 }

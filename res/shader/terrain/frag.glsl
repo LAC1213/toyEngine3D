@@ -1,8 +1,9 @@
 #version 450
 
-layout (location = 0) out vec4 FragColor;
-layout (location = 1) out vec4 position;
-layout (location = 2) out vec4 normal;
+layout (location = 0) out vec3 diffuseColor;
+layout (location = 1) out vec4 specColor;
+layout (location = 2) out vec3 position;
+layout (location = 3) out vec3 normal;
 
 in vec3 gTriDistance;
 in vec4 gPatchDistance;
@@ -45,8 +46,8 @@ void main()
         color.a = 1;
     }
 
-    FragColor = color;
-    position = vec4(view * vec4(gPosition, 1));
-    normal.xyz = mat3(view) * N;
-    normal.a = 1;
+    diffuseColor = color.rgb;
+    specColor.a = 0;
+    position = vec3(view * vec4(gPosition, 1));
+    normal = mat3(view) * N;
 }

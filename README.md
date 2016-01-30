@@ -13,9 +13,11 @@ My Homemade engine that I develop whenever I do something further with opengl.
 
 ## To Do
 
-1. pointlight shadows
-2. bad guys, level1
-3. mesh importer (assimp)
-4. avoid RAII so we can allocate efficiently
-5. avoid inheritence
-6. nicer Terrain generation
+1. nicer Terrain generation
+2. pointlight shadows
+3. bad guys, level1
+4. import model textures
+5. avoid RAII so we can allocate efficiently
+6. avoid inheritence
+7. SSAO
+8. console

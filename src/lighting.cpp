@@ -9,8 +9,8 @@ Shader * Lighting::_shader = nullptr;
 
 Lighting::Lighting ( Framebuffer * gBuffer )
     :   _gBuffer ( gBuffer ),
-        _sunShadowWidth ( 20 ),
-        _sunShadowHeight ( 20 ),
+        _sunShadowWidth ( 5 ),
+        _sunShadowHeight ( 5 ),
         _shadowRange ( 300 ),
         _ambient ( 0.01, 0.01, 0.01 ),
         _sunPos ( -10, 20, 0 ),
@@ -100,19 +100,23 @@ void Lighting::render()
 
     glActiveTexture ( GL_TEXTURE0 );
     _gBuffer->getAttachments() [0]->bind();
-    _shader->setUniform ( "colorTex", 0 );
+    _shader->setUniform ( "diffuseTex", 0 );
 
     glActiveTexture ( GL_TEXTURE1 );
     _gBuffer->getAttachments() [1]->bind();
-    _shader->setUniform ( "positionTex", 1 );
+    _shader->setUniform ( "specularTex", 1 );
 
     glActiveTexture ( GL_TEXTURE2 );
     _gBuffer->getAttachments() [2]->bind();
-    _shader->setUniform ( "normalTex", 2 );
+    _shader->setUniform ( "positionTex", 2 );
 
     glActiveTexture ( GL_TEXTURE3 );
+    _gBuffer->getAttachments() [3]->bind();
+    _shader->setUniform ( "normalTex", 3 );
+
+    glActiveTexture ( GL_TEXTURE4 );
     _sunShadowMap.getDepthTexture()->bind();
-    _shader->setUniform ( "shadowMap", 3 );
+    _shader->setUniform ( "shadowMap", 4 );
 
     _shader->setUniform ( "shadowView", shadowCam.getView() );
     _shader->setUniform ( "shadowProj", shadowCam.getProj() );

@@ -1,7 +1,7 @@
 #include <level1.h>
 
 static std::vector<MeshObject*> testmeshes;
-static std::vector<glm::mat4> testmodels;
+static ModelData::Properties testprops;
 
 Level1::Level1 ( GLFWwindow* window, int width, int height )
     : Level ( window, width, height )
@@ -25,7 +25,7 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     _lighting.addPointLight ( &p );
     _lighting.setAmbient ( glm::vec3 ( 0.2, 0.2, 0.2 ) );
     _lighting.addPointLight ( _player.light() );
-    _lighting.setSunDiffuse ( glm::vec3 ( 10, 10, 10 ) );
+    _lighting.setSunDiffuse ( glm::vec3 ( 1, 1, 1 ) );
     _lighting.setSunDir ( glm::vec3 ( 0, -1, 1.5 ) );
 
     _shock.setCenter ( glm::vec3 ( 0, 1, 0 ) );
@@ -61,9 +61,9 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     _physics->dynamicsWorld->addRigidBody ( _boxes[i]->body() );
 
     ModelData data;
-    data.loadFromFile( "res/models/building.3ds" );
+    data.loadFromFile( "res/models/fighter.3DS" );
     testmeshes = data.uploadToGPU();
-    testmodels = data.transforms;
+    testprops = data.props;
     data.free();
 
     onResize ( width, height );
@@ -241,6 +241,9 @@ void Level1::onKeyAction ( int key, int scancode, int action, int mods )
         case GLFW_KEY_DOWN:
             _cam.setPivot ( _cam.getPivot() * 1.1f );
             break;
+        case GLFW_KEY_F:
+            _useFXAA ^= true;
+            break;
         }
     }
 }
@@ -370,8 +373,8 @@ void Level1::update ( double dt )
     GLint totalMemKB = 0, availMemKB = 0;
     glGetIntegerv( GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &totalMemKB );
     glGetIntegerv( GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &availMemKB );
-    int p = 100*(totalMemKB - availMemKB)/totalMemKB;
-    ss << "\nGPU Memory: " << totalMemKB - availMemKB << "/" << totalMemKB << "KB (" << p << "%)" ;
+    int p = 100*(totalMemKB - availMemKB - Engine::GPUMemAtInit)/(totalMemKB - Engine::GPUMemAtInit);
+    ss << "\nGPU Memory: " << totalMemKB - availMemKB - Engine::GPUMemAtInit << "/" << totalMemKB - Engine::GPUMemAtInit << "KB (" << p << "%)" ;
 
     _dbgString = ss.str();
 }
@@ -405,15 +408,15 @@ void Level1::render()
         _boxes[i]->render();
 
     _terrainWorld->render();
-    static Model m( testmeshes, testmodels );
+    static Model m( testmeshes, testprops );
     m.render();
 
     _player.render();
 
-    glEnable ( GL_BLEND );
-
     _canvas->clear();
     _canvas->copyDepth ( *_gBuffer );
+
+    glEnable ( GL_BLEND );
 
     _lighting.render();
 
@@ -472,7 +475,10 @@ void Level1::render()
     Framebuffer::Screen.clear();
     static PostEffect fxaa( PostEffect::FXAA, _canvas->getAttachments()[0] );
     glEnable ( GL_FRAMEBUFFER_SRGB );
-    fxaa.render();
+    if( _useFXAA )
+        fxaa.render();
+    else
+        passthrough.render();
     glDisable ( GL_FRAMEBUFFER_SRGB );
 
     static Font font ( "/usr/share/fonts/TTF/DejaVuSansMono-Bold.ttf", 14 );

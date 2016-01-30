@@ -56,4 +56,6 @@ protected:
 
     std::list<Bomb*> _bombs;
     std::list<Shockwave*> _shocks;
+
+    bool _useFXAA = true;
 };
