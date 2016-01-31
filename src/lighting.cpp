@@ -1,6 +1,4 @@
 #include <lighting.h>
-#include <billboard.h>
-#include <iostream>
 
 #include <engine.h>
 #include <posteffect.h>
@@ -31,6 +29,7 @@ Lighting::Lighting ( Framebuffer * gBuffer )
     _ssaoFb.addAttachment();
     _ssaoFb.getAttachments().back()->setFormat( GL_RED );
     _ssaoFb.getAttachments().back()->setInternalFormat( GL_R16F );
+    //TODO handle later resizement of the screen
     _ssaoFb.resize( Framebuffer::Screen.getWidth(), Framebuffer::Screen.getHeight() );
 
     _useSSAO = true;

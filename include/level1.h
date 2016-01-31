@@ -41,6 +41,9 @@ protected:
     Shockwave _shock;
 
     Billboard _rayPickBillboard;
+    std::vector<MeshObject *> _xwingmeshes;
+    ModelData::Properties _xwingprops;
+    Model *_xwing;
 
     ParticleEmitter _snow;
 

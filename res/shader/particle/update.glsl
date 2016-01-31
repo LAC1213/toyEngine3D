@@ -14,22 +14,39 @@ layout ( location = 4 ) out float scale_out;
 
 uniform float dt;
 uniform float time;
-uniform int insertIndex;
 uniform float spawnFrequency;
 uniform float animSpeed;
 uniform vec2 animSize;
 uniform float lifeTime;
 
+uniform vec3 p;
+uniform float pRadius;
+uniform vec3 dp;
+uniform float dpRadius;
 uniform vec3 ddp;
 
+uniform vec4 c;
+uniform float cRadius;
 uniform vec4 dc;
 uniform vec4 ddc;
 
+uniform float s;
+uniform float sRadius;
 uniform float ds;
 uniform float dds;
 
+#define RANDOM_VEC_COUNT 128
+uniform vec3 randomVecs[RANDOM_VEC_COUNT];
+
+int modi( float a, float b )
+{
+    return int(mod(a, b));
+}
+
 void main()
 {
+    float particleCount = spawnFrequency * lifeTime;
+    float insertIndex = mod(time * spawnFrequency, particleCount);
     dp_out = dp_in + ddp * dt;
     p_out = p_in + dp_out * dt;
     if( dot( animSize, animSize ) > 3 )
@@ -49,4 +66,14 @@ void main()
 
     if( gl_VertexID > time * spawnFrequency )
         color_out = vec4(0);
+
+    if( mod( gl_VertexID - insertIndex + particleCount, particleCount ) < dt * spawnFrequency )
+    {
+        p_out = p + pRadius * randomVecs[modi(gl_VertexID, RANDOM_VEC_COUNT)];
+        dp_out = dp + dpRadius * randomVecs[modi(gl_VertexID + 1, RANDOM_VEC_COUNT)];
+        uv_out = vec2(0);
+        color_out = c + cRadius * vec4(randomVecs[modi(gl_VertexID + 2, RANDOM_VEC_COUNT)]
+            , randomVecs[modi(gl_VertexID + 3, RANDOM_VEC_COUNT)].x);
+        scale_out = s + sRadius * randomVecs[modi(gl_VertexID + 3, RANDOM_VEC_COUNT)].z;
+    }
 }

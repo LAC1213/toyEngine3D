@@ -33,7 +33,7 @@ protected:
     GLenum _target = GL_ARRAY_BUFFER;
 
 private:
-    size_t _size;
+    size_t _size = 0;
 
     BufferObject ( const BufferObject& bo ) = delete;
     BufferObject& operator= ( const BufferObject& bo ) = delete;

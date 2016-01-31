@@ -88,7 +88,7 @@ public:
 private:
     Framebuffer * _gBuffer;
     Texture _noiseTexture;
-    glm::vec3 * _kernel;
-    size_t _kernelSize = 128;
-    float _radius = 60.f;
+    static constexpr size_t KERNEL_SIZE = 128;
+    glm::vec3 _kernel[KERNEL_SIZE];
+    static constexpr float RADIUS = 5.f;
 };

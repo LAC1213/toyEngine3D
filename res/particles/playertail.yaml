@@ -1,7 +1,7 @@
 texture: "res/textures/particle4.png"
 animation_layout: [4, 4]
 
-size: 0.2
+size: 0.4
 
 max_age: 2
 particles_per_second: 1000

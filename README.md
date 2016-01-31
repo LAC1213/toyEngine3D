@@ -15,9 +15,5 @@ My Homemade engine that I develop whenever I do something further with opengl.
 
 1. nicer Terrain generation
 2. pointlight shadows
-3. bad guys, level1
-4. import model textures
-5. avoid RAII so we can allocate efficiently
-6. avoid inheritence
-7. AmbientOcclusion
-8. console
+3. arbitrary particles on GPU
+4. console

@@ -592,6 +592,15 @@ Model::Model(const std::vector<MeshObject *> &data, const ModelData::Properties&
     _wireframe = true;
 }
 
+Model::~Model() {
+    vec_for_each(i, _diffuseMaps) {
+        if (_diffuseMaps[i])
+            Engine::TextureManager->release(_diffuseMaps[i]);
+        if (_specularMaps[i])
+            Engine::TextureManager->release(_specularMaps[i]);
+    }
+}
+
 void Model::toggleWireframe()
 {
     _wireframe ^= true;

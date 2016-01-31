@@ -151,8 +151,7 @@ AmbientOcclusion::AmbientOcclusion( Framebuffer * gBuffer )
     }
     _noiseTexture.loadData( &randomVecs[0] );
 
-    _kernel = new glm::vec3[_kernelSize];
-    for ( size_t i = 0 ; i < _kernelSize ; ++i )
+    for (size_t i = 0; i < KERNEL_SIZE; ++i)
     {
         _kernel[i] = glm::vec3( 2* randomFloat() - 1, 2*randomFloat() - 1, randomFloat() );
         _kernel[i] = glm::normalize( _kernel[i] );
@@ -165,7 +164,6 @@ AmbientOcclusion::AmbientOcclusion( Framebuffer * gBuffer )
 
 AmbientOcclusion::~AmbientOcclusion()
 {
-    delete[] _kernel;
 }
 
 void AmbientOcclusion::render()
@@ -184,8 +182,8 @@ void AmbientOcclusion::render()
     _shaders[_type]->setUniform( "noiseTex", 1 );
     _noiseTexture.bind();
 
-    _shaders[_type]->setUniform( "kernel", _kernelSize, _kernel );
-    _shaders[_type]->setUniform( "radius", _radius );
+    _shaders[_type]->setUniform("kernel", KERNEL_SIZE, &_kernel[0]);
+    _shaders[_type]->setUniform("radius", RADIUS);
     _shaders[_type]->setUniform( "proj", ((PerspectiveCamera*)Camera::Active)->getProj() );
 
     Engine::DrawScreenQuad->execute();

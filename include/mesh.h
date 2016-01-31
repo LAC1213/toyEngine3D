@@ -134,6 +134,8 @@ class Model : public Renderable
 {
 public:
     Model( const std::vector<MeshObject*>& data, const ModelData::Properties& props );
+
+    virtual ~Model();
     void toggleWireframe();
     virtual void render();
 

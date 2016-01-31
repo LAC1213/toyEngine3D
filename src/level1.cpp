@@ -3,9 +3,6 @@
 #include <font.h>
 #include <text.h>
 
-static std::vector<MeshObject*> testmeshes;
-static ModelData::Properties testprops;
-
 Level1::Level1 ( GLFWwindow* window, int width, int height )
     : Level ( window, width, height )
     , _cam ( _window, &_player, ( float ) _width/ _height )
@@ -64,10 +61,13 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     _physics->dynamicsWorld->addRigidBody ( _boxes[i]->body() );
 
     ModelData data;
-    data.loadFromFile( "res/models/fighter.3DS" );
-    testmeshes = data.uploadToGPU();
-    testprops = data.props;
+    data.loadFromFile("/home/lambert/Downloads/nanosuit/nanosuit.obj");
+    _xwingmeshes = data.uploadToGPU();
+    _xwingprops = data.props;
     data.free();
+
+    _xwing = new Model(_xwingmeshes, _xwingprops);
+    _xwing->toggleWireframe();
 
     onResize ( width, height );
 }
@@ -80,6 +80,10 @@ Level1::~Level1()
 
     Engine::TextureManager->release ( "res/textures/dirt.png" );
     Engine::TextureManager->release ( "res/textures/blob.png" );
+
+    delete _xwing;
+    vec_for_each(i, _xwingmeshes)
+        delete _xwingmeshes[i];
 
     vec_for_each ( i, _spinnies )
     delete _spinnies[i];
@@ -414,8 +418,7 @@ void Level1::render()
         _boxes[i]->render();
 
     _terrainWorld->render();
-    static Model m( testmeshes, testprops );
-    m.render();
+    _xwing->render();
 
     _player.render();
 

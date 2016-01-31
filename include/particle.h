@@ -60,16 +60,16 @@ protected:
 
     float _spawnFrequency;
 
-    glm::vec3 _p;
+    glm::vec3 _p = glm::vec3(0);
     float _pRadius = 0;
-    glm::vec3 _dp;
+    glm::vec3 _dp = glm::vec3(0);
     float _dpRadius = 0;
-    glm::vec3 _ddp;
+    glm::vec3 _ddp = glm::vec3(0);
 
-    glm::vec4 _c;
+    glm::vec4 _c = glm::vec4(0);
     float _cRadius = 0;
-    glm::vec4 _dc;
-    glm::vec4 _ddc;
+    glm::vec4 _dc = glm::vec4(0);
+    glm::vec4 _ddc = glm::vec4(0);
 
     float _s;
     float _sRadius = 0;
@@ -79,20 +79,21 @@ protected:
     float _lifeTime;
     double _time;
 
-    /** particles which get spawned with _spawnFrequency, always completely filled
-     *  expect for 0 < _time < _lifeTime
-     */
-    std::vector<Particle> _periodicParticles;
     //! groups of particles with the same age
     std::list<std::pair<double, std::vector<Particle>*>> _arbitraryParticles;
 
 private:
     static Shader _updateShader;
-    BufferObject _buffer;
-    BufferObject _swapBuffer;
-    DrawCall _drawCall;
-    DrawCall _updateCall;
+    BufferObject _buffer[2];
+    uint8_t readBuf = 0;
+    DrawCall _drawCallA; //!^ draw particles in _buffer[0]
+    DrawCall _drawCallB; //!^ draw particles in _buffer[1]
+    DrawCall _updateCallA; //!^ update particles in _buffer[1] to _buffer[0]
+    DrawCall _updateCallB; //!^ update particles in _buffer[0] to _buffer[1]
     Texture * _texture;
+
+    static constexpr size_t RANDOM_VEC_COUNT = 128;
+    glm::vec3 _randomVecs[RANDOM_VEC_COUNT];
 };
 
 class Explosion : public ParticleEmitter
