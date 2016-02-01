@@ -32,9 +32,14 @@ public:
     void genMipmap() const;
 
     void loadFromFile ( const std::string& path );
+
     void loadData ( float * data ) const;
     void loadData ( unsigned short * data ) const;
     void loadData ( unsigned char * data ) const;
+
+    void loadSubData ( GLuint xoffset, GLuint yoffset, GLuint width, GLuint height, float * data ) const;
+    void loadSubData ( GLuint xoffset, GLuint yoffset, GLuint width, GLuint height, unsigned short * data ) const;
+    void loadSubData ( GLuint xoffset, GLuint yoffset, GLuint width, GLuint height, unsigned char * data ) const;
 
     void resize ( int w, int h );
 

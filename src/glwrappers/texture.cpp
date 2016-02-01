@@ -134,10 +134,10 @@ void Texture::loadData ( unsigned char * data ) const
  */
 void Texture::loadFromFile ( const std::string& path )
 {
-    std::cerr << log_info << "Loading Texture " << path << log_endl;
+    LOG << log_info << "Loading Texture " << path << log_endl;
     if ( !SOIL_load_OGL_texture ( path.c_str(), SOIL_LOAD_AUTO, _id, 0 ) )
     {
-        std::cerr << log_alert << "SOIL error: " << SOIL_last_result() << log_endl;
+        LOG << log_alert << "SOIL error: " << SOIL_last_result() << log_endl;
     }
 }
 
@@ -176,4 +176,22 @@ Texture* Texture::Manager::loadResource ( const std::string& path )
     tex->setParameter ( GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
     tex->genMipmap();
     return tex;
+}
+
+void Texture::loadSubData(GLuint xoffset, GLuint yoffset, GLuint width, GLuint height, float *data) const
+{
+    bind();
+    glTexSubImage2D ( _target, 0, xoffset, yoffset, width, height, _format, GL_FLOAT, data );
+}
+
+void Texture::loadSubData(GLuint xoffset, GLuint yoffset, GLuint width, GLuint height, unsigned short *data) const
+{
+    bind();
+    glTexSubImage2D ( _target, 0, xoffset, yoffset, width, height, _format, GL_UNSIGNED_SHORT, data );
+}
+
+void Texture::loadSubData(GLuint xoffset, GLuint yoffset, GLuint width, GLuint height, unsigned char *data) const
+{
+    bind();
+    glTexSubImage2D ( _target, 0, xoffset, yoffset, width, height, _format, GL_UNSIGNED_BYTE, data );
 }

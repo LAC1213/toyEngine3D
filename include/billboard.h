@@ -31,9 +31,9 @@ public:
     static void init();
     static void destroy();
 
-protected:
     static Shader * _shader;
 
+protected:
     BufferObject _pointBuffer;
     DrawCall _drawCall;
 

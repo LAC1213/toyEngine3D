@@ -514,7 +514,7 @@ void ParticleEmitter::init()
     glGetProgramInfoLog( updateShaderID, logSize, NULL, errMsg);
     if (logSize)
     {
-        std::cerr << log_warn << errMsg << log_endl;
+        LOG << log_warn << errMsg << log_endl;
     }
 
     _updateShader.clone( updateShaderID );

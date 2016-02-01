@@ -16,4 +16,3 @@ My Homemade engine that I develop whenever I do something further with opengl.
 1. nicer Terrain generation
 2. pointlight shadows
 3. arbitrary particles on GPU
-4. console

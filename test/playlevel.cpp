@@ -44,6 +44,11 @@ void onResize ( __attribute__ ( ( unused ) ) GLFWwindow * window, int width, int
     currentLevel->onResize ( width, height );
 }
 
+void onText ( __attribute__((unused)) GLFWwindow * window, uint32_t codepoint )
+{
+    currentLevel->onText( codepoint );
+}
+
 int main()
 {
     int errFd = -1;
@@ -58,7 +63,7 @@ int main()
         //close(STDERR_FILENO);
         dup ( errFd );
         close ( errFd );
-        fprintf ( stderr, "\x1b[1;32mBuilt %s %s \x1b[0;39m: \n", __TIME__, __DATE__ );
+        LOG << log_info << "Built " << __TIME__ << " " << __DATE__ << log_endl;
     }
 
     GLFWwindow * window = Engine::init();
@@ -77,6 +82,7 @@ int main()
     glfwSetCursorPosCallback ( window, onMouseMove );
     glfwSetScrollCallback ( window, onMouseScroll );
     glfwSetFramebufferSizeCallback ( window, onResize );
+    glfwSetCharCallback( window, onText );
 
     double t0 = 0, dt;
 

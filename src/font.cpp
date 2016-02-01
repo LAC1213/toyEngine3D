@@ -5,7 +5,7 @@ FT_Library Font::ft = 0;
 
 using std::max;
 
-Font::Font ( const char * name, int fontSize ) : _size ( fontSize )
+Font::Font ( const char * name, FT_UInt fontSize ) : _size ( fontSize )
 {
     FT_Face face;
 
@@ -20,27 +20,25 @@ Font::Font ( const char * name, int fontSize ) : _size ( fontSize )
     _atlasHeight = 0;
     _atlasWidth = 0;
 
+    //TODO unicode support
     for ( int i = 0 ; i < 128 ; ++i )
     {
         if ( FT_Load_Char ( face, i, FT_LOAD_RENDER ) )
         {
-            fprintf ( stderr, "Couldn't load char %c\n", i );
+            fprintf ( stderr, "Couldn't load char %i\n", i );
             continue;
         }
         _atlasWidth += g->bitmap.width;
         _atlasHeight = max ( _atlasHeight, g->bitmap.rows );
     }
 
-    glActiveTexture ( GL_TEXTURE0 );
-    glGenTextures ( 1, &_atlas );
-    glBindTexture ( GL_TEXTURE_2D, _atlas );
-    glPixelStorei ( GL_UNPACK_ALIGNMENT, 1 );
-    glTexImage2D ( GL_TEXTURE_2D, 0, GL_RED, _atlasWidth, _atlasHeight, 0, GL_RED, GL_UNSIGNED_BYTE, 0 );
-    glPixelStorei ( GL_UNPACK_ALIGNMENT, 16 );
-    glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-    glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-    glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-    glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    _atlas.bind();
+    _atlas.setFormat( GL_RED );
+    _atlas.setInternalFormat( GL_RED );
+    _atlas.resize( _atlasWidth, _atlasHeight );
+
+    _atlas.setParameter ( GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    _atlas.setParameter ( GL_TEXTURE_MIN_FILTER, GL_LINEAR );
 
     int x = 0;
     CharInfo * ci = _info;
@@ -52,8 +50,9 @@ Font::Font ( const char * name, int fontSize ) : _size ( fontSize )
             continue;
         }
 
-        glTexSubImage2D ( GL_TEXTURE_2D, 0, x, 0, g->bitmap.width, g->bitmap.rows,
-                          GL_RED, GL_UNSIGNED_BYTE, g->bitmap.buffer );
+        glPixelStorei( GL_PACK_ALIGNMENT, 1 );
+        _atlas.loadSubData( x, 0, g->bitmap.width, g->bitmap.rows, g->bitmap.buffer );
+        glPixelStorei( GL_PACK_ALIGNMENT, 16 );
 
         ci->ax = g->advance.x >> 6;
         ci->ay = g->advance.y >> 6;
@@ -68,11 +67,9 @@ Font::Font ( const char * name, int fontSize ) : _size ( fontSize )
         x += g->bitmap.width;
     }
 
-    glBindTexture ( GL_TEXTURE_2D, 0 );
     FT_Done_Face ( face );
 }
 
 Font::~Font()
 {
-    glDeleteTextures ( 1, &_atlas );
 }

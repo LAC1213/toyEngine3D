@@ -74,7 +74,7 @@ int main ( int argc, char ** argv )
     glGetTexLevelParameteriv ( GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &w );
     glGetTexLevelParameteriv ( GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &h );
 
-    std::cerr << log_info << "w: " << w << " h: " << h << log_endl;
+    LOG << log_info << "w: " << w << " h: " << h << log_endl;
 
     glActiveTexture ( GL_TEXTURE0 );
     srcTex.bind();
@@ -94,7 +94,7 @@ int main ( int argc, char ** argv )
     glReadPixels ( 0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, buf );
     if ( !SOIL_save_image ( "filtered.bmp", SOIL_SAVE_TYPE_BMP, w, h, 3, buf ) )
     {
-        std::cerr << log_alert << SOIL_last_result() << log_endl;
+        LOG << log_alert << SOIL_last_result() << log_endl;
     }
     delete[] buf;
 

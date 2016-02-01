@@ -1,5 +1,6 @@
 #include <drawcall.h>
 #include <iostream>
+#include <internal/util.h>
 
 VertexAttribute::VertexAttribute ( const BufferObject * data, GLenum type, GLuint length )
     :   data_ ( data ),
@@ -103,7 +104,7 @@ void DrawCall::setIndexBuffer ( const BufferObject * indexBuffer )
 
     if ( indexBuffer->getTarget() != GL_ELEMENT_ARRAY_BUFFER )
     {
-        std::cerr << "IndexBuffer must have GL_ELEMENT_ARRAY_BUFFER as target" << std::endl;
+        LOG << log_warn << "IndexBuffer must have GL_ELEMENT_ARRAY_BUFFER as target" << log_endl;
         return;
     }
     _indexBuffer = indexBuffer;

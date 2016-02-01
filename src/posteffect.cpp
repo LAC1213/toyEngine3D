@@ -71,7 +71,7 @@ void Bloom::setBlursteps ( unsigned int blurs )
 {
     if ( blurs == 0 )
     {
-        std::cerr << "must have at least one Blur step" << std::endl;
+        LOG << "must have at least one Blur step" << std::endl;
     }
     else
     {

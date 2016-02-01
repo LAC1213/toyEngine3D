@@ -69,7 +69,7 @@ void MeshData::loadFromAssimpMesh(aiMesh *mesh)
         }
     }
 
-    std::cerr << log_info << "Loading Mesh: " << mesh->mNumFaces << " Triangles" << log_endl;
+    LOG << log_info << "Loading Mesh: " << mesh->mNumFaces << " Triangles" << log_endl;
 }
 
 void MeshData::allocate( size_t vertexCount, size_t indexCount )
@@ -119,12 +119,12 @@ void ModelData::loadFromFile( const std::string &path )
     Assimp::Importer importer;
     const aiScene * scene = importer.ReadFile( path, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_GenUVCoords );
 
-    std::cerr << log_info << "Loading Model from file: " << path << log_endl;
+    LOG << log_info << "Loading Model from file: " << path << log_endl;
 
     if( !scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode )
         errorExit( "assimp mesh loading error" );
 
-    std::cerr << log_info << scene->mNumMeshes << " Meshes found." << log_endl;
+    LOG << log_info << scene->mNumMeshes << " Meshes found." << log_endl;
 
     meshes.resize(scene->mNumMeshes);
     size_t tricount = 0;
@@ -138,8 +138,8 @@ void ModelData::loadFromFile( const std::string &path )
             aiMaterial *material = scene->mMaterials[scene->mMeshes[i]->mMaterialIndex];
             size_t diffuseCount = material->GetTextureCount(aiTextureType_DIFFUSE);
             size_t specularCount = material->GetTextureCount(aiTextureType_SPECULAR);
-            std::cerr << log_info << diffuseCount << " diffuse maps found." << log_endl;
-            std::cerr << log_info << specularCount << " specular maps found." << log_endl;
+            LOG << log_info << diffuseCount << " diffuse maps found." << log_endl;
+            LOG << log_info << specularCount << " specular maps found." << log_endl;
             aiString diffStr, specStr;
             props.diffuseMaps.push_back("");
             if (diffuseCount)
@@ -159,7 +159,7 @@ void ModelData::loadFromFile( const std::string &path )
             }
         }
     }
-    std::cerr << log_info << "Model has " << tricount << " triangles total" << log_endl;
+    LOG << log_info << "Model has " << tricount << " triangles total" << log_endl;
     loadFromNode( scene->mRootNode, scene, glm::mat4(1) );
 }
 

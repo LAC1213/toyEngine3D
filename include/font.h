@@ -5,6 +5,7 @@
 #include FT_FREETYPE_H
 
 #include <renderable.h>
+#include <texture.h>
 
 /** Font atlas stored on GPU
  */
@@ -13,7 +14,7 @@ class Font
 public:
     static FT_Library ft;
 
-    Font ( const char * name, int fontSize );
+    Font ( const char * name, FT_UInt fontSize );
     ~Font();
 
     struct CharInfo {
@@ -32,7 +33,7 @@ public:
     CharInfo * getCharInfo() {
         return _info;
     }
-    GLuint getAtlas() const {
+    const Texture& getAtlas() const {
         return _atlas;
     }
     unsigned int getAtlasHeight() const {
@@ -46,12 +47,12 @@ public:
         return _size;
     }
 private:
-    GLuint _atlas;
+    Texture _atlas;
     unsigned int _atlasWidth;
     unsigned int _atlasHeight;
     CharInfo _info[128];
 
-    int _size;
+    FT_UInt _size;
 };
 
 #endif // FONT_H

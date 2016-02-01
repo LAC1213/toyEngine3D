@@ -30,6 +30,9 @@ public:
     virtual void onMouseScroll ( double x, double y );
     virtual void onKeyAction ( int key, int scancode, int action, int mods );
     virtual void onMouseAction ( int button, int action, int mods );
+    virtual void onText ( uint32_t codepoint );
+
+    void onCommand ( const std::string& command );
 
 protected:
     PlayerCamera _cam;
@@ -61,4 +64,12 @@ protected:
     std::list<Shockwave*> _shocks;
 
     bool _useFXAA = true;
+    bool _uiEnabled = false;
+    std::string _uiInput;
+    size_t _cursorPos = 0;
+
+    static constexpr size_t _historyMaxSize = 128;
+    bool _newCommand;
+    std::list<std::string>::iterator _currentCommand;
+    std::list<std::string> _commandHistory;
 };

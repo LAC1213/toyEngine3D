@@ -1,6 +1,8 @@
 #include <internal/util.h>
 #include <glm/gtc/matrix_transform.hpp>
 
+std::stringstream log_stream;
+
 void __errorExit ( const char * file, const char * func, unsigned int line, const char * format, ... )
 {
     va_list args;

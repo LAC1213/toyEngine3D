@@ -52,7 +52,7 @@ GLFWwindow * init()
 {
     if ( initialized )
     {
-        std::cerr << log_warn << "Engine already initialized." << log_endl;
+        LOG << log_warn << "Engine already initialized." << log_endl;
         return nullptr;
     }
 
@@ -60,13 +60,13 @@ GLFWwindow * init()
     if ( resPath )
     {
         chdir ( resPath );
-        std::cerr << log_info << "engine root at " << std::string ( resPath ) << log_endl;
+        LOG << log_info << "engine root at " << std::string ( resPath ) << log_endl;
     }
     else
     {
         char wd[4096];
         getcwd ( wd, sizeof wd );
-        std::cerr << log_info << "engine root at " << std::string ( wd ) << log_endl;
+        LOG << log_info << "engine root at " << std::string ( wd ) << log_endl;
     }
 
     glfwSetErrorCallback ( glfwErrorCallback );
@@ -127,7 +127,7 @@ GLFWwindow * init()
     glGetIntegerv( GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &availMemKB );
 
     GPUMemAtInit = totalMemKB - availMemKB;
-    std::cerr << log_info << "GPU Memory at init " << GPUMemAtInit << "KB" << log_endl;
+    LOG << log_info << "GPU Memory at init " << GPUMemAtInit << "KB" << log_endl;
 
     GLenum err = glewInit();
     if ( err != GLEW_OK )

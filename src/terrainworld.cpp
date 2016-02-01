@@ -51,7 +51,7 @@ void TerrainWorld::setCenter ( int32_t x, int32_t y, bool forceUpdate )
             }
             else
             {
-                std::cerr << log_info << "Generating Terrain Chunk [" << current.x
+                LOG << log_info << "Generating Terrain Chunk [" << current.x
                           << ", " << current.y << "]" << log_endl;
 
                 float* edges[] = {nullptr, nullptr, nullptr, nullptr};
@@ -61,7 +61,7 @@ void TerrainWorld::setCenter ( int32_t x, int32_t y, bool forceUpdate )
                 auto north_it = _heights.find ( north );
                 if ( north_it != _heights.end() )
                 {
-                    std::cerr << log_info << "Found generated terrain chunk at north edge" << log_endl;
+                    LOG << log_info << "Found generated terrain chunk at north edge" << log_endl;
                     edges[2] = north_it->second.data;
                 }
 
@@ -70,7 +70,7 @@ void TerrainWorld::setCenter ( int32_t x, int32_t y, bool forceUpdate )
                 auto south_it = _heights.find ( south );
                 if ( south_it != _heights.end() )
                 {
-                    std::cerr << log_info << "Found generated terrain chunk at south edge" << log_endl;
+                    LOG << log_info << "Found generated terrain chunk at south edge" << log_endl;
                     edges[0] = south_it->second.data;
                 }
 
@@ -79,7 +79,7 @@ void TerrainWorld::setCenter ( int32_t x, int32_t y, bool forceUpdate )
                 auto east_it = _heights.find ( east );
                 if ( east_it != _heights.end() )
                 {
-                    std::cerr << log_info << "Found generated terrain chunk at east edge" << log_endl;
+                    LOG << log_info << "Found generated terrain chunk at east edge" << log_endl;
                     edges[1] = east_it->second.data;
                 }
 
@@ -88,7 +88,7 @@ void TerrainWorld::setCenter ( int32_t x, int32_t y, bool forceUpdate )
                 auto west_it = _heights.find ( west );
                 if ( west_it != _heights.end() )
                 {
-                    std::cerr << log_info << "Found generated terrain chunk at west edge" << log_endl;
+                    LOG << log_info << "Found generated terrain chunk at west edge" << log_endl;
                     edges[3] = west_it->second.data;
                 }
 

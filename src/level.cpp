@@ -90,21 +90,19 @@ void Level::onMouseScroll ( double x, double y )
 
 }
 
+void Level::onText ( uint32_t codepoint )
+{
+
+}
+
 void Level::onKeyAction ( int key, int scancode, int action, int mods )
 {
     if ( action == GLFW_PRESS )
     {
         switch ( key )
         {
-        case GLFW_KEY_R:
-            std::cerr << log_info << "Resetting..." << log_endl;
-            reset();
-            break;
         case GLFW_KEY_ESCAPE:
             _status = Shutdown;
-            break;
-        case GLFW_KEY_Z:
-            _drawCollisionShapes ^= true;
             break;
         }
     }

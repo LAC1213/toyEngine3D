@@ -32,6 +32,7 @@ public:
     virtual void onMouseAction ( int button, int action, int mods );
     virtual void onMouseMove ( double x, double y );
     virtual void onMouseScroll ( double x, double y );
+    virtual void onText ( uint32_t codepoint );
 
 protected:
     GLFWwindow * _window;
@@ -48,6 +49,5 @@ protected:
 
     PhysicsVars * _physics = nullptr;
 
-private:
     Status _status;
 };

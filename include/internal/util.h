@@ -4,6 +4,7 @@
 #include <stdarg.h>
 #include <iostream>
 #include <string>
+#include <sstream>
 
 #include <btBulletDynamicsCommon.h>
 #include <glm/glm.hpp>
@@ -18,7 +19,10 @@ void __errorExit ( const char * file, const char * func, unsigned int line, cons
 #define vec_for_each( index, vec ) for( size_t index = 0 ; index < (vec).size() ; ++index )
 #define list_for_each( it, xs ) for( auto it = xs.begin() ; it != xs.end() ; ++it )
 
-#define INVALID_CODE_PATH std::cerr << log_alert << "INVALID_CODE_PATH" << log_endl; abort();
+#define INVALID_CODE_PATH LOG << log_alert << "INVALID_CODE_PATH" << log_endl; abort();
+
+extern std::stringstream log_stream;
+#define LOG log_stream
 
 enum Log {
     log_warn,
