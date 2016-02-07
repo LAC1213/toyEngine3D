@@ -33,12 +33,12 @@ Font::Font ( const char * name, FT_UInt fontSize ) : _size ( fontSize )
     }
 
     _atlas.bind();
-    _atlas.setFormat( GL_RED );
-    _atlas.setInternalFormat( GL_RED );
-    _atlas.resize( _atlasWidth, _atlasHeight );
+    _atlas.setFormat ( GL_RED );
+    _atlas.setInternalFormat ( GL_RED );
+    _atlas.resize ( _atlasWidth, _atlasHeight );
 
-    _atlas.setParameter ( GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-    _atlas.setParameter ( GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    _atlas.setParameter ( GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+    _atlas.setParameter ( GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 
     int x = 0;
     CharInfo * ci = _info;
@@ -50,9 +50,9 @@ Font::Font ( const char * name, FT_UInt fontSize ) : _size ( fontSize )
             continue;
         }
 
-        glPixelStorei( GL_PACK_ALIGNMENT, 1 );
-        _atlas.loadSubData( x, 0, g->bitmap.width, g->bitmap.rows, g->bitmap.buffer );
-        glPixelStorei( GL_PACK_ALIGNMENT, 16 );
+        glPixelStorei ( GL_PACK_ALIGNMENT, 1 );
+        _atlas.loadSubData ( x, 0, g->bitmap.width, g->bitmap.rows, g->bitmap.buffer );
+        glPixelStorei ( GL_PACK_ALIGNMENT, 16 );
 
         ci->ax = g->advance.x >> 6;
         ci->ay = g->advance.y >> 6;

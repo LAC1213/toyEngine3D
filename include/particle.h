@@ -51,7 +51,7 @@ public:
     void addParticles ( size_t n );
 
 protected:
-    virtual void initParticle( Particle& p );
+    virtual void initParticle ( Particle& p );
     virtual void stepParticle ( Particle& p, float dt );
 
     static Shader * _shader;
@@ -60,16 +60,16 @@ protected:
 
     float _spawnFrequency;
 
-    glm::vec3 _p = glm::vec3(0);
+    glm::vec3 _p = glm::vec3 ( 0 );
     float _pRadius = 0;
-    glm::vec3 _dp = glm::vec3(0);
+    glm::vec3 _dp = glm::vec3 ( 0 );
     float _dpRadius = 0;
-    glm::vec3 _ddp = glm::vec3(0);
+    glm::vec3 _ddp = glm::vec3 ( 0 );
 
-    glm::vec4 _c = glm::vec4(0);
+    glm::vec4 _c = glm::vec4 ( 0 );
     float _cRadius = 0;
-    glm::vec4 _dc = glm::vec4(0);
-    glm::vec4 _ddc = glm::vec4(0);
+    glm::vec4 _dc = glm::vec4 ( 0 );
+    glm::vec4 _ddc = glm::vec4 ( 0 );
 
     float _s;
     float _sRadius = 0;
@@ -102,7 +102,7 @@ public:
     void setMaxRadius ( float r );
     void setExpandSpeed ( float v );
 
-    virtual void initParticle( Particle& p );
+    virtual void initParticle ( Particle& p );
 protected:
     float _expandSpeed = 1;
     float _maxRadius = 1;

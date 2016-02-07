@@ -17,16 +17,16 @@ Shader::~Shader()
     glDeleteProgram ( _program );
 }
 
-void Shader::clone( GLuint p )
+void Shader::clone ( GLuint p )
 {
     _program = p;
 }
 
 /** glUseProgram() wrapper, also sets uniforms of Camera::Active
  */
-void Shader::use( bool setCameraUniforms )
+void Shader::use ( bool setCameraUniforms )
 {
-    if( setCameraUniforms )
+    if ( setCameraUniforms )
         Camera::Active->setUniforms ( this );
     if ( this == Active )
     {
@@ -152,9 +152,9 @@ bool Shader::setUniform ( const std::string& name, const glm::mat4& val )
     return true;
 }
 
-bool Shader::setUniform( const std::string &name, size_t count, glm::vec3 * vecs )
+bool Shader::setUniform ( const std::string &name, size_t count, glm::vec3 * vecs )
 {
-    GLint loc = getUniformLocation( name );
+    GLint loc = getUniformLocation ( name );
     if ( loc == -1 )
     {
         return false;
@@ -162,7 +162,7 @@ bool Shader::setUniform( const std::string &name, size_t count, glm::vec3 * vecs
     else
     {
         GLfloat data[3*count];
-        for( size_t i = 0 ; i < count ; ++i )
+        for ( size_t i = 0 ; i < count ; ++i )
         {
             data[3*i] = vecs[i].x;
             data[3*i + 1] = vecs[i].y;
@@ -172,131 +172,134 @@ bool Shader::setUniform( const std::string &name, size_t count, glm::vec3 * vecs
     }
 }
 
-static void compileShader(GLuint id, const char *src)
+static void compileShader ( GLuint id, const char *src )
 {
     GLint logSize;
 
     // Compile Vertex Shader
     const GLchar *srcs[] = {src};
-    glShaderSource(id, 1, srcs, nullptr);
-    glCompileShader(id);
+    glShaderSource ( id, 1, srcs, nullptr );
+    glCompileShader ( id );
 
     // Check Vertex Shader
-    glGetShaderiv(id, GL_INFO_LOG_LENGTH, &logSize);
+    glGetShaderiv ( id, GL_INFO_LOG_LENGTH, &logSize );
     char errMsg[logSize];
-    glGetShaderInfoLog(id, logSize, NULL, errMsg);
+    glGetShaderInfoLog ( id, logSize, NULL, errMsg );
 
-    if (logSize)
+    if ( logSize )
     {
         LOG << log_warn << errMsg << log_endl;
     }
 }
 
 // caller has to free memory
-static char *readShaderSrc(const char *path) {
-    FILE *file = fopen(path, "r");
+static char *readShaderSrc ( const char *path )
+{
+    FILE *file = fopen ( path, "r" );
     if ( !file )
     {
-        errorExit ("Couldn't open shader source file %s", path);
+        errorExit ( "Couldn't open shader source file %s", path );
     }
 
-    if (fseek(file, 0, SEEK_END))
-        errorExit("Error in fseek()");
-    ssize_t size = ftell(file);
-    if (size == -1)
-        errorExit("Error in ftell()");
-    if (fseek(file, 0, SEEK_SET))
-        errorExit("Error in fseek()");
+    if ( fseek ( file, 0, SEEK_END ) )
+        errorExit ( "Error in fseek()" );
+    ssize_t size = ftell ( file );
+    if ( size == -1 )
+        errorExit ( "Error in ftell()" );
+    if ( fseek ( file, 0, SEEK_SET ) )
+        errorExit ( "Error in fseek()" );
     char *src = new char[size + 1];
-    if (size != fread(src, 1, size, file))
-        errorExit("Error in fread()");
+    if ( size != fread ( src, 1, size, file ) )
+        errorExit ( "Error in fread()" );
 
     src[size] = '\0';
 
-    if (fclose(file))
-        errorExit("Error in fclose()");
+    if ( fclose ( file ) )
+        errorExit ( "Error in fclose()" );
 
     return src;
 }
 
-GLuint addShader(GLuint program, const std::string &path, GLenum shaderType) {
-    GLuint shaderID = glCreateShader(shaderType);
-    char *src = readShaderSrc(path.c_str());
-    compileShader(shaderID, src);
-    glAttachShader(program, shaderID);
+GLuint addShader ( GLuint program, const std::string &path, GLenum shaderType )
+{
+    GLuint shaderID = glCreateShader ( shaderType );
+    char *src = readShaderSrc ( path.c_str() );
+    compileShader ( shaderID, src );
+    glAttachShader ( program, shaderID );
     delete[] src;
     return shaderID;
 }
 
-static GLuint createProgram(const std::__cxx11::string *vertPath,
-                            const std::__cxx11::string *contPath,
-                            const std::__cxx11::string *evalPath,
-                            const std::__cxx11::string *geomPath,
-                            const std::__cxx11::string *fragPath) {
+static GLuint createProgram ( const std::__cxx11::string *vertPath,
+                              const std::__cxx11::string *contPath,
+                              const std::__cxx11::string *evalPath,
+                              const std::__cxx11::string *geomPath,
+                              const std::__cxx11::string *fragPath )
+{
     GLuint prog = glCreateProgram();
 
     LOG << log_info << "creating Program, ID: " << prog << log_endl;
 
     GLuint vertID, fragID, contID, evalID, geomID;
 
-    if (vertPath)
+    if ( vertPath )
     {
-        vertID = addShader(prog, *vertPath, GL_VERTEX_SHADER);
+        vertID = addShader ( prog, *vertPath, GL_VERTEX_SHADER );
         LOG << log_info << "adding Vertex Shader from source: " << *vertPath << log_endl;
     }
 
-    if (contPath)
+    if ( contPath )
     {
-        contID = addShader(prog, *contPath, GL_TESS_CONTROL_SHADER);
+        contID = addShader ( prog, *contPath, GL_TESS_CONTROL_SHADER );
         LOG << log_info << "adding Tessellation Control Shader from source: " << *contPath << log_endl;
     }
 
-    if (evalPath)
+    if ( evalPath )
     {
-        evalID = addShader(prog, *evalPath, GL_TESS_EVALUATION_SHADER);
+        evalID = addShader ( prog, *evalPath, GL_TESS_EVALUATION_SHADER );
         LOG << log_info << "adding Tessellation Evaluation Shader from source: " << *evalPath << log_endl;
     }
 
-    if (geomPath)
+    if ( geomPath )
     {
-        geomID = addShader(prog, *geomPath, GL_GEOMETRY_SHADER);
+        geomID = addShader ( prog, *geomPath, GL_GEOMETRY_SHADER );
         LOG << log_info << "adding Geometry Shader from source: " << *geomPath << log_endl;
     }
 
-    if (fragPath)
+    if ( fragPath )
     {
-        fragID = addShader(prog, *fragPath, GL_FRAGMENT_SHADER);
+        fragID = addShader ( prog, *fragPath, GL_FRAGMENT_SHADER );
         LOG << log_info << "adding Fragment Shader from source: " << *fragPath << log_endl;
     }
 
     LOG << log_info << "Linking Program..." << log_endl;
 
-    glLinkProgram(prog);
+    glLinkProgram ( prog );
 
     int logSize;
     // Check the program
-    glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &logSize);
-    char errMsg[max(logSize, 1)];
-    glGetProgramInfoLog(prog, logSize, NULL, errMsg);
-    if (logSize)
+    glGetProgramiv ( prog, GL_INFO_LOG_LENGTH, &logSize );
+    char errMsg[max ( logSize, 1 )];
+    glGetProgramInfoLog ( prog, logSize, NULL, errMsg );
+    if ( logSize )
     {
         LOG << log_warn << errMsg << log_endl;
     }
 
-    if (vertPath)
-        glDeleteShader(vertID);
+    if ( vertPath )
+        glDeleteShader ( vertID );
 
-    if (contPath)
-        glDeleteShader(contID);
+    if ( contPath )
+        glDeleteShader ( contID );
 
-    if (evalPath)
-        glDeleteShader(evalID);
+    if ( evalPath )
+        glDeleteShader ( evalID );
 
-    if (geomPath)
-        glDeleteShader(geomID);
+    if ( geomPath )
+        glDeleteShader ( geomID );
 
-    if (fragPath)
-        glDeleteShader(fragID);
+    if ( fragPath )
+        glDeleteShader ( fragID );
 
     return prog;
 }
@@ -305,7 +308,7 @@ Shader::Shader()
 {
 }
 
-Shader::Shader( GLuint prog )
+Shader::Shader ( GLuint prog )
 {
     _program = prog;
 }
@@ -327,11 +330,12 @@ Shader::Shader( GLuint prog )
  *  \param shaderDir directory where the shader files are located
  *  \param loadFlags specifies what kind of shaders should be loaded
  */
-Shader::Shader(const std::string &shaderDir, int loadFlags) {
+Shader::Shader ( const std::string &shaderDir, int loadFlags )
+{
     char oldDir[4096];
-    getcwd(oldDir, sizeof oldDir);
+    getcwd ( oldDir, sizeof oldDir );
     LOG << log_info << "Loading shader dir " << shaderDir << log_endl;
-    chdir(shaderDir.c_str());
+    chdir ( shaderDir.c_str() );
 
     std::string vertPath, contPath, evalPath, geomPath, fragPath;
     vertPath = VERT_PATH;
@@ -346,21 +350,21 @@ Shader::Shader(const std::string &shaderDir, int loadFlags) {
     std::string *d = nullptr;
     std::string *e = nullptr;
 
-    if (loadFlags & LOAD_VERT)
+    if ( loadFlags & LOAD_VERT )
         a = &vertPath;
-    if (loadFlags & LOAD_FRAG)
+    if ( loadFlags & LOAD_FRAG )
         e = &fragPath;
-    if (loadFlags & LOAD_TESS)
+    if ( loadFlags & LOAD_TESS )
     {
         b = &contPath;
         c = &evalPath;
     }
-    if (loadFlags & LOAD_GEOM)
+    if ( loadFlags & LOAD_GEOM )
         d = &geomPath;
 
-    _program = createProgram(a, b, c, d, e);
+    _program = createProgram ( a, b, c, d, e );
 
-    chdir(oldDir);
+    chdir ( oldDir );
 }
 
 
@@ -372,22 +376,22 @@ Shader::Shader ( const std::__cxx11::string* vertPath,
                  const std::__cxx11::string* geomPath,
                  const std::__cxx11::string* fragPath )
 {
-    _program = createProgram(vertPath, contPath, evalPath, geomPath, fragPath);
+    _program = createProgram ( vertPath, contPath, evalPath, geomPath, fragPath );
 }
 
 /** Convenience constructor for the classic vertex/fragment case
  */
 Shader::Shader ( const std::string& vertPath, const std::string& fragPath )
 {
-    _program = createProgram( &vertPath, nullptr, nullptr, nullptr, &fragPath );
+    _program = createProgram ( &vertPath, nullptr, nullptr, nullptr, &fragPath );
 }
 
-Shader *Shader::Manager::loadResource(const std::pair<std::__cxx11::string, int> &ci)
+Shader *Shader::Manager::loadResource ( const std::pair<std::__cxx11::string, int> &ci )
 {
     return new Shader ( ci.first, ci.second );
 }
 
-Shader *Shader::Manager::request(const std::pair<std::__cxx11::string, int> &ci)
+Shader *Shader::Manager::request ( const std::pair<std::__cxx11::string, int> &ci )
 {
     std::string dir;
     if ( ci.first[ci.first.size() - 1] == '/' )
@@ -398,10 +402,10 @@ Shader *Shader::Manager::request(const std::pair<std::__cxx11::string, int> &ci)
     {
         dir = ci.first + '/';
     }
-    return ResourceManager::request(std::pair<std::string, int>(dir, ci.second));
+    return ResourceManager::request ( std::pair<std::string, int> ( dir, ci.second ) );
 }
 
-Shader *Shader::Manager::request(const std::string &shaderDir, int flags)
+Shader *Shader::Manager::request ( const std::string &shaderDir, int flags )
 {
-    return request(std::pair<std::string, int>(shaderDir, flags));
+    return request ( std::pair<std::string, int> ( shaderDir, flags ) );
 }

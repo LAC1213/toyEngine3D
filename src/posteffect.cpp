@@ -31,22 +31,22 @@ void PostEffect::render()
 
 void PostEffect::init()
 {
-    chdir("res/shader/post");
-    _shaders[NONE] = new Shader( "vert.glsl", "none.glsl" );
-    _shaders[PIXELATE] = new Shader( "vert.glsl", "pixelate.glsl" );
-    _shaders[VERTICAL_GAUSS_BLUR] = new Shader( "vert.glsl", "vertical_gauss_blur.glsl" );
-    _shaders[HORIZONTAL_GAUSS_BLUR] = new Shader( "vert.glsl", "horizontal_gauss_blur.glsl" );
-    _shaders[BLOOM_FILTER] = new Shader( "vert.glsl", "bloom_filter.glsl" );
-    _shaders[REDUCE_HDR] = new Shader( "vert.glsl", "reduce_hdr.glsl" );
-    _shaders[DITHER] = new Shader( "vert.glsl", "dither.glsl" );
-    _shaders[FXAA] = new Shader( "vert.glsl", "fxaa.glsl" );
-    _shaders[SSAO] = new Shader( "vert.glsl", "ssao.glsl" );
-    chdir("../../..");
+    chdir ( "res/shader/post" );
+    _shaders[NONE] = new Shader ( "vert.glsl", "none.glsl" );
+    _shaders[PIXELATE] = new Shader ( "vert.glsl", "pixelate.glsl" );
+    _shaders[VERTICAL_GAUSS_BLUR] = new Shader ( "vert.glsl", "vertical_gauss_blur.glsl" );
+    _shaders[HORIZONTAL_GAUSS_BLUR] = new Shader ( "vert.glsl", "horizontal_gauss_blur.glsl" );
+    _shaders[BLOOM_FILTER] = new Shader ( "vert.glsl", "bloom_filter.glsl" );
+    _shaders[REDUCE_HDR] = new Shader ( "vert.glsl", "reduce_hdr.glsl" );
+    _shaders[DITHER] = new Shader ( "vert.glsl", "dither.glsl" );
+    _shaders[FXAA] = new Shader ( "vert.glsl", "fxaa.glsl" );
+    _shaders[SSAO] = new Shader ( "vert.glsl", "ssao.glsl" );
+    chdir ( "../../.." );
 }
 
 void PostEffect::destroy()
 {
-    for( int i = 0 ; i > TYPE_COUNT ; ++i )
+    for ( int i = 0 ; i > TYPE_COUNT ; ++i )
         delete _shaders[i];
 }
 
@@ -98,7 +98,7 @@ void Bloom::render()
         _second->clearColor();
         _gaussv.render();
 
-        if( i == _blurs - 1 )
+        if ( i == _blurs - 1 )
             out->clearColor();
         else
             _first->clearColor();
@@ -114,16 +114,16 @@ Blend::Blend ( const Texture * a, const Texture * b )
 
 void Blend::render()
 {
-    glBlendFunc( GL_ONE, GL_ONE );
+    glBlendFunc ( GL_ONE, GL_ONE );
     glDisable ( GL_DEPTH_TEST );
     PostEffect::render();
-    static PostEffect none( NONE, _blendTex );
+    static PostEffect none ( NONE, _blendTex );
     none.render();
-    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+    glBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
     glEnable ( GL_DEPTH_TEST );
 }
 
-void PostEffect::setType( PostEffect::Type type )
+void PostEffect::setType ( PostEffect::Type type )
 {
     _type = type;
 }
@@ -133,31 +133,31 @@ PostEffect::Type PostEffect::getType() const
     return _type;
 }
 
-AmbientOcclusion::AmbientOcclusion( Framebuffer * gBuffer )
-        : PostEffect( SSAO, nullptr )
-        , _gBuffer( gBuffer )
+AmbientOcclusion::AmbientOcclusion ( Framebuffer * gBuffer )
+    : PostEffect ( SSAO, nullptr )
+    , _gBuffer ( gBuffer )
 {
-    _noiseTexture.resize( 4, 4 );
-    _noiseTexture.setParameter( GL_TEXTURE_WRAP_S, GL_REPEAT );
-    _noiseTexture.setParameter( GL_TEXTURE_WRAP_T, GL_REPEAT );
-    _noiseTexture.setFormat( GL_RGB );
-    _noiseTexture.setInternalFormat( GL_RGB16F );
+    _noiseTexture.resize ( 4, 4 );
+    _noiseTexture.setParameter ( GL_TEXTURE_WRAP_S, GL_REPEAT );
+    _noiseTexture.setParameter ( GL_TEXTURE_WRAP_T, GL_REPEAT );
+    _noiseTexture.setFormat ( GL_RGB );
+    _noiseTexture.setInternalFormat ( GL_RGB16F );
     GLfloat randomVecs[48];
-    for( int i = 0 ; i < 16 ; ++i )
+    for ( int i = 0 ; i < 16 ; ++i )
     {
         randomVecs[3*i] = randomFloat() * 2 - 1;
         randomVecs[3*i + 1] = randomFloat() * 2 - 1;
         randomVecs[3*i + 2] = 0;
     }
-    _noiseTexture.loadData( &randomVecs[0] );
+    _noiseTexture.loadData ( &randomVecs[0] );
 
-    for (size_t i = 0; i < KERNEL_SIZE; ++i)
+    for ( size_t i = 0; i < KERNEL_SIZE; ++i )
     {
-        _kernel[i] = glm::vec3( 2* randomFloat() - 1, 2*randomFloat() - 1, randomFloat() );
-        _kernel[i] = glm::normalize( _kernel[i] );
+        _kernel[i] = glm::vec3 ( 2* randomFloat() - 1, 2*randomFloat() - 1, randomFloat() );
+        _kernel[i] = glm::normalize ( _kernel[i] );
         _kernel[i] *= randomFloat();
-        float scale = float(i) / 64.f;
-        scale = lerp( 0, 1, scale * scale );
+        float scale = float ( i ) / 64.f;
+        scale = lerp ( 0, 1, scale * scale );
         _kernel[i] *= scale;
     }
 }
@@ -168,23 +168,23 @@ AmbientOcclusion::~AmbientOcclusion()
 
 void AmbientOcclusion::render()
 {
-    _shaders[_type]->use( false );
+    _shaders[_type]->use ( false );
 
-    glActiveTexture( GL_TEXTURE0 );
-    _shaders[_type]->setUniform( "positions", 0 );
-    _gBuffer->getAttachments()[2]->bind();
+    glActiveTexture ( GL_TEXTURE0 );
+    _shaders[_type]->setUniform ( "positions", 0 );
+    _gBuffer->getAttachments() [GBUFFER_POSITION]->bind();
 
-    glActiveTexture( GL_TEXTURE1 );
-    _shaders[_type]->setUniform( "normals", 1 );
-    _gBuffer->getAttachments()[3]->bind();
+    glActiveTexture ( GL_TEXTURE1 );
+    _shaders[_type]->setUniform ( "normals", 1 );
+    _gBuffer->getAttachments() [GBUFFER_NORMAL]->bind();
 
-    glActiveTexture( GL_TEXTURE2 );
-    _shaders[_type]->setUniform( "noiseTex", 1 );
+    glActiveTexture ( GL_TEXTURE2 );
+    _shaders[_type]->setUniform ( "noiseTex", 1 );
     _noiseTexture.bind();
 
-    _shaders[_type]->setUniform("kernel", KERNEL_SIZE, &_kernel[0]);
-    _shaders[_type]->setUniform("radius", RADIUS);
-    _shaders[_type]->setUniform( "proj", ((PerspectiveCamera*)Camera::Active)->getProj() );
+    _shaders[_type]->setUniform ( "kernel", KERNEL_SIZE, &_kernel[0] );
+    _shaders[_type]->setUniform ( "radius", RADIUS );
+    _shaders[_type]->setUniform ( "proj", ( ( PerspectiveCamera* ) Camera::Active )->getProj() );
 
     Engine::DrawScreenQuad->execute();
 }

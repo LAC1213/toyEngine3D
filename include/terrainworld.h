@@ -49,7 +49,7 @@ protected:
     float _maxHeight;
     ChunkCoord _centerChunk;
     int _loadRange;
-    int _heightmapSize;
+    unsigned int _heightmapSize;
     std::vector<Terrain> _activeTerrains;
     std::unordered_map< ChunkCoord, HeightMap > _heights;
 };

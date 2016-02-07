@@ -4,6 +4,13 @@
 #include <vector>
 #include <texture.h>
 
+enum
+{ GBUFFER_DIFFUSE
+, GBUFFER_SPEC
+, GBUFFER_POSITION
+, GBUFFER_NORMAL
+};
+
 class Framebuffer
 {
 public:

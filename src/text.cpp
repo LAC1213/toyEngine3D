@@ -26,49 +26,49 @@ Text::Text ( Font * font, std::string str, glm::vec2 screen, glm::vec4 color )
 
     glm::vec4 currentColor = color;
 
-    const glm::vec4 ANSI_BLACK = glm::vec4(glm::vec3(0, 0, 0)/255.f, color.a);
-    const glm::vec4 ANSI_RED = glm::vec4(glm::vec3(194, 54, 33)/255.f, color.a);
-    const glm::vec4 ANSI_GREEN = glm::vec4(glm::vec3(37, 188, 36)/255.f, color.a);
-    const glm::vec4 ANSI_YELLOW = glm::vec4(glm::vec3(173, 173, 39)/255.f, color.a);
-    const glm::vec4 ANSI_BLUE = glm::vec4(glm::vec3(73, 46, 225)/255.f, color.a);
-    const glm::vec4 ANSI_MAGENTA = glm::vec4(glm::vec3(211, 56, 211)/255.f, color.a);
-    const glm::vec4 ANSI_CYAN = glm::vec4(glm::vec3(51, 187, 200)/255.f, color.a);
-    const glm::vec4 ANSI_WHITE = glm::vec4(glm::vec3(203, 204, 205)/255.f, color.a);
+    const glm::vec4 ANSI_BLACK = glm::vec4 ( glm::vec3 ( 0, 0, 0 ) /255.f, color.a );
+    const glm::vec4 ANSI_RED = glm::vec4 ( glm::vec3 ( 194, 54, 33 ) /255.f, color.a );
+    const glm::vec4 ANSI_GREEN = glm::vec4 ( glm::vec3 ( 37, 188, 36 ) /255.f, color.a );
+    const glm::vec4 ANSI_YELLOW = glm::vec4 ( glm::vec3 ( 173, 173, 39 ) /255.f, color.a );
+    const glm::vec4 ANSI_BLUE = glm::vec4 ( glm::vec3 ( 73, 46, 225 ) /255.f, color.a );
+    const glm::vec4 ANSI_MAGENTA = glm::vec4 ( glm::vec3 ( 211, 56, 211 ) /255.f, color.a );
+    const glm::vec4 ANSI_CYAN = glm::vec4 ( glm::vec3 ( 51, 187, 200 ) /255.f, color.a );
+    const glm::vec4 ANSI_WHITE = glm::vec4 ( glm::vec3 ( 203, 204, 205 ) /255.f, color.a );
 
     _height = _font->getSize();
     //TODO unicode
     Font::CharInfo * info = _font->getCharInfo();
     for ( const char * p = str.c_str() ; *p ; ++p )
     {
-        if( *p == '\n' )
+        if ( *p == '\n' )
         {
-            y -= 2.5*_font->getSize() / _screen.y;
-            _height += 2.5*_font->getSize();
+            y -= 2.2*_font->getSize() / _screen.y;
+            _height += 2.2*_font->getSize();
             x = -1;
             continue;
         }
-        else if( !strncmp(p, "\x1b[0m", 4 ) )
+        else if ( !strncmp ( p, "\x1b[0m", 4 ) )
         {
             currentColor = color;
             p += 3;
             continue;
         }
 #define COLOR_OPTION( CODE, COLOR ) \
-        else if( !strncmp(p, CODE, 5 ) ) \
+        else if( !strncmp( p, CODE, 5 ) ) \
         { \
             currentColor = COLOR; \
-            p += 4; \
+            p += strlen(CODE) - 1; \
             continue; \
         }
 //TODO full ANSI color code support
-        COLOR_OPTION( "\x1b[30m", ANSI_BLACK )
-        COLOR_OPTION( "\x1b[31m", ANSI_RED )
-        COLOR_OPTION( "\x1b[32m", ANSI_GREEN )
-        COLOR_OPTION( "\x1b[33m", ANSI_YELLOW )
-        COLOR_OPTION( "\x1b[34m", ANSI_BLUE )
-        COLOR_OPTION( "\x1b[35m", ANSI_MAGENTA )
-        COLOR_OPTION( "\x1b[36m", ANSI_CYAN )
-        COLOR_OPTION( "\x1b[37m", ANSI_WHITE )
+        COLOR_OPTION ( "\x1b[30m", ANSI_BLACK )
+        COLOR_OPTION ( "\x1b[31m", ANSI_RED )
+        COLOR_OPTION ( "\x1b[32m", ANSI_GREEN )
+        COLOR_OPTION ( "\x1b[33m", ANSI_YELLOW )
+        COLOR_OPTION ( "\x1b[34m", ANSI_BLUE )
+        COLOR_OPTION ( "\x1b[35m", ANSI_MAGENTA )
+        COLOR_OPTION ( "\x1b[36m", ANSI_CYAN )
+        COLOR_OPTION ( "\x1b[37m", ANSI_WHITE )
 
         unsigned int idx = *p;
         float x2 =  x + info[idx].bl * sx;
@@ -111,17 +111,17 @@ Text::Text ( Font * font, std::string str, glm::vec2 screen, glm::vec4 color )
         vertices[8*i + 6] = x2;
         vertices[8*i + 7] = y2 + h;
 
-        memcpy( &colors[16*i], glm::value_ptr( currentColor ), 4*sizeof(float) );
-        memcpy( &colors[16*i + 4], glm::value_ptr( currentColor ), 4*sizeof(float) );
-        memcpy( &colors[16*i + 8], glm::value_ptr( currentColor ), 4*sizeof(float) );
-        memcpy( &colors[16*i + 12], glm::value_ptr( currentColor ), 4*sizeof(float) );
+        memcpy ( &colors[16*i], glm::value_ptr ( currentColor ), 4*sizeof ( float ) );
+        memcpy ( &colors[16*i + 4], glm::value_ptr ( currentColor ), 4*sizeof ( float ) );
+        memcpy ( &colors[16*i + 8], glm::value_ptr ( currentColor ), 4*sizeof ( float ) );
+        memcpy ( &colors[16*i + 12], glm::value_ptr ( currentColor ), 4*sizeof ( float ) );
 
         ++i;
     }
 
     _buffers[0].loadData ( vertices, 8*n*sizeof ( float ) );
     _buffers[1].loadData ( uvs, 8*n*sizeof ( float ) );
-    _buffers[2].loadData ( colors, 16*n*sizeof( float ) );
+    _buffers[2].loadData ( colors, 16*n*sizeof ( float ) );
     _buffers[3].loadData ( indices, 6*n*sizeof ( unsigned short ) );
 
     _drawCall.setElements ( _elements );
@@ -187,6 +187,7 @@ glm::vec2 Text::getPosition() const
     return _pos;
 }
 
-int Text::getHeight() const {
+int Text::getHeight() const
+{
     return _height;
 }

@@ -5,16 +5,16 @@
  */
 BufferObject::BufferObject()
 {
-    glGenBuffers( 1, &_id );
+    glGenBuffers ( 1, &_id );
 }
 
 /** Contructor
  * \param target initial target
  */
 BufferObject::BufferObject ( GLenum target, GLenum hint )
-    : _target ( target ), _hint( hint )
+    : _target ( target ), _hint ( hint )
 {
-    glGenBuffers( 1, &_id );
+    glGenBuffers ( 1, &_id );
 }
 
 /** Destructor which deletes the openGL buffer object
@@ -76,7 +76,7 @@ void BufferObject::loadSubData ( const void* data, size_t offset, size_t n ) con
  */
 void BufferObject::reserve ( size_t size )
 {
-    if( _size == size )
+    if ( _size == size )
         return;
     _size = size;
     bind();

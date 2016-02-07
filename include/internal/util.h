@@ -19,7 +19,7 @@ void __errorExit ( const char * file, const char * func, unsigned int line, cons
 #define vec_for_each( index, vec ) for( size_t index = 0 ; index < (vec).size() ; ++index )
 #define list_for_each( it, xs ) for( auto it = xs.begin() ; it != xs.end() ; ++it )
 
-#define INVALID_CODE_PATH LOG << log_alert << "INVALID_CODE_PATH" << log_endl; abort();
+#define INVALID_CODE_PATH std::cerr << log_alert << "INVALID_CODE_PATH" << log_endl; abort();
 
 extern std::stringstream log_stream;
 #define LOG log_stream
@@ -38,12 +38,12 @@ std::ostream& operator<< ( std::ostream& os, glm::vec4 v4 );
 
 inline float randomFloat()
 {
-    return ((float)rand())/RAND_MAX;
+    return ( ( float ) rand() ) /RAND_MAX;
 }
 
-inline float lerp( float a, float b, float f )
+inline float lerp ( float a, float b, float f )
 {
-    return a + f * (b - a);
+    return a + f * ( b - a );
 }
 
 glm::vec3 bt2glm ( const btVector3& vec );
@@ -56,41 +56,40 @@ glm::mat4 makeModel ( const glm::vec3& origin = __nullvec,
                       const glm::vec3& rotation = __rotvec,
                       const glm::vec3& scale = __scalevec );
 
-struct Transform
-{
+struct Transform {
     const glm::vec3 &getOrigin() const {
         return origin;
     }
 
-    void setOrigin(const glm::vec3 &origin) {
+    void setOrigin ( const glm::vec3 &origin ) {
         Transform::origin = origin;
-        mat = makeModel( origin, rot, scale );
+        mat = makeModel ( origin, rot, scale );
     }
 
     const glm::vec3 &getRot() const {
         return rot;
     }
 
-    void setRot(const glm::vec3 &rot) {
+    void setRot ( const glm::vec3 &rot ) {
         Transform::rot = rot;
-        mat = makeModel( origin, rot, scale );
+        mat = makeModel ( origin, rot, scale );
     }
 
     const glm::vec3 &getScale() const {
         return scale;
     }
 
-    void setScale(const glm::vec3 &scale) {
+    void setScale ( const glm::vec3 &scale ) {
         Transform::scale = scale;
-        mat = makeModel( origin, rot, scale );
+        mat = makeModel ( origin, rot, scale );
     }
 
-    glm::mat4 mat = glm::mat4(1);
+    glm::mat4 mat = glm::mat4 ( 1 );
 
 private:
     glm::vec3 origin;
     glm::vec3 rot;
-    glm::vec3 scale = glm::vec3(1);
+    glm::vec3 scale = glm::vec3 ( 1 );
 };
 
 namespace YAML

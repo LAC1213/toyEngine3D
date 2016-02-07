@@ -64,7 +64,7 @@ void Shockwave::render()
     glDisable ( GL_DEPTH_TEST );
 
     glActiveTexture ( GL_TEXTURE1 );
-    _gBuffer->getAttachments() [1]->bind();
+    _gBuffer->getAttachments() [GBUFFER_POSITION]->bind();
     _shader->setUniform ( "positionTex", 1 );
 
     glActiveTexture ( GL_TEXTURE0 );

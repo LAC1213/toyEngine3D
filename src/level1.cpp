@@ -15,14 +15,8 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     , _spinnies ( 1 )
 {
     Engine::Physics = _physics;
-    _player.setModel ( glm::vec3 ( 0, 3, 0 ), glm::vec3 ( 0 ), glm::vec3 ( 0.5 ) );
+    _player.setModel ( glm::vec3 ( 0, 3, 0 ), glm::vec3 ( 0 ), glm::vec3 ( 2 ) );
 
-    static PointLight p;
-    p.position = glm::vec3 ( 0, -55, 0 );
-    p.diffuse = glm::vec3 ( 1, 1, 1 );
-    p.specular = glm::vec3 ( 1, 1, 1 );
-    p.attenuation = glm::vec3 ( 0.01, 0.01, 0.01 );
-    _lighting.addPointLight ( &p );
     _lighting.setAmbient ( glm::vec3 ( 0.2 ) );
     _lighting.addPointLight ( _player.light() );
     _lighting.setSunDiffuse ( glm::vec3 ( 1 ) );
@@ -43,7 +37,7 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     groundTex->setParameter ( GL_TEXTURE_WRAP_S, GL_REPEAT );
     groundTex->setParameter ( GL_TEXTURE_WRAP_T, GL_REPEAT );
     _terrainWorld = new TerrainWorld ( groundTex );
-    _terrainWorld->toggleWireframe();
+ //   _terrainWorld->toggleWireframe();
 
     _spinnies[0] = new Spinny;
 
@@ -61,13 +55,16 @@ Level1::Level1 ( GLFWwindow* window, int width, int height )
     _physics->dynamicsWorld->addRigidBody ( _boxes[i]->body() );
 
     ModelData data;
-    data.loadFromFile("/home/lambert/Downloads/nanosuit/nanosuit.obj");
+    data.loadFromFile ( "/home/lambert/Downloads/Paris/Paris2010_0.obj" );
     _xwingmeshes = data.uploadToGPU();
     _xwingprops = data.props;
     data.free();
 
-    _xwing = new Model(_xwingmeshes, _xwingprops);
+    _xwing = new Model ( _xwingmeshes, _xwingprops );
+    _xwing->trans.setScale( glm::vec3( 0.1, 0.1, 0.1 ) );
     _xwing->toggleWireframe();
+
+    _lighting.addShadowCaster( _xwing );
 
     _currentCommand = _commandHistory.begin();
 
@@ -84,8 +81,8 @@ Level1::~Level1()
     Engine::TextureManager->release ( "res/textures/blob.png" );
 
     delete _xwing;
-    vec_for_each(i, _xwingmeshes)
-        delete _xwingmeshes[i];
+    vec_for_each ( i, _xwingmeshes )
+    delete _xwingmeshes[i];
 
     vec_for_each ( i, _spinnies )
     delete _spinnies[i];
@@ -209,7 +206,21 @@ void Level1::onMouseMove ( double x, double y )
 void Level1::onMouseScroll ( double x, double y )
 {
     Level::onMouseScroll ( x, y );
-    _cam.onMouseScroll ( x, y );
+
+    if ( _uiEnabled )
+    {
+        double xpos, ypos;
+        glfwGetCursorPos(_window, &xpos, &ypos);
+        if( xpos - _consoleX < _consoleWidth && ypos - _consoleY < _consoleHeight )
+        {
+            if( int(_lineScroll) + y >= 0 )
+                _lineScroll += y;
+        }
+    }
+    else
+    {
+        _cam.onMouseScroll ( x, y );
+    }
 }
 
 void Level1::onResize ( int w, int h )
@@ -225,117 +236,125 @@ void Level1::onKeyAction ( int key, int scancode, int action, int mods )
     Level::onKeyAction ( key, scancode, action, mods );
     if ( action == GLFW_PRESS )
     {
-        if( _uiEnabled )
+        if ( _uiEnabled )
         {
             switch ( key )
             {
-                case GLFW_KEY_GRAVE_ACCENT:
-                    _uiEnabled ^= true;
-                    break;
-                case GLFW_KEY_ENTER:
-                    onCommand( _uiInput );
-                    _uiInput = "";
+            case GLFW_KEY_GRAVE_ACCENT:
+                _uiEnabled ^= true;
+                break;
+            case GLFW_KEY_ENTER:
+                onCommand ( _uiInput );
+                _uiInput = "";
+                _cursorPos = 0;
+                break;
+            case GLFW_KEY_BACKSPACE:
+                _uiInput =  _uiInput.substr ( 0, _cursorPos - 1 ) + _uiInput.substr ( _cursorPos, _uiInput.size() - _cursorPos );
+                if ( _cursorPos == 0 )
                     _cursorPos = 0;
+                else
+                    --_cursorPos;
+                break;
+            case GLFW_KEY_RIGHT:
+                if( _cursorPos < _uiInput.size() )
+                    _cursorPos++;
+                break;
+            case GLFW_KEY_LEFT:
+                if( _cursorPos > 0 )
+                    --_cursorPos;
+                break;
+            case GLFW_KEY_UP:
+                if ( _commandHistory.empty() )
                     break;
-                case GLFW_KEY_BACKSPACE:
-                    _uiInput =  _uiInput.substr(0, _uiInput.size() - 1 );
-                    if( _cursorPos == 0 )
-                        _cursorPos = 0;
-                    else
-                        --_cursorPos;
+                if ( _newCommand )
+                {
+                    _newCommand = false;
+                }
+                else
+                {
+                    ++_currentCommand;
+                }
+                if ( _currentCommand == _commandHistory.end() )
+                    --_currentCommand;
+                _uiInput = *_currentCommand;
+                _cursorPos = _uiInput.size();
+                break;
+            case GLFW_KEY_DOWN:
+                if ( _commandHistory.empty() )
                     break;
-                case GLFW_KEY_UP:
-                    if( _commandHistory.empty() )
-                        break;
-                    if( _newCommand )
-                    {
-                        _newCommand = false;
-                    }
-                    else
-                    {
-                        ++_currentCommand;
-                    }
-                    if( _currentCommand == _commandHistory.end() )
-                        --_currentCommand;
+                if ( _currentCommand != _commandHistory.begin() )
+                {
+                    --_currentCommand;
                     _uiInput = *_currentCommand;
                     _cursorPos = _uiInput.size();
-                    break;
-                case GLFW_KEY_DOWN:
-                    if( _commandHistory.empty() )
-                        break;
-                    if( _currentCommand != _commandHistory.begin() )
-                    {
-                        --_currentCommand;
-                        _uiInput = *_currentCommand;
-                        _cursorPos = _uiInput.size();
-                    }
-                    else
-                    {
-                        _uiInput = "";
-                        _cursorPos = _uiInput.size();
-                        _newCommand = true;
-                    }
-                    break;
+                }
+                else
+                {
+                    _uiInput = "";
+                    _cursorPos = _uiInput.size();
+                    _newCommand = true;
+                }
+                break;
             }
         }
         else
         {
             switch ( key )
             {
-                case GLFW_KEY_R:
-                    LOG << log_info << "Resetting..." << log_endl;
-                    reset();
-                    break;
-                case GLFW_KEY_SPACE:
-                    _player.jump();
-                    break;
-                case GLFW_KEY_E:
-                {
-                    Bomb * nb = new Bomb;
-                    nb->setColor ( glm::vec4 ( 6, 0, 6, 6 ) );
-                    nb->setModel ( _player.getPos() + glm::vec3 ( 0, 1.6, 0 ), glm::vec3 ( 2*M_PI, 0, 0 ), glm::vec3 ( 0.2 ) );
-                    _physics->dynamicsWorld->addRigidBody ( nb->body() );
-                    _lighting.addPointLight ( &nb->light() );
-                    nb->body()->applyCentralImpulse ( btVector3 ( 0, 10, 0 ) );
-                    _bombs.push_back ( nb );
-                    break;
-                }
-                case GLFW_KEY_Q:
-                    _shock.fire();
-                    break;
-                case GLFW_KEY_UP:
-                    _cam.setPivot ( _cam.getPivot() * 0.9f );
-                    break;
-                case GLFW_KEY_DOWN:
-                    _cam.setPivot ( _cam.getPivot() * 1.1f );
-                    break;
-                case GLFW_KEY_GRAVE_ACCENT:
-                    _uiEnabled ^= true;
-                    break;
+            case GLFW_KEY_R:
+                LOG << log_info << "Resetting..." << log_endl;
+                reset();
+                break;
+            case GLFW_KEY_SPACE:
+                _player.jump();
+                break;
+            case GLFW_KEY_E:
+            {
+                Bomb * nb = new Bomb;
+                nb->setColor ( glm::vec4 ( 6, 0, 6, 6 ) );
+                nb->setModel ( _player.getPos() + glm::vec3 ( 0, 4, 0 ), glm::vec3 ( 2*M_PI, 0, 0 ), glm::vec3 ( 0.8 ) );
+                _physics->dynamicsWorld->addRigidBody ( nb->body() );
+                _lighting.addPointLight ( &nb->light() );
+                nb->body()->applyCentralImpulse ( btVector3 ( 0, 40, 0 ) );
+                _bombs.push_back ( nb );
+                break;
+            }
+            case GLFW_KEY_Q:
+                _shock.fire();
+                break;
+            case GLFW_KEY_UP:
+                _cam.setPivot ( _cam.getPivot() * 0.9f );
+                break;
+            case GLFW_KEY_DOWN:
+                _cam.setPivot ( _cam.getPivot() * 1.1f );
+                break;
+            case GLFW_KEY_GRAVE_ACCENT:
+                _uiEnabled ^= true;
+                break;
             }
         }
     }
 }
 
-void Level1::onText( uint32_t codepoint )
+void Level1::onText ( uint32_t codepoint )
 {
     if ( codepoint == '`' )
         return;
     if ( _uiEnabled )
     {
-        _uiInput = _uiInput.substr(0, _cursorPos) + (char)codepoint
-                   + _uiInput.substr(_cursorPos, _uiInput.size() - _cursorPos);
+        _uiInput = _uiInput.substr ( 0, _cursorPos ) + ( char ) codepoint
+                   + _uiInput.substr ( _cursorPos, _uiInput.size() - _cursorPos );
         ++_cursorPos;
     }
 }
 
-void Level1::onCommand( const std::string &command )
+void Level1::onCommand ( const std::string &command )
 {
-    _commandHistory.push_front( command );
+    _commandHistory.push_front ( command );
     _currentCommand = _commandHistory.begin();
     _newCommand = true;
-    if( _commandHistory.size() > _historyMaxSize )
-        _commandHistory.resize( _historyMaxSize );
+    if ( _commandHistory.size() > _historyMaxSize )
+        _commandHistory.resize ( _historyMaxSize );
     LOG << command << "\n";
     if ( command == "exit" )
     {
@@ -357,7 +376,11 @@ void Level1::onCommand( const std::string &command )
     {
         LOG << log_info << _useFXAA << log_endl;
     }
-    else if ( !strncmp( "ssao ", command.c_str(), 5 ) )
+    else if ( command == "draw_physics" )
+    {
+        LOG << log_info << _drawCollisionShapes << log_endl;
+    }
+    else if ( !strncmp ( "ssao ", command.c_str(), 5 ) )
     {
         const char * c = command.c_str() + 5;
         while ( *c == ' ' )
@@ -366,7 +389,7 @@ void Level1::onCommand( const std::string &command )
         }
         _lighting.useSSAO() = *c - '0';
     }
-    else if ( !strncmp( "fxaa ", command.c_str(), 5) )
+    else if ( !strncmp ( "fxaa ", command.c_str(), 5 ) )
     {
         const char * c = command.c_str() + 5;
         while ( *c == ' ' )
@@ -375,7 +398,7 @@ void Level1::onCommand( const std::string &command )
         }
         _useFXAA = *c - '0';
     }
-    else if ( !strncmp( "draw_physics ", command.c_str(), 13) )
+    else if ( !strncmp ( "draw_physics ", command.c_str(), 13 ) )
     {
         const char * c = command.c_str() + 13;
         while ( *c == ' ' )
@@ -395,7 +418,7 @@ extern char etext;
 void Level1::update ( double dt )
 {
     Engine::Physics = _physics;
-    if( !_uiEnabled )
+    if ( !_uiEnabled )
         _player.step ( dt );
     //TODO get from terrainworld object
     float chunkSize = 100;
@@ -513,11 +536,11 @@ void Level1::update ( double dt )
 #define GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX    0x9048
 #define GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX  0x9049
 
-    ss << "\nCPU Memory: " << ((ptrdiff_t)(sbrk(0)) - (ptrdiff_t)&etext)/ (1 << 10) << "KiB";
+    ss << "\nCPU Memory: " << ( ( ptrdiff_t ) ( sbrk ( 0 ) ) - ( ptrdiff_t ) &etext ) / ( 1 << 10 ) << "KiB";
     GLint totalMemKB = 0, availMemKB = 0;
-    glGetIntegerv( GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &totalMemKB );
-    glGetIntegerv( GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &availMemKB );
-    int p = 100*(totalMemKB - availMemKB - Engine::GPUMemAtInit)/(totalMemKB - Engine::GPUMemAtInit);
+    glGetIntegerv ( GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &totalMemKB );
+    glGetIntegerv ( GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &availMemKB );
+    int p = 100* ( totalMemKB - availMemKB - Engine::GPUMemAtInit ) / ( totalMemKB - Engine::GPUMemAtInit );
     ss << "\nGPU Memory: " << totalMemKB - availMemKB - Engine::GPUMemAtInit << "/" << totalMemKB - Engine::GPUMemAtInit << "KB (" << p << "%)" ;
 
     _dbgString = ss.str();
@@ -538,7 +561,7 @@ void Level1::render()
     _gBuffer->clear();
 
     vec_for_each ( i, _spinnies )
-        _spinnies[i]->renderGeom();
+    _spinnies[i]->renderGeom();
 
     for ( auto it : _bombs )
     {
@@ -546,10 +569,10 @@ void Level1::render()
     }
 
     vec_for_each ( i, _walls )
-        _walls[i]->render();
+    _walls[i]->render();
 
     vec_for_each ( i, _boxes )
-        _boxes[i]->render();
+    _boxes[i]->render();
 
     _terrainWorld->render();
     _xwing->render();
@@ -566,7 +589,7 @@ void Level1::render()
     _player.renderFX();
     _snow.render();
     vec_for_each ( i, _spinnies )
-        _spinnies[i]->renderFX();
+    _spinnies[i]->renderFX();
     _shock.renderFX();
 
     glDisable ( GL_DEPTH_TEST );
@@ -612,51 +635,83 @@ void Level1::render()
     effect.render();
 
     _canvas->clear();
-    static PostEffect fin( PostEffect::REDUCE_HDR, _swapBuffer->getAttachments()[0] );
+    static PostEffect fin ( PostEffect::REDUCE_HDR, _swapBuffer->getAttachments() [0] );
     fin.render();
 
     Framebuffer::Screen.clear();
-    static PostEffect fxaa( PostEffect::FXAA, _canvas->getAttachments()[0] );
+    static PostEffect fxaa ( PostEffect::FXAA, _canvas->getAttachments() [0] );
     glEnable ( GL_FRAMEBUFFER_SRGB );
-    if( _useFXAA )
+    if ( _useFXAA )
         fxaa.render();
     else
         passthrough.render();
     glDisable ( GL_FRAMEBUFFER_SRGB );
 
-    static Font font ( "/usr/share/fonts/TTF/DejaVuSansMono.ttf", 12 );
-    Text txt ( &font, _dbgString, glm::vec2 ( _width, _height ), glm::vec4 ( 1, 1, 0.3, 0.7 ) );
+    //render UI
+    glDisable( GL_DEPTH_TEST );
+    static Font font ( "res/UbuntuMono-R.ttf", 14 );
+    Text txt ( &font, _dbgString, glm::vec2 ( _width, _height ), glm::vec4 ( 1, 1, 0.3, 1 ) );
     txt.setPosition ( glm::vec2 ( 10, 5 ) );
     txt.render();
 
     if ( _uiEnabled )
     {
-        int consoleWidth = _width*2/5;
-        int consoleHeight = _height - 200;
-        glViewport( 0, 100, consoleWidth, consoleHeight );
-        //TODO scrolling, line wrapping, draw the cursor, resize console window
+        _consoleWidth = _width * 2 / 5;
+        _consoleHeight = _height - 100;
+        glViewport (_consoleX, _consoleY, _consoleWidth, _consoleHeight);
+        //TODO scrolling indicator, line wrapping, invert text color under cursor, resize console window
         Texture tex;
-        tex.resize(1, 1);
-        tex.setFormat( GL_RGBA );
-        tex.setFormat( GL_RGBA );
+        tex.resize ( 1, 1 );
+        tex.setFormat ( GL_RGBA );
+        tex.setFormat ( GL_RGBA );
         uint8_t d[] = { 255, 255, 255, 255 };
-        tex.loadData( d );
-        Billboard background( &tex );
-        background.setColor( glm::vec4( 0.3, 0.3, 0.3, 0.6 ) );
-        background.setPosition( glm::vec3( 0, 0, -0.9 ) );
-        background.setSize( glm::vec2(10) );
-        Billboard::_shader->setUniform( "view", glm::mat4(1) );
-        Billboard::_shader->setUniform( "proj", glm::mat4(1) );
+        tex.loadData ( d );
+        Billboard background ( &tex );
+        background.setColor ( glm::vec4 ( 0.3, 0.3, 0.3, 0.6 ) );
+        background.setPosition ( glm::vec3 ( 0, 0, 0 ) );
+        background.setSize ( glm::vec2 ( 2 ) );
+        Billboard::_shader->setUniform ( "view", glm::mat4 ( 1 ) );
+        Billboard::_shader->setUniform ( "proj", glm::mat4 ( 1 ) );
         background.render();
 
-        Text outputText (&font, LOG.str(), glm::vec2( consoleWidth, consoleHeight ) );
-        outputText.setPosition( glm::vec2( 10, consoleHeight - outputText.getHeight()/2 - 30 ) );
+        float cursorHeight = font.getSize() * 2.f / _consoleHeight;
+        float cursorWidth = font.getCharInfo()['_'].ax * 2 / _consoleWidth;
+        background.setSize ( glm::vec2 ( cursorWidth + 2.f / _consoleWidth, cursorHeight + 2.f / _consoleHeight) );
+        background.setColor( glm::vec4( 0, 0, 0, 1 ) );
+        float cursorX = -1 + 20.f / _consoleWidth + cursorWidth / 2 + (4 + _cursorPos) * cursorWidth;
+        background.setPosition( glm::vec3(cursorX, -1 + 60.f / _consoleHeight - 0.5f * cursorHeight, 0 ) );
+        background.render();
+
+        size_t lines = _consoleHeight / font.getSize() / 1.1 - 3;
+        size_t tmpLineScroll = _lineScroll;
+        const char * textStart = &log_stream.str().back();
+        size_t len = 0;
+        while( lines )
+        {
+            if( *(--textStart) == '\n' )
+            {
+                if( tmpLineScroll )
+                    --tmpLineScroll;
+                else
+                    --lines;
+            }
+            if( !tmpLineScroll)
+                ++len;
+            if( textStart == log_stream.str().c_str() )
+                break;
+        }
+
+        std::string tmpStr( textStart );
+        tmpStr.resize( len );
+        Text outputText ( &font, tmpStr, glm::vec2 (_consoleWidth, _consoleHeight) );
+        outputText.setPosition ( glm::vec2 ( 10, 0 ) );
         outputText.render();
 
-        Text inputText ( &font, ">>> " + _uiInput, glm::vec2 ( consoleWidth, consoleHeight ) );
-        inputText.setPosition( glm::vec2( 10, consoleHeight - 30 ) );
+        Text inputText ( &font, ">>> " + _uiInput, glm::vec2 (_consoleWidth, _consoleHeight) );
+        inputText.setPosition ( glm::vec2 ( 10, _consoleHeight - 30 ) );
         inputText.render();
     }
+    glEnable( GL_DEPTH_TEST );
 }
 
 Level::Status Level1::getStatus()

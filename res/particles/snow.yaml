@@ -1,4 +1,4 @@
-particles_per_second: 10000
+particles_per_second: 4000
 max_age: 15
 
 size: 0.2

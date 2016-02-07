@@ -8,7 +8,7 @@
 class Text : public Renderable
 {
 public:
-    Text ( Font * font, std::string text, glm::vec2 screen, glm::vec4 color = glm::vec4( 0.8, 0.8, 0.8, 1) );
+    Text ( Font * font, std::string text, glm::vec2 screen, glm::vec4 color = glm::vec4 ( 0.8, 0.8, 0.8, 1 ) );
     virtual ~Text();
 
     virtual void render();

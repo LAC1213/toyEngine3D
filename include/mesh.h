@@ -14,8 +14,7 @@ class MeshObject;
 
 /** POD for mesh data on cpu ( without textures )
  */
-struct MeshData
-{
+struct MeshData {
     void * data;
     GLfloat * verts() const;
     GLfloat * normals() const;
@@ -28,13 +27,12 @@ struct MeshData
     void * indices() const;
     size_t elements;
 
-    void loadFromAssimpMesh(aiMesh *mesh);
-    void allocate( size_t vertexCount, size_t indexCount );
+    void loadFromAssimpMesh ( aiMesh *mesh );
+    void allocate ( size_t vertexCount, size_t indexCount );
     void free();
 };
 
-struct ModelData
-{
+struct ModelData {
     std::vector<MeshData> meshes;
     struct Properties {
         std::vector<glm::mat4> transforms;
@@ -43,9 +41,9 @@ struct ModelData
         std::vector<std::string> specularMaps;
     } props;
 
-    void loadFromFile( const std::string& path );
+    void loadFromFile ( const std::string& path );
 private:
-    void loadFromNode( aiNode * node, const aiScene * scene, glm::mat4 transform );
+    void loadFromNode ( aiNode * node, const aiScene * scene, glm::mat4 transform );
 public:
     std::vector<MeshObject*> uploadToGPU();
     void free();
@@ -133,7 +131,7 @@ protected:
 class Model : public Renderable
 {
 public:
-    Model( const std::vector<MeshObject*>& data, const ModelData::Properties& props );
+    Model ( const std::vector<MeshObject*>& data, const ModelData::Properties& props );
 
     virtual ~Model();
     void toggleWireframe();

@@ -28,10 +28,10 @@ public:
 
     virtual void render();
 
-    void setType( Type type );
+    void setType ( Type type );
     Type getType() const;
 
-    void setSourceTexture(const Texture * tex) {
+    void setSourceTexture ( const Texture * tex ) {
         _src = tex;
     }
 
@@ -80,7 +80,7 @@ private:
 class AmbientOcclusion : public PostEffect
 {
 public:
-    AmbientOcclusion(Framebuffer * gBuffer );
+    AmbientOcclusion ( Framebuffer * gBuffer );
     ~AmbientOcclusion();
 
     virtual void render();

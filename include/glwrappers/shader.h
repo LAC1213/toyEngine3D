@@ -12,7 +12,7 @@ constexpr const char * EVAL_PATH = "eval.glsl";
 constexpr const char * GEOM_PATH = "geom.glsl";
 constexpr const char * FRAG_PATH = "frag.glsl";
 
-GLuint addShader( GLuint prog, const std::string &path, GLenum shaderType );
+GLuint addShader ( GLuint prog, const std::string &path, GLenum shaderType );
 
 class Shader
 {
@@ -46,9 +46,9 @@ public:
     Shader ( const std::string& vertPath, const std::string& fragPath );
     ~Shader();
 
-    void clone( GLuint prog );
+    void clone ( GLuint prog );
 
-    void use( bool setCameraUniforms = true );
+    void use ( bool setCameraUniforms = true );
 
     GLint getUniformLocation ( const std::string& name );
 

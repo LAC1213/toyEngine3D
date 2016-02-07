@@ -4,67 +4,67 @@
 
 uint8_t MeshData::indexSize() const
 {
-    switch( indexType )
+    switch ( indexType )
     {
-        case GL_UNSIGNED_BYTE:
-            return 1;
-        case GL_UNSIGNED_SHORT:
-            return 2;
-        case GL_UNSIGNED_INT:
-            return 4;
-        default:
-            errorExit( "indces must be 8, 16 or 32 bits wide" );
+    case GL_UNSIGNED_BYTE:
+        return 1;
+    case GL_UNSIGNED_SHORT:
+        return 2;
+    case GL_UNSIGNED_INT:
+        return 4;
+    default:
+        errorExit ( "indces must be 8, 16 or 32 bits wide" );
     }
 }
 
-void MeshData::loadFromAssimpMesh(aiMesh *mesh)
+void MeshData::loadFromAssimpMesh ( aiMesh *mesh )
 {
-    if( mesh->mNumFaces <= 256 )
+    if ( mesh->mNumFaces <= 256 )
         indexType = GL_UNSIGNED_BYTE;
-    else if( mesh->mNumFaces <= 65536 )
+    else if ( mesh->mNumFaces <= 65536 )
         indexType = GL_UNSIGNED_SHORT;
     else
         indexType = GL_UNSIGNED_INT;
 
-    allocate( mesh->mNumVertices, 3 * mesh->mNumFaces );
+    allocate ( mesh->mNumVertices, 3 * mesh->mNumFaces );
 
-    for( size_t i = 0 ; i < vertCount ; ++i )
+    for ( size_t i = 0 ; i < vertCount ; ++i )
     {
-        verts()[3*i + 0] = mesh->mVertices[i].x;
-        verts()[3*i + 1] = mesh->mVertices[i].y;
-        verts()[3*i + 2] = mesh->mVertices[i].z;
+        verts() [3*i + 0] = mesh->mVertices[i].x;
+        verts() [3*i + 1] = mesh->mVertices[i].y;
+        verts() [3*i + 2] = mesh->mVertices[i].z;
 
-        normals()[3*i + 0] = mesh->mNormals[i].x;
-        normals()[3*i + 1] = mesh->mNormals[i].y;
-        normals()[3*i + 2] = mesh->mNormals[i].z;
+        normals() [3*i + 0] = mesh->mNormals[i].x;
+        normals() [3*i + 1] = mesh->mNormals[i].y;
+        normals() [3*i + 2] = mesh->mNormals[i].z;
 
-        if( mesh->mTextureCoords[0] )
+        if ( mesh->mTextureCoords[0] )
         {
-            uvs()[2 * i + 0] = mesh->mTextureCoords[0][i].x;
-            uvs()[2 * i + 1] = mesh->mTextureCoords[0][i].y;
+            uvs() [2 * i + 0] = mesh->mTextureCoords[0][i].x;
+            uvs() [2 * i + 1] = mesh->mTextureCoords[0][i].y;
         }
     }
 
-    for( size_t i = 0 ; i < mesh->mNumFaces ; ++i )
+    for ( size_t i = 0 ; i < mesh->mNumFaces ; ++i )
     {
         const aiFace& face = mesh->mFaces[i];
-        if( face.mNumIndices != 3 )
-            errorExit( "Only Triangles allowed in meshes" );
-        for( size_t j = 0 ; j < face.mNumIndices ; ++j )
+        if ( face.mNumIndices != 3 )
+            errorExit ( "Only Triangles allowed in meshes" );
+        for ( size_t j = 0 ; j < face.mNumIndices ; ++j )
         {
-            switch(indexType)
+            switch ( indexType )
             {
-                case GL_UNSIGNED_BYTE:
-                    ((uint8_t*)indices())[3*i + j] = face.mIndices[j];
-                    break;
-                case GL_UNSIGNED_SHORT:
-                    ((uint16_t*)indices())[3*i + j] = face.mIndices[j];
-                    break;
-                case GL_UNSIGNED_INT:
-                    ((uint32_t*)indices())[3*i + j] = face.mIndices[j];
-                    break;
-                default:
-                    INVALID_CODE_PATH;
+            case GL_UNSIGNED_BYTE:
+                ( ( uint8_t* ) indices() ) [3*i + j] = face.mIndices[j];
+                break;
+            case GL_UNSIGNED_SHORT:
+                ( ( uint16_t* ) indices() ) [3*i + j] = face.mIndices[j];
+                break;
+            case GL_UNSIGNED_INT:
+                ( ( uint32_t* ) indices() ) [3*i + j] = face.mIndices[j];
+                break;
+            default:
+                INVALID_CODE_PATH;
             }
         }
     }
@@ -72,123 +72,122 @@ void MeshData::loadFromAssimpMesh(aiMesh *mesh)
     LOG << log_info << "Loading Mesh: " << mesh->mNumFaces << " Triangles" << log_endl;
 }
 
-void MeshData::allocate( size_t vertexCount, size_t indexCount )
+void MeshData::allocate ( size_t vertexCount, size_t indexCount )
 {
     vertCount = vertexCount;
     elements = indexCount;
 
-    data = new char[vertCount*sizeof(GLfloat)*8 + elements*indexSize()];
+    data = new char[vertCount*sizeof ( GLfloat ) *8 + elements*indexSize()];
 }
 
 GLfloat* MeshData::verts() const
 {
-    return (GLfloat*)data;
+    return ( GLfloat* ) data;
 }
 
 GLfloat* MeshData::normals() const
 {
-    return ((GLfloat*)data) + 3*vertCount;
+    return ( ( GLfloat* ) data ) + 3*vertCount;
 }
 
 GLfloat* MeshData::uvs() const
 {
-    return ((GLfloat*)data) + 6*vertCount;
+    return ( ( GLfloat* ) data ) + 6*vertCount;
 }
 
 void * MeshData::indices() const
 {
-    return ((GLfloat*)data) + 8*vertCount;
+    return ( ( GLfloat* ) data ) + 8*vertCount;
 }
 
 void MeshData::free()
 {
-    delete[] (char*)data;
+    delete[] ( char* ) data;
 }
 
 void ModelData::free()
 {
-    vec_for_each( i, meshes )
-        meshes[i].free();
+    vec_for_each ( i, meshes )
+    meshes[i].free();
     props.indices.clear();
     props.transforms.clear();
     meshes.clear();
 }
 
-void ModelData::loadFromFile( const std::string &path )
+void ModelData::loadFromFile ( const std::string &path )
 {
     Assimp::Importer importer;
-    const aiScene * scene = importer.ReadFile( path, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_GenUVCoords );
+    const aiScene * scene = importer.ReadFile ( path, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_GenUVCoords );
 
     LOG << log_info << "Loading Model from file: " << path << log_endl;
 
-    if( !scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode )
-        errorExit( "assimp mesh loading error" );
+    if ( !scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode )
+        errorExit ( "assimp mesh loading error" );
 
     LOG << log_info << scene->mNumMeshes << " Meshes found." << log_endl;
 
-    meshes.resize(scene->mNumMeshes);
+    meshes.resize ( scene->mNumMeshes );
     size_t tricount = 0;
-    for( size_t i = 0 ; i < scene->mNumMeshes ; ++i )
+    for ( size_t i = 0 ; i < scene->mNumMeshes ; ++i )
     {
-        meshes[i].loadFromAssimpMesh(scene->mMeshes[i]);
+        meshes[i].loadFromAssimpMesh ( scene->mMeshes[i] );
         tricount += scene->mMeshes[i]->mNumFaces;
 
-        if ( scene->mMeshes[i]->mMaterialIndex >= 0 )
+        aiMaterial *material = scene->mMaterials[scene->mMeshes[i]->mMaterialIndex];
+        size_t diffuseCount = material->GetTextureCount ( aiTextureType_DIFFUSE );
+        size_t specularCount = material->GetTextureCount ( aiTextureType_SPECULAR );
+        LOG << log_info << diffuseCount << " diffuse maps found." << log_endl;
+        LOG << log_info << specularCount << " specular maps found." << log_endl;
+        aiString diffStr, specStr;
+        props.diffuseMaps.push_back ( "" );
+        if ( diffuseCount )
         {
-            aiMaterial *material = scene->mMaterials[scene->mMeshes[i]->mMaterialIndex];
-            size_t diffuseCount = material->GetTextureCount(aiTextureType_DIFFUSE);
-            size_t specularCount = material->GetTextureCount(aiTextureType_SPECULAR);
-            LOG << log_info << diffuseCount << " diffuse maps found." << log_endl;
-            LOG << log_info << specularCount << " specular maps found." << log_endl;
-            aiString diffStr, specStr;
-            props.diffuseMaps.push_back("");
-            if (diffuseCount)
-            {
-                material->GetTexture(aiTextureType_DIFFUSE, 0, &diffStr);
-                props.diffuseMaps.back() = path;
-                props.diffuseMaps.back().resize(path.find_last_of( '/' ) + 1);
-                props.diffuseMaps.back() += diffStr.C_Str();
-            }
-            props.specularMaps.push_back("");
-            if (specularCount)
-            {
-                material->GetTexture(aiTextureType_SPECULAR, 0, &specStr);
-                props.specularMaps.back() = path;
-                props.specularMaps.back().resize(path.find_last_of( '/' ) + 1);
-                props.specularMaps.back() += specStr.C_Str();
-            }
+            material->GetTexture ( aiTextureType_DIFFUSE, 0, &diffStr );
+            props.diffuseMaps.back() = path;
+            props.diffuseMaps.back().resize ( path.find_last_of ( '/' ) + 1 );
+            props.diffuseMaps.back() += diffStr.C_Str();
+        }
+        props.specularMaps.push_back ( "" );
+        if ( specularCount )
+        {
+            material->GetTexture ( aiTextureType_SPECULAR, 0, &specStr );
+            props.specularMaps.back() = path;
+            props.specularMaps.back().resize ( path.find_last_of ( '/' ) + 1 );
+            props.specularMaps.back() += specStr.C_Str();
         }
     }
+
     LOG << log_info << "Model has " << tricount << " triangles total" << log_endl;
-    loadFromNode( scene->mRootNode, scene, glm::mat4(1) );
+    loadFromNode ( scene->mRootNode, scene, glm::mat4 ( 1 ) );
 }
 
-void ModelData::loadFromNode( aiNode *node, const aiScene * scene, glm::mat4 parentTransform )
+void ModelData::loadFromNode ( aiNode *node, const aiScene * scene, glm::mat4 parentTransform )
 {
     aiMatrix4x4 M = node->mTransformation;
-    float a[] = {
-            M.a1, M.b1, M.c1, M.d1,
-            M.a2, M.b2, M.c2, M.d2,
-            M.a3, M.b3, M.c3, M.d3,
-            M.a4, M.b4, M.c4, M.d4,
-    };
-    glm::mat4 transform = parentTransform * glm::make_mat4(a);
-
-    for( size_t i = 0 ; i < node->mNumMeshes ; ++i )
+    float a[] =
     {
-        props.indices.push_back( node->mMeshes[i] );
-        props.transforms.push_back( transform );
+        M.a1, M.b1, M.c1, M.d1,
+        M.a2, M.b2, M.c2, M.d2,
+        M.a3, M.b3, M.c3, M.d3,
+        M.a4, M.b4, M.c4, M.d4,
+    };
+    glm::mat4 transform = parentTransform * glm::make_mat4 ( a );
+
+    for ( size_t i = 0 ; i < node->mNumMeshes ; ++i )
+    {
+        props.indices.push_back ( node->mMeshes[i] );
+        props.transforms.push_back ( transform );
     }
 
-    for( size_t i = 0 ; i < node->mNumChildren ; ++i )
-        loadFromNode(node->mChildren[i], scene, transform);
+    for ( size_t i = 0 ; i < node->mNumChildren ; ++i )
+        loadFromNode ( node->mChildren[i], scene, transform );
 }
 
 std::vector<MeshObject*> ModelData::uploadToGPU()
 {
-    std::vector<MeshObject*> res(meshes.size());
-    vec_for_each( i, res )
-        res[i] = new MeshObject( meshes[i] );
+    std::vector<MeshObject*> res ( meshes.size() );
+    vec_for_each ( i, res )
+    res[i] = new MeshObject ( meshes[i] );
     return res;
 }
 
@@ -202,7 +201,7 @@ MeshObject::MeshObject ( const MeshData& data )
     buffers[2].loadData ( data.uvs(), 2*data.vertCount*sizeof ( GLfloat ) );
     buffers[3].loadData ( data.indices(), data.elements*data.indexSize() );
     buffers[3].setTarget ( GL_ELEMENT_ARRAY_BUFFER );
-    drawCall.setIndexType( data.indexType );
+    drawCall.setIndexType ( data.indexType );
     drawCall.setIndexBuffer ( &buffers[3] );
 
     drawCall.setElements ( data.elements );
@@ -444,7 +443,7 @@ MeshObject * MeshObject::genTetrahedron()
 
 void MeshObject::init()
 {
-    SHADER = Engine::ShaderManager->request("./res/shader/mesh/", Shader::LOAD_GEOM | Shader::LOAD_BASIC);
+    SHADER = Engine::ShaderManager->request ( "./res/shader/mesh/", Shader::LOAD_GEOM | Shader::LOAD_BASIC );
 }
 
 void MeshObject::destroy()
@@ -569,35 +568,45 @@ void Mesh::render()
     _meshObject->render();
 }
 
-Model::Model(const std::vector<MeshObject *> &data, const ModelData::Properties& props)
+Model::Model ( const std::vector<MeshObject *> &data, const ModelData::Properties& props )
 {
     _transforms = props.transforms;
     _indices = props.indices;
-    vec_for_each( i, props.diffuseMaps )
+    vec_for_each ( i, props.diffuseMaps )
     {
         Texture * tex = nullptr;
-        if( props.diffuseMaps[i] != "" )
-            tex = Engine::TextureManager->request( props.diffuseMaps[i] );
-        _diffuseMaps.push_back(tex);
+        if ( props.diffuseMaps[i] != "" )
+        {
+            tex = Engine::TextureManager->request(props.diffuseMaps[i]);
+            tex->setParameter( GL_TEXTURE_WRAP_S, GL_REPEAT );
+            tex->setParameter( GL_TEXTURE_WRAP_T, GL_REPEAT );
+        }
+        _diffuseMaps.push_back ( tex );
     }
-    vec_for_each( i, props.specularMaps )
+    vec_for_each ( i, props.specularMaps )
     {
         Texture * tex = nullptr;
-        if( props.specularMaps[i] != "" )
-            tex = Engine::TextureManager->request( props.specularMaps[i] );
-        _specularMaps.push_back(tex);
+        if ( props.specularMaps[i] != "" )
+        {
+            tex = Engine::TextureManager->request(props.specularMaps[i]);
+            tex->setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+            tex->setParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+        }
+        _specularMaps.push_back ( tex );
     }
     _meshes = data;
-    _diffuseColor = glm::vec4(0.2, 0.2, 0.2, 1);
+    _diffuseColor = glm::vec4 ( 0.2, 0.2, 0.2, 1 );
     _wireframe = true;
 }
 
-Model::~Model() {
-    vec_for_each(i, _diffuseMaps) {
-        if (_diffuseMaps[i])
-            Engine::TextureManager->release(_diffuseMaps[i]);
-        if (_specularMaps[i])
-            Engine::TextureManager->release(_specularMaps[i]);
+Model::~Model()
+{
+    vec_for_each ( i, _diffuseMaps )
+    {
+        if ( _diffuseMaps[i] )
+            Engine::TextureManager->release ( _diffuseMaps[i] );
+        if ( _specularMaps[i] )
+            Engine::TextureManager->release ( _specularMaps[i] );
     }
 }
 
@@ -608,19 +617,19 @@ void Model::toggleWireframe()
 
 void Model::render()
 {
-    vec_for_each(j, _indices)
+    vec_for_each ( j, _indices )
     {
         size_t i = _indices[j];
-        _meshes[i]->shader->setUniform( "wireframe", _wireframe );
-        _meshes[i]->shader->setUniform( "model", trans.mat * _transforms[j] );
-        _meshes[i]->shader->setUniform( "DiffuseMaterial", _diffuseColor );
+        _meshes[i]->shader->setUniform ( "wireframe", _wireframe );
+        _meshes[i]->shader->setUniform ( "model", trans.mat * _transforms[j] );
+        _meshes[i]->shader->setUniform ( "DiffuseMaterial", _diffuseColor );
         glActiveTexture ( GL_TEXTURE0 );
         _meshes[i]->shader->setUniform ( "diffuseMap", 0 );
-        if( _diffuseMaps[i] )
+        if ( _diffuseMaps[i] )
             _diffuseMaps[i]->bind();
         glActiveTexture ( GL_TEXTURE1 );
         _meshes[i]->shader->setUniform ( "specularMap", 1 );
-        if( _specularMaps[i] )
+        if ( _specularMaps[i] )
             _specularMaps[i]->bind();
 
         _meshes[i]->render();

@@ -27,10 +27,10 @@ Lighting::Lighting ( Framebuffer * gBuffer )
     glTexParameterfv ( GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor );
 
     _ssaoFb.addAttachment();
-    _ssaoFb.getAttachments().back()->setFormat( GL_RED );
-    _ssaoFb.getAttachments().back()->setInternalFormat( GL_R16F );
+    _ssaoFb.getAttachments().back()->setFormat ( GL_RED );
+    _ssaoFb.getAttachments().back()->setInternalFormat ( GL_R16F );
     //TODO handle later resizement of the screen
-    _ssaoFb.resize( Framebuffer::Screen.getWidth(), Framebuffer::Screen.getHeight() );
+    _ssaoFb.resize ( Framebuffer::Screen.getWidth(), Framebuffer::Screen.getHeight() );
 
     _useSSAO = true;
 }
@@ -88,7 +88,7 @@ void Lighting::render()
 
     // render ssao texture
     _ssaoFb.clear();
-    static AmbientOcclusion ssao( _gBuffer );
+    static AmbientOcclusion ssao ( _gBuffer );
     if ( _useSSAO )
         ssao.render();
 
@@ -113,19 +113,19 @@ void Lighting::render()
     glDisable ( GL_DEPTH_TEST );
 
     glActiveTexture ( GL_TEXTURE0 );
-    _gBuffer->getAttachments() [0]->bind();
+    _gBuffer->getAttachments() [GBUFFER_DIFFUSE]->bind();
     _shader->setUniform ( "diffuseTex", 0 );
 
     glActiveTexture ( GL_TEXTURE1 );
-    _gBuffer->getAttachments() [1]->bind();
+    _gBuffer->getAttachments() [GBUFFER_SPEC]->bind();
     _shader->setUniform ( "specularTex", 1 );
 
     glActiveTexture ( GL_TEXTURE2 );
-    _gBuffer->getAttachments() [2]->bind();
+    _gBuffer->getAttachments() [GBUFFER_POSITION]->bind();
     _shader->setUniform ( "positionTex", 2 );
 
     glActiveTexture ( GL_TEXTURE3 );
-    _gBuffer->getAttachments() [3]->bind();
+    _gBuffer->getAttachments() [GBUFFER_NORMAL]->bind();
     _shader->setUniform ( "normalTex", 3 );
 
     glActiveTexture ( GL_TEXTURE4 );
@@ -133,7 +133,7 @@ void Lighting::render()
     _shader->setUniform ( "shadowMap", 4 );
 
     glActiveTexture ( GL_TEXTURE5 );
-    _ssaoFb.getAttachments()[0]->bind();
+    _ssaoFb.getAttachments() [0]->bind();
     _shader->setUniform ( "ssaoTex", 5 );
 
     _shader->setUniform ( "shadowView", shadowCam.getView() );
@@ -169,7 +169,7 @@ void Lighting::render()
 
     Engine::DrawScreenQuad->execute();
 
- //   target->copyColor( _ssaoFb );
+//   target->copyColor( _ssaoFb );
 
     glEnable ( GL_DEPTH_TEST );
     glBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
@@ -251,6 +251,7 @@ void Lighting::destroy()
     Engine::ShaderManager->release ( _shader );
 }
 
-bool &Lighting::useSSAO() {
+bool &Lighting::useSSAO()
+{
     return _useSSAO;
 }

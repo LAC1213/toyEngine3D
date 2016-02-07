@@ -1,12 +1,12 @@
 #include <terrainworld.h>
-#include <internal/util.h>
+#include <engine.h>
 
 TerrainWorld::TerrainWorld ( Texture * groundTexture )
     : _groundTexture ( groundTexture )
     , _chunkSize ( 100 )
     , _maxHeight ( 100 )
-    , _loadRange ( 0 )
-    , _heightmapSize ( 257 )
+    , _loadRange ( 2 )
+    , _heightmapSize ( 33 )
 {
     _activeTerrains.resize ( ( 2*_loadRange + 1 ) * ( 2*_loadRange + 1 ) );
     vec_for_each ( i, _activeTerrains )
@@ -20,7 +20,7 @@ TerrainWorld::TerrainWorld ( Texture * groundTexture )
 
 void TerrainWorld::toggleWireframe()
 {
-    vec_for_each( i, _activeTerrains )
+    vec_for_each ( i, _activeTerrains )
     {
         _activeTerrains[i].toggleWireframe();
     }
@@ -52,7 +52,7 @@ void TerrainWorld::setCenter ( int32_t x, int32_t y, bool forceUpdate )
             else
             {
                 LOG << log_info << "Generating Terrain Chunk [" << current.x
-                          << ", " << current.y << "]" << log_endl;
+                    << ", " << current.y << "]" << log_endl;
 
                 float* edges[] = {nullptr, nullptr, nullptr, nullptr};
 
@@ -98,6 +98,12 @@ void TerrainWorld::setCenter ( int32_t x, int32_t y, bool forceUpdate )
             }
             _activeTerrains[ idx ].setPosition ( glm::vec3 ( ( ( float ) current.x ) *_chunkSize, 0.f, ( ( float ) current.y ) *_chunkSize ) );
         }
+
+    static btRigidBody * centerBody = nullptr;
+    if( centerBody )
+        Engine::Physics->dynamicsWorld->removeRigidBody( centerBody );
+    centerBody = _activeTerrains[_loadRange*n + _loadRange].body();
+    Engine::Physics->dynamicsWorld->addRigidBody( centerBody );
 }
 
 void TerrainWorld::render()

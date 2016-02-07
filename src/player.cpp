@@ -1,7 +1,6 @@
 #include <player.h>
 #include <engine.h>
 
-#include <internal/util.h>
 #include <collisionlistener.h>
 
 Player::Player ()

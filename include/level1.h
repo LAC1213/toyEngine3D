@@ -68,6 +68,12 @@ protected:
     std::string _uiInput;
     size_t _cursorPos = 0;
 
+    size_t _lineScroll = 0;
+    int _consoleX = 0;
+    int _consoleY = 0;
+    int _consoleWidth = _width * 2 / 5;
+    int _consoleHeight = _height - 100;
+
     static constexpr size_t _historyMaxSize = 128;
     bool _newCommand;
     std::list<std::string>::iterator _currentCommand;

@@ -70,9 +70,9 @@ GLFWwindow * init()
     }
 
     glfwSetErrorCallback ( glfwErrorCallback );
-    if( !glfwInit() )
+    if ( !glfwInit() )
     {
-        errorExit( "GLFW Initialization failed" );
+        errorExit ( "GLFW Initialization failed" );
     }
 
     YAML::Node conf = YAML::LoadFile ( "config.yaml" );
@@ -123,8 +123,8 @@ GLFWwindow * init()
 #define GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX  0x9049
 
     GLint totalMemKB = 0, availMemKB = 0;
-    glGetIntegerv( GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &totalMemKB );
-    glGetIntegerv( GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &availMemKB );
+    glGetIntegerv ( GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &totalMemKB );
+    glGetIntegerv ( GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &availMemKB );
 
     GPUMemAtInit = totalMemKB - availMemKB;
     LOG << log_info << "GPU Memory at init " << GPUMemAtInit << "KB" << log_endl;
@@ -146,14 +146,14 @@ GLFWwindow * init()
 
     QuadBuffer = new BufferObject();
     GLfloat quadVerts[] =
-            {
-                    -1, -1,
-                    1, -1,
-                    1, 1,
-                    -1, -1,
-                    1, 1,
-                    -1, 1
-            };
+    {
+        -1, -1,
+        1, -1,
+        1, 1,
+        -1, -1,
+        1, 1,
+        -1, 1
+    };
     QuadBuffer->loadData ( quadVerts, sizeof quadVerts );
 
     DrawScreenQuad = new DrawCall();
